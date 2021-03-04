@@ -1,3 +1,6 @@
+#nvm
+.nvm
+
 # Logs
 logs
 *.log
@@ -102,3 +105,12 @@ dist
 
 # TernJS port file
 .tern-port
+
+# yarn stuff
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
