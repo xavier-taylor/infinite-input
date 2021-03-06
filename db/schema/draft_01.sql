@@ -95,6 +95,7 @@ CREATE TABLE mandarin.sentence
     id bigserial,
     english text NOT NULL,
     chinese text NOT NULL,
+    corpus_id serial NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -118,6 +119,25 @@ CREATE TABLE mandarin.sentence_word
     word_hanzi text,
     part_of_speech text
 );
+
+CREATE TABLE mandarin.corpus
+(
+    name text NOT NULL,
+    id serial,
+    licence text NOT NULL,
+    website text NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE mandarin.next_sentence
+(
+    sentence_id bigint,
+    next_sentence_id bigint,
+    PRIMARY KEY (sentence_id, next_sentence_id)
+);
+
+COMMENT ON TABLE mandarin.next_sentence
+    IS 'This table records, for each sentence, the next sentence in the corpus it came from (if any). In some corpora this is useless, but it is useful for corpora where sentences are from continuous text - especiallly so if a corpus has a minor alignment issue!';
 
 ALTER TABLE mandarin.cc_cedict
     ADD FOREIGN KEY (traditional)
@@ -200,6 +220,12 @@ ALTER TABLE mandarin.sentence_word
 ALTER TABLE mandarin.sentence_word
     ADD FOREIGN KEY (word_hanzi)
     REFERENCES mandarin.word (hanzi)
+    NOT VALID;
+
+
+ALTER TABLE mandarin.sentence
+    ADD FOREIGN KEY (corpus_id)
+    REFERENCES mandarin.corpus (id)
     NOT VALID;
 
 END;
