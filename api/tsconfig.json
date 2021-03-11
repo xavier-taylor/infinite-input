@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "kanel.config.js"],
   "extends": "@tsconfig/node14/tsconfig.json",
   "compilerOptions": {
     "lib": ["dom", "es2020"],
