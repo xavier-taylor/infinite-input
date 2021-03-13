@@ -3,31 +3,34 @@
 import { sentenceId } from './sentence';
 import { wordId } from './word';
 
+export type sentence_wordId = number & { __flavor?: 'sentence_word' };
+
 export default interface sentence_word {
   /** Primary key. Index: sentence_word_pkey */
+  id: sentence_wordId;
+
   sentence_id: sentenceId;
 
-  /** Primary key. Index: sentence_word_pkey */
-  word_hanzi: wordId;
+  word_hanzi: wordId | null;
 
   part_of_speech: string;
 
-  /** Primary key. Index: sentence_word_pkey */
-  sentence_index: number;
+  sentence_index: number | null;
 }
 
 export interface sentence_wordInitializer {
   /**
-   * Default value: nextval('mandarin.sentence_word_sentence_id_seq'::regclass)
+   * Default value: nextval('mandarin.sentence_word_id_seq'::regclass)
    * Primary key. Index: sentence_word_pkey
    */
+  id?: sentence_wordId;
+
+  /** Default value: nextval('mandarin.sentence_word_sentence_id_seq'::regclass) */
   sentence_id?: sentenceId;
 
-  /** Primary key. Index: sentence_word_pkey */
-  word_hanzi: wordId;
+  word_hanzi?: wordId | null;
 
   part_of_speech: string;
 
-  /** Primary key. Index: sentence_word_pkey */
-  sentence_index: number;
+  sentence_index?: number | null;
 }

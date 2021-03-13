@@ -10,14 +10,10 @@ export default interface read_log {
   /** Primary key. Index: read_log_pkey */
   student_id: studentId;
 
-  /** Primary key. Index: read_log_pkey */
-  sentence_id: sentence_wordId;
-
-  word_hanzi: sentence_wordId;
-
-  sentence_index: sentence_wordId;
-
   understood: boolean;
+
+  /** Primary key. Index: read_log_pkey */
+  sentence_word_id: sentence_wordId;
 }
 
 export interface read_logInitializer {
@@ -30,15 +26,11 @@ export interface read_logInitializer {
    */
   student_id?: studentId;
 
+  understood: boolean;
+
   /**
-   * Default value: nextval('mandarin.read_log_sentence_id_seq'::regclass)
+   * Default value: nextval('mandarin.read_log_sentence_word_id_seq'::regclass)
    * Primary key. Index: read_log_pkey
    */
-  sentence_id?: sentence_wordId;
-
-  word_hanzi: sentence_wordId;
-
-  sentence_index: sentence_wordId;
-
-  understood: boolean;
+  sentence_word_id?: sentence_wordId;
 }

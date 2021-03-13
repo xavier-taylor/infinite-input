@@ -4,9 +4,9 @@
   "scripts": {
     "local": "ts-node-dev -r dotenv/config src/server.ts",
     "build": "tsc",
-    "start": "node -r dotenv/config dist/server.js",
+    "start": "node -r dotenv/config build/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "gen-psql": "npx -r dotenv/config kanel",
+    "codegen": "npx -r dotenv/config kanel",
     "lint": "eslint --ext ts src/**",
     "lint-fix": "eslint --ext ts --fix src"
   },

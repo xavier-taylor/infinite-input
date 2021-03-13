@@ -1,5 +1,7 @@
 BEGIN;
 
+DROP SCHEMA IF EXISTS mandarin CASCADE;
+
 CREATE SCHEMA mandarin;
 
 CREATE TABLE mandarin.word
@@ -105,37 +107,34 @@ CREATE TABLE mandarin.student_sentence_listen
 
 CREATE TABLE mandarin.sentence_word
 (
+    id bigserial,
     sentence_id bigserial REFERENCES mandarin.sentence (id),
     word_hanzi text REFERENCES mandarin.word (hanzi),
     part_of_speech text NOT NULL,
     sentence_index integer CHECK (sentence_index > -1),
-    PRIMARY KEY (sentence_id, word_hanzi, sentence_index)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE mandarin.read_log
 (
     date_time date,
     student_id bigserial REFERENCES mandarin.student (id),
-    sentence_id bigserial,
-    word_hanzi text NOT NULL,
-    sentence_index integer NOT NULL,
     understood boolean NOT NULL,
-    PRIMARY KEY (date_time, student_id, sentence_id),
-    FOREIGN KEY (sentence_id, word_hanzi, sentence_index)
-        REFERENCES mandarin.sentence_word (sentence_id, word_hanzi, sentence_index)
+    sentence_word_id bigserial REFERENCES mandarin.sentence_word (id),
+    PRIMARY KEY (date_time, student_id, sentence_word_id),
+    FOREIGN KEY (sentence_word_id)
+        REFERENCES mandarin.sentence_word (id)
 );
 
 CREATE TABLE mandarin.listen_log
 (
     date_time date,
     student_id bigserial REFERENCES mandarin.student (id),
-    sentence_id bigserial,
-    word_hanzi text NOT NULL,
-    sentence_index integer NOT NULL,
     understood boolean NOT NULL,
-    PRIMARY KEY (date_time, student_id, sentence_id),
-    FOREIGN KEY (sentence_id, word_hanzi, sentence_index)
-        REFERENCES mandarin.sentence_word (sentence_id, word_hanzi, sentence_index)
+    sentence_word_id bigserial REFERENCES mandarin.sentence_word (id),
+    PRIMARY KEY (date_time, student_id, sentence_word_id),
+    FOREIGN KEY (sentence_word_id)
+        REFERENCES mandarin.sentence_word (id)
 );
 
 END;
