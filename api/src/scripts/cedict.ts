@@ -24,6 +24,7 @@ export function parseLine(line: string): CEDictEntry {
       definitions: matches[4].split('/'),
     };
   } else {
+    console.error('couldnt match', line);
     throw 'gah';
   }
 }
@@ -44,17 +45,9 @@ export function parseLine(line: string): CEDictEntry {
 // up to line 158 looking for types
 */
 
-// import neo4j from "neo4j-driver";
-
-// const { NEO4J_USERNAME, NEO4J_PASSWORD } = process.env;
-// console.log(`read neo4j username ${NEO4J_USERNAME}`);
-
 export async function processLineByLine() {
   const fileStream = fs.createReadStream(
-    path.join(
-      __dirname,
-      '../../../data/cedict/cedict_1_0_ts_utf-8_mdbg_TEST.txt'
-    )
+    path.join(process.env.FILES_PATH as string, 'cedict/cedict_ts.u8')
   );
 
   const rl = readline.createInterface({
@@ -63,14 +56,10 @@ export async function processLineByLine() {
   });
 
   for await (const line of rl) {
-    // Each line in input.txt will be successively available here as `line`.
-    // const result = await session.writeTransaction((tx) => {
-    //   tx.run(); // continue reading and applying here: https://neo4j.com/docs/javascript-manual/current/session-api/#js-driver-async-transaction-fn
-    // });
     if (line[0] !== '#') {
       console.log(parseLine(line));
     } else {
-      console.log(line);
+      // console.log(line);
     }
   }
 }
@@ -83,3 +72,5 @@ function loadEntryIntoDB(ce: CEDictEntry): void {
   // if trad!==simpl, query to merge the simp -> cedict relationship?
   // I think that is too painful, instead should make a custom mutation for creating a CEdict that does all that under the hood for me.
 }
+
+processLineByLine();
