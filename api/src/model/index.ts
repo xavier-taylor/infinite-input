@@ -3,62 +3,60 @@
 import cc_cedict, { cc_cedictInitializer, cc_cedictId } from './cc_cedict';
 import cc_cedict_definition, { cc_cedict_definitionInitializer } from './cc_cedict_definition';
 import corpus, { corpusInitializer, corpusId } from './corpus';
-import definition, { definitionInitializer, definitionId } from './definition';
-import next_sentence, { next_sentenceInitializer } from './next_sentence';
+import listen_log, { listen_logInitializer } from './listen_log';
+import read_log, { read_logInitializer } from './read_log';
 import sentence, { sentenceInitializer, sentenceId } from './sentence';
 import sentence_word, { sentence_wordInitializer } from './sentence_word';
-import user, { userInitializer, userId } from './user';
-import user_sentence_listen, { user_sentence_listenInitializer } from './user_sentence_listen';
-import user_sentence_read, { user_sentence_readInitializer } from './user_sentence_read';
-import user_word_listen, { user_word_listenInitializer } from './user_word_listen';
-import user_word_read, { user_word_readInitializer } from './user_word_read';
+import student, { studentInitializer, studentId } from './student';
+import student_sentence_listen, { student_sentence_listenInitializer } from './student_sentence_listen';
+import student_sentence_read, { student_sentence_readInitializer } from './student_sentence_read';
+import student_word_listen, { student_word_listenInitializer } from './student_word_listen';
+import student_word_read, { student_word_readInitializer } from './student_word_read';
 import word, { wordInitializer, wordId } from './word';
 
 type Model =
   | cc_cedict
   | cc_cedict_definition
   | corpus
-  | definition
-  | next_sentence
+  | listen_log
+  | read_log
   | sentence
   | sentence_word
-  | user
-  | user_sentence_listen
-  | user_sentence_read
-  | user_word_listen
-  | user_word_read
+  | student
+  | student_sentence_listen
+  | student_sentence_read
+  | student_word_listen
+  | student_word_read
   | word
 
 interface ModelTypeMap {
   'cc_cedict': cc_cedict;
   'cc_cedict_definition': cc_cedict_definition;
   'corpus': corpus;
-  'definition': definition;
-  'next_sentence': next_sentence;
+  'listen_log': listen_log;
+  'read_log': read_log;
   'sentence': sentence;
   'sentence_word': sentence_word;
-  'user': user;
-  'user_sentence_listen': user_sentence_listen;
-  'user_sentence_read': user_sentence_read;
-  'user_word_listen': user_word_listen;
-  'user_word_read': user_word_read;
+  'student': student;
+  'student_sentence_listen': student_sentence_listen;
+  'student_sentence_read': student_sentence_read;
+  'student_word_listen': student_word_listen;
+  'student_word_read': student_word_read;
   'word': word;
 }
 
 type ModelId =
   | cc_cedictId
   | corpusId
-  | definitionId
   | sentenceId
-  | userId
+  | studentId
   | wordId
 
 interface ModelIdTypeMap {
   'cc_cedict': cc_cedictId;
   'corpus': corpusId;
-  'definition': definitionId;
   'sentence': sentenceId;
-  'user': userId;
+  'student': studentId;
   'word': wordId;
 }
 
@@ -66,30 +64,30 @@ type Initializer =
   | cc_cedictInitializer
   | cc_cedict_definitionInitializer
   | corpusInitializer
-  | definitionInitializer
-  | next_sentenceInitializer
+  | listen_logInitializer
+  | read_logInitializer
   | sentenceInitializer
   | sentence_wordInitializer
-  | userInitializer
-  | user_sentence_listenInitializer
-  | user_sentence_readInitializer
-  | user_word_listenInitializer
-  | user_word_readInitializer
+  | studentInitializer
+  | student_sentence_listenInitializer
+  | student_sentence_readInitializer
+  | student_word_listenInitializer
+  | student_word_readInitializer
   | wordInitializer
 
 interface InitializerTypeMap {
   'cc_cedict': cc_cedictInitializer;
   'cc_cedict_definition': cc_cedict_definitionInitializer;
   'corpus': corpusInitializer;
-  'definition': definitionInitializer;
-  'next_sentence': next_sentenceInitializer;
+  'listen_log': listen_logInitializer;
+  'read_log': read_logInitializer;
   'sentence': sentenceInitializer;
   'sentence_word': sentence_wordInitializer;
-  'user': userInitializer;
-  'user_sentence_listen': user_sentence_listenInitializer;
-  'user_sentence_read': user_sentence_readInitializer;
-  'user_word_listen': user_word_listenInitializer;
-  'user_word_read': user_word_readInitializer;
+  'student': studentInitializer;
+  'student_sentence_listen': student_sentence_listenInitializer;
+  'student_sentence_read': student_sentence_readInitializer;
+  'student_word_listen': student_word_listenInitializer;
+  'student_word_read': student_word_readInitializer;
   'word': wordInitializer;
 }
 
@@ -97,15 +95,15 @@ export {
   cc_cedict, cc_cedictInitializer, cc_cedictId,
   cc_cedict_definition, cc_cedict_definitionInitializer,
   corpus, corpusInitializer, corpusId,
-  definition, definitionInitializer, definitionId,
-  next_sentence, next_sentenceInitializer,
+  listen_log, listen_logInitializer,
+  read_log, read_logInitializer,
   sentence, sentenceInitializer, sentenceId,
   sentence_word, sentence_wordInitializer,
-  user, userInitializer, userId,
-  user_sentence_listen, user_sentence_listenInitializer,
-  user_sentence_read, user_sentence_readInitializer,
-  user_word_listen, user_word_listenInitializer,
-  user_word_read, user_word_readInitializer,
+  student, studentInitializer, studentId,
+  student_sentence_listen, student_sentence_listenInitializer,
+  student_sentence_read, student_sentence_readInitializer,
+  student_word_listen, student_word_listenInitializer,
+  student_word_read, student_word_readInitializer,
   word, wordInitializer, wordId,
 
   Model,

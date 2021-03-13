@@ -12,7 +12,9 @@ export default interface sentence {
 
   chinese: string;
 
-  corpus_id: corpusId;
+  corpus_name: corpusId;
+
+  next_sentence: sentenceId;
 }
 
 export interface sentenceInitializer {
@@ -26,6 +28,8 @@ export interface sentenceInitializer {
 
   chinese: string;
 
-  /** Default value: nextval('mandarin.sentence_corpus_id_seq'::regclass) */
-  corpus_id?: corpusId;
+  corpus_name: corpusId;
+
+  /** Default value: nextval('mandarin.sentence_next_sentence_seq'::regclass) */
+  next_sentence?: sentenceId;
 }

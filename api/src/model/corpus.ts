@@ -1,12 +1,10 @@
 // Automatically generated. Don't change this file manually.
 
-export type corpusId = number & { __flavor?: 'corpus' };
+export type corpusId = string & { __flavor?: 'corpus' };
 
 export default interface corpus {
-  name: string;
-
   /** Primary key. Index: corpus_pkey */
-  id: corpusId;
+  name: corpusId;
 
   licence: string;
 
@@ -14,13 +12,8 @@ export default interface corpus {
 }
 
 export interface corpusInitializer {
-  name: string;
-
-  /**
-   * Default value: nextval('mandarin.corpus_id_seq'::regclass)
-   * Primary key. Index: corpus_pkey
-   */
-  id?: corpusId;
+  /** Primary key. Index: corpus_pkey */
+  name: corpusId;
 
   licence: string;
 
