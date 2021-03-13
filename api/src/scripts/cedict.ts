@@ -2,6 +2,66 @@ import fs from 'fs';
 import readline from 'readline';
 import path from 'path';
 
+import hskLevelList from '../../data/wordLists.json';
+import { cc_cedict, cc_cedictInitializer, wordInitializer } from '../model';
+import { Pool } from 'pg';
+
+// build maps HSK_level_N -> Set of words at level N
+const simplifiedSets: Record<string, Set<string>> = {};
+const traditionalSets: Record<string, Set<string>> = {};
+for (let i = 1; i < 7; i++) {
+  const index = `${i}` as '1' | '2' | '3' | '4' | '5' | '6';
+  simplifiedSets[`${i}`] = new Set(
+    hskLevelList[index].map((a) => a.simplified)
+  );
+  traditionalSets[`${i}`] = new Set(
+    hskLevelList[index].map((a) => a.traditional)
+  );
+}
+// build maps of the hsk level where a character first appears
+// ie, if simplifiedCharSets['2'].has(x), x first appeared as a char at hsk level 2
+const simplifiedCharSets: Record<string, Set<string>> = {};
+const traditionalCharSets: Record<string, Set<string>> = {};
+for (let i = 1; i < 7; i++) {
+  const index = `${i}` as '1' | '2' | '3' | '4' | '5' | '6';
+  simplifiedCharSets[index] = new Set();
+  traditionalCharSets[index] = new Set();
+  for (const word of hskLevelList[index]) {
+    const tradCharsFirstSeenAtThisLevel = word.traditional
+      .split('')
+      .filter((c) => {
+        // loop through lower levels and check whether already saw this char
+        for (let l = 1; l < i; l++) {
+          if (traditionalCharSets[`${l}`].has(c)) {
+            return false;
+          }
+        }
+        return true;
+      });
+    for (const char of tradCharsFirstSeenAtThisLevel) {
+      traditionalCharSets[index].add(char);
+    }
+    const simpCharsFirstSeenAtThisLevel = word.simplified
+      .split('')
+      .filter((c) => {
+        // loop through lower levels and check whether already saw this char
+        for (let l = 1; l < i; l++) {
+          if (simplifiedCharSets[`${l}`].has(c)) {
+            return false;
+          }
+        }
+        return true;
+      });
+    for (const char of simpCharsFirstSeenAtThisLevel) {
+      simplifiedCharSets[index].add(char);
+    }
+  }
+}
+// xavier you brilliant idiot, the above horror produces the right numbers per https://en.wikipedia.org/wiki/Hanyu_Shuiping_Kaoshi#Between_2010%E2%80%932020
+// for (let i = 1; i < 7; i++) {
+//   console.log(simplifiedCharSets[`${i}`].size);
+// }
+
 type traditional = string;
 type simplified = string;
 
@@ -46,7 +106,7 @@ export function parseLine(line: string): CEDictEntry {
 // up to line 158 looking for types
 */
 
-export async function processLineByLine() {
+export async function processLineByLine(pool: Pool) {
   const fileStream = fs.createReadStream(
     path.join(process.env.FILES_PATH as string, 'cedict/cedict_ts.u8')
   );
@@ -58,16 +118,112 @@ export async function processLineByLine() {
 
   for await (const line of rl) {
     if (line[0] !== '#') {
-      console.log(parseLine(line));
+      const l = parseLine(line);
+      const init: cc_cedictInitializer = {
+        // TODO get rid of intermediary type
+        simplified: l.simplified,
+        traditional: l.traditional,
+        pinyin: l.pinyinNumbers,
+        definitions: l.definitions,
+      };
+      await loadEntryIntoDB(init, pool);
     } else {
       // console.log(line);
     }
   }
 }
+// use with the word levels sets
+function findWordLevel(
+  levels: Record<string, Set<string>>,
+  word: string
+): number {
+  for (let i = 1; i < 7; i++) {
+    if (levels[`${i}`].has(word)) {
+      return i;
+    }
+  }
+  return 7;
+}
 
-function loadEntryIntoDB(ce: CEDictEntry): void {}
+function findCharLevel(
+  charlevels: Record<string, Set<string>>,
+  char: string
+): number {
+  for (let i = 1; i < 7; i++) {
+    if (charlevels[`${i}`].has(char)) {
+      return i;
+    }
+  }
+  return 7;
+}
+// For a chinese word ABC, where A, B and C appeared as chars at hsk levels x,y,z
+// return the highest of x,y,z
+// In other words, return the hsk level at which one is familiar with all the constituent
+// chars in ABC. For a single zi chinese word A, obviously this just gives us the level where A first appeared,
+function findWordCharLevel(
+  charlevels: Record<string, Set<string>>,
+  word: string
+): number {
+  const chars = word.split('');
+  const charLevels: number[] = chars.map((c) => findCharLevel(charlevels, c));
+  return Math.max(...charLevels);
+}
 
-processLineByLine();
+export async function loadEntryIntoDB(
+  ce: cc_cedictInitializer,
+  pool: Pool
+): Promise<void> {
+  const INSERT_WORD = `INSERT INTO mandarin.word (hanzi, hsk_word_2010, hsk_char_2010)  VALUES ($1,$2,$3) ON CONFLICT DO NOTHING;`;
+  const wordSimp: wordInitializer = {
+    hanzi: ce.simplified,
+    hsk_word_2010: findWordLevel(simplifiedSets, ce.simplified),
+    hsk_char_2010: findWordCharLevel(simplifiedCharSets, ce.simplified),
+  };
+  try {
+    await pool.query(INSERT_WORD, [
+      wordSimp.hanzi,
+      wordSimp.hsk_word_2010,
+      wordSimp.hsk_char_2010,
+    ]);
+  } catch (e) {
+    console.error(e);
+  }
+
+  if (ce.simplified !== ce.traditional) {
+    // upsert this string of hanzi
+    const wordTrad: wordInitializer = {
+      hanzi: ce.traditional,
+      hsk_word_2010: findWordLevel(traditionalSets, ce.simplified),
+      hsk_char_2010: findWordCharLevel(traditionalCharSets, ce.simplified),
+    };
+    try {
+      await pool.query(INSERT_WORD, [
+        wordTrad.hanzi,
+        wordTrad.hsk_word_2010,
+        wordTrad.hsk_char_2010,
+      ]);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  const INSERT_CEDICT = `INSERT INTO mandarin.cc_cedict (simplified, traditional, pinyin, definitions) VALUES ($1,$2,$3,$4) RETURNING id;`;
+  const res = await pool.query<cc_cedict>(INSERT_CEDICT, [
+    ce.simplified,
+    ce.traditional,
+    ce.pinyin,
+    ce.definitions,
+  ]);
+  console.log(res.fields);
+  console.log(res.rows);
+  const id = res.rows[0].id;
+  console.log(id);
+
+  const INSERT_CEDICT_DEFINITION = `INSERT INTO mandarin.cc_cedict_definition (cc_cedict_id, definition_meaning) VALUES ($1,$2) ON CONFLICT DO NOTHING; `;
+  for (const d of ce.definitions) {
+    await pool.query(INSERT_CEDICT_DEFINITION, [id, d]);
+  }
+}
 
 /*
 著 着 [zhao1] /(chess) move/trick/all right!/(dialect) to add/

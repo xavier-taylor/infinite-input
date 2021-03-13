@@ -1,17 +1,24 @@
 import { Pool, Client, PoolConfig } from 'pg';
-import { CEDictEntry, parseLine } from './cedict';
+import { cc_cedictInitializer } from '../model';
+import { CEDictEntry, parseLine, loadEntryIntoDB } from './cedict';
 
 describe('cedict ingestion integration tests', () => {
+  let pool: Pool;
+  beforeAll(() => {
+    pool = new Pool({
+      database: 'test',
+    });
+  });
+  afterAll(async () => {
+    await pool.end();
+  });
+
   it('canary test', async () => {
     // pool constructor can read the env itself, just passing in
     // explicitly for clarity
-    const pool = new Pool({
-      database: 'test',
-    });
 
     // you can also use async/await
     const res = await pool.query('SELECT NOW()');
-    await pool.end();
     expect(res.rows[0]).toHaveProperty('now');
   });
   it('', async () => {
@@ -23,6 +30,23 @@ describe('cedict ingestion integration tests', () => {
       '著 著 [zhu4] /to make known/to show/to prove/to write/book/outstanding/',
     ];
     const entries = lines.map(parseLine);
+    for (const e of entries) {
+      const init: cc_cedictInitializer = {
+        simplified: e.simplified,
+        traditional: e.traditional,
+        pinyin: e.pinyinNumbers,
+        definitions: e.definitions,
+      };
+      await loadEntryIntoDB(init, pool);
+    }
+    const words = await pool.query(`SELECT * FROM mandarin.word`);
+
+    const cc = await pool.query(`SELECT * FROM mandarin.cc_cedict`);
+    const ccs = await pool.query(`SELECT * FROM mandarin.cc_cedict_definition`);
+
+    expect(words.rowCount).toBe(2);
+    expect(cc.rowCount).toBe(5);
+    expect(ccs.rowCount).toBe(24);
     // expect there to be 2 word rows in the db
     // expect there to be 5 cc_cedict rows in the db
     // expect there to be some biggish number of cc_definitions
