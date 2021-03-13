@@ -4,30 +4,30 @@ import { sentenceId } from './sentence';
 import { wordId } from './word';
 
 export default interface sentence_word {
-  /** Primary key. Index: sentence_word_pkey */
-  sentence_id: sentenceId;
+    /** Primary key. Index: sentence_word_pkey */
+    sentence_id: sentenceId;
 
-  /** Primary key. Index: sentence_word_pkey */
-  word_hanzi: wordId;
+    /** Primary key. Index: sentence_word_pkey */
+    word_hanzi: wordId;
 
-  part_of_speech: string;
+    part_of_speech: string;
 
-  /** Primary key. Index: sentence_word_pkey */
-  sentence_index: number;
+    /** Primary key. Index: sentence_word_pkey */
+    sentence_index: number;
 }
 
 export interface sentence_wordInitializer {
-  /**
-   * Default value: nextval('mandarin.sentence_word_sentence_id_seq'::regclass)
-   * Primary key. Index: sentence_word_pkey
-   */
-  sentence_id?: sentenceId;
+    /**
+     * Default value: nextval('mandarin.sentence_word_sentence_id_seq'::regclass)
+     * Primary key. Index: sentence_word_pkey
+     */
+    sentence_id?: sentenceId;
 
-  /** Primary key. Index: sentence_word_pkey */
-  word_hanzi: wordId;
+    /** Primary key. Index: sentence_word_pkey */
+    word_hanzi: wordId;
 
-  part_of_speech: string;
+    part_of_speech: string;
 
-  /** Primary key. Index: sentence_word_pkey */
-  sentence_index: number;
+    /** Primary key. Index: sentence_word_pkey */
+    sentence_index: number;
 }

@@ -30,6 +30,7 @@ A schema is a namespace. There is a default one in each database called 'public'
 its pretty cool, but it is incomplete - for example, it lacks unique constraint. So any schema diagram created with it is just the first step - afterwards, you need to go through and add more details
 
 # running a .sql file
-psql xavier -d infinite_input -f  mandarin.sql
+
+psql xavier -d infinite_input -f mandarin.sql
 -d indicates the database, -f indicates the file, and xavier is the role
 This command runs that .sql file
