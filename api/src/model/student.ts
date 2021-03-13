@@ -3,22 +3,22 @@
 export type studentId = number & { __flavor?: 'student' };
 
 export default interface student {
-    /** Primary key. Index: student_pkey */
-    id: studentId;
+  /** Primary key. Index: student_pkey */
+  id: studentId;
 
-    first_name: string;
+  first_name: string;
 
-    last_name: string;
+  last_name: string;
 }
 
 export interface studentInitializer {
-    /**
-     * Default value: nextval('mandarin.student_id_seq'::regclass)
-     * Primary key. Index: student_pkey
-     */
-    id?: studentId;
+  /**
+   * Default value: nextval('mandarin.student_id_seq'::regclass)
+   * Primary key. Index: student_pkey
+   */
+  id?: studentId;
 
-    first_name: string;
+  first_name: string;
 
-    last_name: string;
+  last_name: string;
 }
