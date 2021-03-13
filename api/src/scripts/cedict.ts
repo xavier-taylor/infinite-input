@@ -4,7 +4,8 @@ import path from 'path';
 
 type traditional = string;
 type simplified = string;
-interface CEDictEntry {
+
+export interface CEDictEntry {
   traditional: traditional;
   simplified: simplified;
   pinyinNumbers: string;
@@ -64,13 +65,15 @@ export async function processLineByLine() {
   }
 }
 
-function loadEntryIntoDB(ce: CEDictEntry): void {
-  // query to create the ce dict, returns the cedicts uuid
-  // query to merge the trad hanzi as a word, returning the words id.
-  // query to merge the simplified hanzi as a word, returning the words id
-  // query to merge the trad-> cedict relationship
-  // if trad!==simpl, query to merge the simp -> cedict relationship?
-  // I think that is too painful, instead should make a custom mutation for creating a CEdict that does all that under the hood for me.
-}
+function loadEntryIntoDB(ce: CEDictEntry): void {}
 
 processLineByLine();
+
+/*
+著 着 [zhao1] /(chess) move/trick/all right!/(dialect) to add/
+著 着 [zhao2] /to touch/to come in contact with/to feel/to be affected by/to catch fire/to burn/(coll.) to fall asleep/(after a verb) hitting the mark/succeeding in/
+著 着 [zhe5] /aspect particle indicating action in progress/
+著 着 [zhuo2] /to wear (clothes)/to contact/to use/to apply/
+著 著 [zhu4] /to make known/to show/to prove/to write/book/outstanding/
+
+*/

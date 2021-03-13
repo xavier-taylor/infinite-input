@@ -33,5 +33,3 @@ describe('cedict parsing and inserting script', () => {
     });
   });
 });
-
-// TODO write test around the variants of

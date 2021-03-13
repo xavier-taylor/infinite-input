@@ -8,7 +8,8 @@
     "start": "node -r dotenv/config build/server.js",
     "codegen": "npx -r dotenv/config kanel",
     "lint": "eslint --ext ts src/**",
-    "test": "jest",
+    "test": "jest -c jest.config.js",
+    "int": "psql xavier -d test -f ../db/schema/mandarin.sql && jest --setupFiles dotenv/config  -c jest.config.integration.js",
     "lint-fix": "eslint --ext ts --fix src"
   },
   "devDependencies": {
@@ -28,6 +29,8 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
-    "dotenv": "^8.2.0"
+    "@types/pg": "^7.14.11",
+    "dotenv": "^8.2.0",
+    "pg": "^8.5.1"
   }
 }
