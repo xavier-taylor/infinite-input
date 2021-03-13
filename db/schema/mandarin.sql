@@ -1,5 +1,7 @@
 BEGIN;
 
+CREATE SCHEMA mandarin;
+
 CREATE TABLE mandarin.word
 (
     hanzi text,
