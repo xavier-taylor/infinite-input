@@ -6,11 +6,17 @@
     "build": "tsc",
     "start": "node -r dotenv/config dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "gen-psql": "npx -r dotenv/config kanel"
+    "gen-psql": "npx -r dotenv/config kanel",
+    "lint": "eslint --ext ts src/**",
+    "lint-fix": "eslint --ext ts --fix src"
   },
   "devDependencies": {
     "@tsconfig/node14": "^1.0.0",
     "@types/node": "^14.14.32",
+    "@typescript-eslint/eslint-plugin": "^4.17.0",
+    "@typescript-eslint/parser": "^4.17.0",
+    "eslint": "7.22.0",
+    "eslint-config-prettier": "^8.1.0",
     "kanel": "^1.1.0",
     "prettier": "2.2.1",
     "ts-node-dev": "^1.1.6",
