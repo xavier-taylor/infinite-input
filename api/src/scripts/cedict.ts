@@ -4,7 +4,7 @@ import path from 'path';
 
 import hskLevelList from '../../data/wordLists.json';
 import { cc_cedict, cc_cedictInitializer, wordInitializer } from '../model';
-import { Pool } from 'pg';
+import { Pool, PoolClient } from 'pg';
 
 // build maps HSK_level_N -> Set of words at level N
 const simplifiedSets: Record<string, Set<string>> = {};
@@ -106,7 +106,7 @@ export function parseLine(line: string): CEDictEntry {
 // up to line 158 looking for types
 */
 
-export async function processLineByLine(pool: Pool) {
+export async function processLineByLine(client: PoolClient) {
   const fileStream = fs.createReadStream(
     path.join(process.env.FILES_PATH as string, 'cedict/cedict_ts.u8')
   );
@@ -126,7 +126,7 @@ export async function processLineByLine(pool: Pool) {
         pinyin: l.pinyinNumbers,
         definitions: l.definitions,
       };
-      await loadEntryIntoDB(init, pool);
+      await loadEntryIntoDB(init, client);
     } else {
       // console.log(line);
     }
@@ -171,7 +171,7 @@ function findWordCharLevel(
 
 export async function loadEntryIntoDB(
   ce: cc_cedictInitializer,
-  pool: Pool
+  client: PoolClient
 ): Promise<void> {
   const INSERT_WORD = `INSERT INTO mandarin.word (hanzi, hsk_word_2010, hsk_char_2010)  VALUES ($1,$2,$3) ON CONFLICT DO NOTHING;`;
   const wordSimp: wordInitializer = {
@@ -180,7 +180,7 @@ export async function loadEntryIntoDB(
     hsk_char_2010: findWordCharLevel(simplifiedCharSets, ce.simplified),
   };
   try {
-    await pool.query(INSERT_WORD, [
+    await client.query(INSERT_WORD, [
       wordSimp.hanzi,
       wordSimp.hsk_word_2010,
       wordSimp.hsk_char_2010,
@@ -197,7 +197,7 @@ export async function loadEntryIntoDB(
       hsk_char_2010: findWordCharLevel(traditionalCharSets, ce.simplified),
     };
     try {
-      await pool.query(INSERT_WORD, [
+      await client.query(INSERT_WORD, [
         wordTrad.hanzi,
         wordTrad.hsk_word_2010,
         wordTrad.hsk_char_2010,
@@ -208,20 +208,17 @@ export async function loadEntryIntoDB(
   }
 
   const INSERT_CEDICT = `INSERT INTO mandarin.cc_cedict (simplified, traditional, pinyin, definitions) VALUES ($1,$2,$3,$4) RETURNING id;`;
-  const res = await pool.query<cc_cedict>(INSERT_CEDICT, [
+  const res = await client.query<cc_cedict>(INSERT_CEDICT, [
     ce.simplified,
     ce.traditional,
     ce.pinyin,
     ce.definitions,
   ]);
-  console.log(res.fields);
-  console.log(res.rows);
   const id = res.rows[0].id;
-  console.log(id);
 
   const INSERT_CEDICT_DEFINITION = `INSERT INTO mandarin.cc_cedict_definition (cc_cedict_id, definition_meaning) VALUES ($1,$2) ON CONFLICT DO NOTHING; `;
   for (const d of ce.definitions) {
-    await pool.query(INSERT_CEDICT_DEFINITION, [id, d]);
+    await client.query(INSERT_CEDICT_DEFINITION, [id, d]);
   }
 }
 
@@ -233,3 +230,19 @@ export async function loadEntryIntoDB(
 著 著 [zhu4] /to make known/to show/to prove/to write/book/outstanding/
 
 */
+
+async function seedDB() {
+  const pool = new Pool(); // params read from env vars
+  const client = await pool.connect();
+  try {
+    await processLineByLine(client);
+  } finally {
+    client.release();
+    pool.end();
+  }
+}
+
+if (require.main === module) {
+  // like if name == main from python
+  seedDB();
+}

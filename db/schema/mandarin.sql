@@ -56,6 +56,7 @@ CREATE TABLE mandarin.student_word_listen
     due date,
     previous date,
     understood_count bigint NOT NULL,
+    understood_distinct_sentences_count bigint NOT NULL,
     PRIMARY KEY (student_id, word_hanzi)
 );
 
@@ -68,6 +69,7 @@ CREATE TABLE mandarin.student_word_read
     due date,
     previous date,
     understood_count bigint NOT NULL,
+    understood_distinct_sentences_count bigint NOT NULL,
     PRIMARY KEY (student_id, word_hanzi)
 );
 

@@ -1,4 +1,4 @@
-import { parseLine } from './cedict';
+import { parseLine } from '../cedict';
 
 // TODO should also write tests that assert the preconditions for the validity of our parsing
 // methods (basically that each string has the things our regex assumes it does) - onerous but

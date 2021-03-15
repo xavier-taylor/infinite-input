@@ -1,6 +1,6 @@
 import { Pool, Client, PoolConfig } from 'pg';
-import { cc_cedictInitializer } from '../model';
-import { CEDictEntry, parseLine, loadEntryIntoDB } from './cedict';
+import { cc_cedictInitializer } from '../../model';
+import { CEDictEntry, parseLine, loadEntryIntoDB } from '../cedict';
 
 describe('cedict ingestion integration tests', () => {
   let pool: Pool;

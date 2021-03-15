@@ -19,6 +19,8 @@ export default interface student_word_listen {
   previous: Date | null;
 
   understood_count: number;
+
+  understood_distinct_sentences_count: number;
 }
 
 export interface student_word_listenInitializer {
@@ -40,4 +42,6 @@ export interface student_word_listenInitializer {
   previous?: Date | null;
 
   understood_count: number;
+
+  understood_distinct_sentences_count: number;
 }
