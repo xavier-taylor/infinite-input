@@ -87,7 +87,7 @@ CREATE TABLE mandarin.sentence
     english text NOT NULL,
     chinese text NOT NULL,
     corpus_name text NOT NULL REFERENCES mandarin.corpus (name),
-    next_sentence bigserial REFERENCES mandarin.sentence (id),
+    previous_sentence bigserial REFERENCES mandarin.sentence (id),
     PRIMARY KEY (id)
 );
 
@@ -108,12 +108,18 @@ CREATE TABLE mandarin.student_sentence_listen
 );
 
 CREATE TABLE mandarin.sentence_word
-(
+( -- note we map 1 token to 1 word to 1 sentence_word because in the chinese model 1 token = 1 word
     id bigserial,
     sentence_id bigserial REFERENCES mandarin.sentence (id),
-    word_hanzi text REFERENCES mandarin.word (hanzi),
-    part_of_speech text NOT NULL,
-    sentence_index integer CHECK (sentence_index > -1),
+    word_hanzi text REFERENCES mandarin.word (hanzi),           -- stanza.word.text
+    lemma text REFERENCES mandarin.word (hanzi),                -- stanza.word.lemma
+    part_of_speech text NOT NULL,                               -- stanza.word.xpos
+    universal_part_of_speech text NOT NULL,                     -- stanza.word.upos
+    sentence_index integer NOT NULL CHECK (sentence_index > 0), -- stanza.word.id
+    head integer NOT NULL CHECK (head > -1),                    -- stanza.word.head
+    deprel text NOT NULL,                                       -- stanza.word.deprel
+    feats jsonb,                                                -- stanza.word.feats
+    ner text NOT NULL,                                          -- stanza.token.ner, apparently in in BIOES format (with 'O' denoting none)
     PRIMARY KEY (id)
 );
 
