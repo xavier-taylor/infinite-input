@@ -6,7 +6,7 @@
     "cedict": "ts-node -r dotenv/config src/scripts/cedict.ts",
     "build": "tsc",
     "start": "node -r dotenv/config build/server.js",
-    "codegen": "npx -r dotenv/config kanel",
+    "codegen": "npx kanel",
     "lint": "eslint --ext ts src/**",
     "test": "jest -c jest.config.js",
     "int": "psql xavier -d test -f ../db/schema/mandarin.sql && jest --setupFiles dotenv/config  -c jest.config.integration.js",

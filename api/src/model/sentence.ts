@@ -14,7 +14,7 @@ export default interface sentence {
 
   corpus_name: corpusId;
 
-  next_sentence: sentenceId;
+  previous_sentence: sentenceId;
 }
 
 export interface sentenceInitializer {
@@ -30,6 +30,6 @@ export interface sentenceInitializer {
 
   corpus_name: corpusId;
 
-  /** Default value: nextval('mandarin.sentence_next_sentence_seq'::regclass) */
-  next_sentence?: sentenceId;
+  /** Default value: nextval('mandarin.sentence_previous_sentence_seq'::regclass) */
+  previous_sentence?: sentenceId;
 }

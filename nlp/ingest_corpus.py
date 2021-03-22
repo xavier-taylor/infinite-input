@@ -5,7 +5,7 @@ zh_nlp = stanza.Pipeline('zh')
 
 # 1. Read the corpus file line by line
 with open('../../../files/UM-Corpus/data/Testing/Testing-Data.txt') as f:
-    # for line in f:
+    # this code seems to suggest that the num tokens for chinese is always = to the number of words! ran it against the um corpus test data and never printed out a line
     i = 0
     for line in f:
         if (i%2 == 0):
@@ -35,7 +35,7 @@ doc.entities             doc.get(                 doc.iter_words(          doc.s
     # TODO workd out which field are optional, which are always there, possibly upos and xpos are compulsory, feats optional. actually can just have field
     # nullable then once have ingested db can confirm empirically which fields are nullable then set a null constraint based on that.
 
-    # TODO workout for this chinese model, is there a distinction between words and tokens? or will the token always be a wrapper around a single 'word'
+    # TODO workout for this chinese model, is there a distinction between words and tokens? or will the token always be a wrapper around a single 'word' - they are 1 to 1, I confirmed
     # I need to know because I need to know what counts as a 'word' for my use case.
    # tokens	List[Token]	The list of tokens in this sentence.
      # words	List[Word]	The list of words in this sentence

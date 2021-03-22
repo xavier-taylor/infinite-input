@@ -9,3 +9,5 @@ tsconfig.json
 .prettierrc
 .kanelrc.js
 db
+
+node_modules

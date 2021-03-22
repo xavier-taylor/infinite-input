@@ -13,9 +13,21 @@ export default interface sentence_word {
 
   word_hanzi: wordId | null;
 
+  lemma: wordId | null;
+
   part_of_speech: string;
 
-  sentence_index: number | null;
+  universal_part_of_speech: string;
+
+  sentence_index: number;
+
+  head: number;
+
+  deprel: string;
+
+  feats: unknown | null;
+
+  ner: string;
 }
 
 export interface sentence_wordInitializer {
@@ -30,7 +42,19 @@ export interface sentence_wordInitializer {
 
   word_hanzi?: wordId | null;
 
+  lemma?: wordId | null;
+
   part_of_speech: string;
 
-  sentence_index?: number | null;
+  universal_part_of_speech: string;
+
+  sentence_index: number;
+
+  head: number;
+
+  deprel: string;
+
+  feats?: unknown | null;
+
+  ner: string;
 }
