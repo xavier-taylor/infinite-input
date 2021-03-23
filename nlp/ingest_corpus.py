@@ -1,4 +1,5 @@
 import psycopg2
+import stanza
 
 conn = psycopg2.connect("dbname=infinite_input user=xavier password=localdb-4301")
 
