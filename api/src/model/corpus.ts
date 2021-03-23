@@ -4,7 +4,7 @@ export type corpusId = string & { __flavor?: 'corpus' };
 
 export default interface corpus {
   /** Primary key. Index: corpus_pkey */
-  name: corpusId;
+  title: corpusId;
 
   licence: string;
 
@@ -13,7 +13,7 @@ export default interface corpus {
 
 export interface corpusInitializer {
   /** Primary key. Index: corpus_pkey */
-  name: corpusId;
+  title: corpusId;
 
   licence: string;
 

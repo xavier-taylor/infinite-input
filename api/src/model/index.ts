@@ -12,6 +12,7 @@ import student_sentence_listen, { student_sentence_listenInitializer } from './s
 import student_sentence_read, { student_sentence_readInitializer } from './student_sentence_read';
 import student_word_listen, { student_word_listenInitializer } from './student_word_listen';
 import student_word_read, { student_word_readInitializer } from './student_word_read';
+import sub_corpus, { sub_corpusInitializer } from './sub_corpus';
 import word, { wordInitializer, wordId } from './word';
 
 type Model =
@@ -27,6 +28,7 @@ type Model =
   | student_sentence_read
   | student_word_listen
   | student_word_read
+  | sub_corpus
   | word
 
 interface ModelTypeMap {
@@ -42,6 +44,7 @@ interface ModelTypeMap {
   'student_sentence_read': student_sentence_read;
   'student_word_listen': student_word_listen;
   'student_word_read': student_word_read;
+  'sub_corpus': sub_corpus;
   'word': word;
 }
 
@@ -75,6 +78,7 @@ type Initializer =
   | student_sentence_readInitializer
   | student_word_listenInitializer
   | student_word_readInitializer
+  | sub_corpusInitializer
   | wordInitializer
 
 interface InitializerTypeMap {
@@ -90,6 +94,7 @@ interface InitializerTypeMap {
   'student_sentence_read': student_sentence_readInitializer;
   'student_word_listen': student_word_listenInitializer;
   'student_word_read': student_word_readInitializer;
+  'sub_corpus': sub_corpusInitializer;
   'word': wordInitializer;
 }
 
@@ -106,6 +111,7 @@ export {
   student_sentence_read, student_sentence_readInitializer,
   student_word_listen, student_word_listenInitializer,
   student_word_read, student_word_readInitializer,
+  sub_corpus, sub_corpusInitializer,
   word, wordInitializer, wordId,
 
   Model,

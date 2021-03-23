@@ -75,10 +75,17 @@ CREATE TABLE mandarin.student_word_read
 
 CREATE TABLE mandarin.corpus
 (
-    name text,
+    title text,
     licence text NOT NULL,
     website text NOT NULL,
-    PRIMARY KEY (name)
+    PRIMARY KEY (title)
+);
+
+CREATE TABLE mandarin.sub_corpus -- for corpuses with no parts, this is a singleton
+(
+    title text,
+    corpus_title text REFERENCES mandarin.corpus (title),
+    PRIMARY KEY (title, corpus_title)
 );
 
 CREATE TABLE mandarin.sentence
@@ -86,8 +93,10 @@ CREATE TABLE mandarin.sentence
     id bigserial,
     english text NOT NULL,
     chinese text NOT NULL,
-    corpus_name text NOT NULL REFERENCES mandarin.corpus (name),
+    sub_corpus_title text NOT NULL,
+    corpus_title text NOT NULL,
     previous_sentence bigserial REFERENCES mandarin.sentence (id),
+    FOREIGN KEY (corpus_title, sub_corpus_title) REFERENCES mandarin.sub_corpus (corpus_title, title),
     PRIMARY KEY (id)
 );
 

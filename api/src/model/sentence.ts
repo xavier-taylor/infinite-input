@@ -1,6 +1,6 @@
 // Automatically generated. Don't change this file manually.
 
-import { corpusId } from './corpus';
+import { sub_corpusId } from './sub_corpus';
 
 export type sentenceId = number & { __flavor?: 'sentence' };
 
@@ -12,7 +12,9 @@ export default interface sentence {
 
   chinese: string;
 
-  corpus_name: corpusId;
+  sub_corpus_title: sub_corpusId;
+
+  corpus_title: sub_corpusId;
 
   previous_sentence: sentenceId;
 }
@@ -28,7 +30,9 @@ export interface sentenceInitializer {
 
   chinese: string;
 
-  corpus_name: corpusId;
+  sub_corpus_title: sub_corpusId;
+
+  corpus_title: sub_corpusId;
 
   /** Default value: nextval('mandarin.sentence_previous_sentence_seq'::regclass) */
   previous_sentence?: sentenceId;
