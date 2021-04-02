@@ -35,7 +35,7 @@ COMMENT ON COLUMN mandarin.cc_cedict.definitions
 CREATE TABLE mandarin.cc_cedict_definition
 (
     cc_cedict_id bigserial REFERENCES mandarin.cc_cedict (id),
-    definition_meaning text,
+    definition_meaning NOT NULL text,
     PRIMARY KEY (cc_cedict_id, definition_meaning)
 );
 
@@ -53,10 +53,10 @@ CREATE TABLE mandarin.student_word_listen
     word_hanzi text REFERENCES mandarin.word (hanzi),
     f1 bigint NOT NULL,
     f2 bigint NOT NULL,
-    due date,
-    previous date,
+    due date NOT NULL,          -- TODO probably need index on this, or perhaps a student_id + this row index...
+    previous date NOT NULL,       -- TODO determine whether not null makes sense here TODO decide if we even need this!
     understood_count bigint NOT NULL,
-    understood_distinct_sentences_count bigint NOT NULL,
+    understood_distinct_documents_count bigint NOT NULL,
     PRIMARY KEY (student_id, word_hanzi)
 );
 
@@ -66,10 +66,10 @@ CREATE TABLE mandarin.student_word_read
     word_hanzi text REFERENCES mandarin.word (hanzi),
     f1 bigint NOT NULL,
     f2 bigint NOT NULL,
-    due date,
-    previous date,
+    due date NOT NULL,
+    previous date NOT NULL,
     understood_count bigint NOT NULL,
-    understood_distinct_sentences_count bigint NOT NULL,
+    understood_distinct_documents_count bigint NOT NULL,
     PRIMARY KEY (student_id, word_hanzi)
 );
 
@@ -78,6 +78,7 @@ CREATE TABLE mandarin.corpus
     title text,
     licence text NOT NULL,
     website text NOT NULL,
+    summary text NOT NULL
     PRIMARY KEY (title)
 );
 
@@ -85,51 +86,79 @@ CREATE TABLE mandarin.sub_corpus -- for corpuses with no parts, this is a single
 (
     title text,
     corpus_title text REFERENCES mandarin.corpus (title),
+    summary text NOT NULL,
     PRIMARY KEY (title, corpus_title)
 );
 
-CREATE TABLE mandarin.sentence
+CREATE TABLE mandarin.document
 (
     id bigserial,
-    english text NOT NULL,
-    chinese text NOT NULL,
     sub_corpus_title text NOT NULL,
     corpus_title text NOT NULL,
-    previous_sentence bigserial REFERENCES mandarin.sentence (id),
+    previous_document bigserial NULL REFERENCES mandarin.document (id),
+    english text NULL,
+    chinese text NOT NULL,
     FOREIGN KEY (corpus_title, sub_corpus_title) REFERENCES mandarin.sub_corpus (corpus_title, title),
     PRIMARY KEY (id)
 );
 
-CREATE TABLE mandarin.student_sentence_read
-(
-    student_id bigserial REFERENCES mandarin.student (id),
-    sentence_id bigserial REFERENCES mandarin.sentence (id),
-    read_count integer NOT NULL,
-    PRIMARY KEY (student_id, sentence_id)
-);
 
-CREATE TABLE mandarin.student_sentence_listen
+CREATE TABLE mandarin.sentence
 (
-    student_id bigserial REFERENCES mandarin.student (id),
-    sentence_id bigserial REFERENCES mandarin.student (id),
-    listen_count integer NOT NULL,
-    PRIMARY KEY (student_id, sentence_id)
-);
-
-CREATE TABLE mandarin.sentence_word
-( -- note we map 1 token to 1 word to 1 sentence_word because in the chinese model 1 token = 1 word
     id bigserial,
+    document_id bigserial NOT NULL REFERENCES mandarin.document (id),
+    chinese text NOT NULL,
+    sentiment text NOT NULL, -- http://a1-www.is.tokushima-u.ac.jp/member/ren/Ren-CECps1.0/Ren-CECps1.0.html
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE mandarin.sentence_word 
+( -- note we map 1 token to 1 word to 1 sentence_word because in the chinese model 1 token = 1 word
+ -- the combination of head and deprel makes the sentence.dependencies data redundant, so we will not store it. 
+ -- however, i am not sure if the ner field makes the entire NER representation (the Span) redundant, so will store it in named_entity
+    id int,                                                     --standa.word.id 1 based index of word in sentence
     sentence_id bigserial REFERENCES mandarin.sentence (id),
-    word_hanzi text REFERENCES mandarin.word (hanzi),           -- stanza.word.text
-    lemma text REFERENCES mandarin.word (hanzi),                -- stanza.word.lemma
+    word_hanzi text NOT NULL REFERENCES mandarin.word (hanzi),  -- stanza.word.text
+    lemma text NOT NULL REFERENCES mandarin.word (hanzi),                -- stanza.word.lemma
     part_of_speech text NOT NULL,                               -- stanza.word.xpos
     universal_part_of_speech text NOT NULL,                     -- stanza.word.upos
-    sentence_index integer NOT NULL CHECK (sentence_index > 0), -- stanza.word.id
     head integer NOT NULL CHECK (head > -1),                    -- stanza.word.head
     deprel text NOT NULL,                                       -- stanza.word.deprel
-    feats jsonb,                                                -- stanza.word.feats
+    feats jsonb NOT NULL,                                       -- stanza.word.feats //The morphological features of this word. Example: ‘Gender=Fem|Person=3’. we convert into json
+    start_char int NOT NULL,                                    -- stanza.token.start_char
+    end_char int NOT NULL,                                      -- standa.token.end_char indexes into document
     ner text NOT NULL,                                          -- stanza.token.ner, apparently in in BIOES format (with 'O' denoting none)
+    named_entity_id bigserial NULL REFERENCES mandarin.named_entity (id),  -- stanza.span.words/tokens
+    PRIMARY KEY (id, sentence_id)
+);
+COMMENT ON COLUMN mandarin.sentence_word.named_entity_id 
+    IS 'The named entity, if any, that this word is part of. 1 named_entity has 1+ sentence_words, one sentence_word has 1 or 0 NE.';
+
+CREATE TABLE mandarin.named_entity
+(
+    id bigserial,
+    chinese text NOT NULL,                                      -- stanza.span.text
+    entity_type text NOT NULL,                                     -- stanza.span.type 
+    start_char int NOT NULL,                                    -- I believe zero indexed, in the document
+    end_char int NOT NULL,
+    document_id bigserial NOT NULL REFERENCES mandarin.document (id),    -- stanza.span.doc
     PRIMARY KEY (id)
+);
+
+CREATE TABLE mandarin.student_document_read
+(
+    student_id bigserial REFERENCES mandarin.student (id),
+    document_id bigserial REFERENCES mandarin.document (id),
+    read_count integer NOT NULL,
+    PRIMARY KEY (student_id, document_id)
+);
+
+CREATE TABLE mandarin.student_document_listen
+(
+    student_id bigserial REFERENCES mandarin.student (id),
+    document_id bigserial REFERENCES mandarin.document (id),
+    listen_count integer NOT NULL,
+    PRIMARY KEY (student_id, document_id)
 );
 
 CREATE TABLE mandarin.read_log
@@ -139,8 +168,6 @@ CREATE TABLE mandarin.read_log
     understood boolean NOT NULL,
     sentence_word_id bigserial REFERENCES mandarin.sentence_word (id),
     PRIMARY KEY (date_time, student_id, sentence_word_id),
-    FOREIGN KEY (sentence_word_id)
-        REFERENCES mandarin.sentence_word (id)
 );
 
 CREATE TABLE mandarin.listen_log
@@ -150,8 +177,6 @@ CREATE TABLE mandarin.listen_log
     understood boolean NOT NULL,
     sentence_word_id bigserial REFERENCES mandarin.sentence_word (id),
     PRIMARY KEY (date_time, student_id, sentence_word_id),
-    FOREIGN KEY (sentence_word_id)
-        REFERENCES mandarin.sentence_word (id)
 );
 
 END;
