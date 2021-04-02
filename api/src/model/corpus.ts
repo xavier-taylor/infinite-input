@@ -9,6 +9,8 @@ export default interface corpus {
   licence: string;
 
   website: string;
+
+  summary: string;
 }
 
 export interface corpusInitializer {
@@ -18,4 +20,6 @@ export interface corpusInitializer {
   licence: string;
 
   website: string;
+
+  summary: string;
 }

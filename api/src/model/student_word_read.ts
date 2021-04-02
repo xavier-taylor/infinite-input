@@ -14,21 +14,18 @@ export default interface student_word_read {
 
   f2: number;
 
-  due: Date | null;
+  due: Date;
 
-  previous: Date | null;
+  previous: Date;
 
   understood_count: number;
 
-  understood_distinct_sentences_count: number;
+  understood_distinct_documents_count: number;
 }
 
 export interface student_word_readInitializer {
-  /**
-   * Default value: nextval('mandarin.student_word_read_student_id_seq'::regclass)
-   * Primary key. Index: student_word_read_pkey
-   */
-  student_id?: studentId;
+  /** Primary key. Index: student_word_read_pkey */
+  student_id: studentId;
 
   /** Primary key. Index: student_word_read_pkey */
   word_hanzi: wordId;
@@ -37,11 +34,11 @@ export interface student_word_readInitializer {
 
   f2: number;
 
-  due?: Date | null;
+  due: Date;
 
-  previous?: Date | null;
+  previous: Date;
 
   understood_count: number;
 
-  understood_distinct_sentences_count: number;
+  understood_distinct_documents_count: number;
 }
