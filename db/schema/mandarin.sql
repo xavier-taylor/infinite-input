@@ -98,6 +98,7 @@ CREATE TABLE mandarin.document
     previous_document bigint NULL REFERENCES mandarin.document (id),
     english text NULL,
     chinese text NOT NULL,
+    words_upos_not_punct text[] NOT NULL, -- distinct words TODO consider deleting this once have investigated quick query
     FOREIGN KEY (corpus_title, sub_corpus_title) REFERENCES mandarin.sub_corpus (corpus_title, title),
     PRIMARY KEY (id)
 );
@@ -116,7 +117,7 @@ CREATE TABLE mandarin.named_entity
     id bigserial,
     chinese text NOT NULL,                                      -- stanza.span.text
     entity_type text NOT NULL,                                     -- stanza.span.type 
-    start_char int NOT NULL,                                    -- I believe zero indexed, in the document
+    start_char int NOT NULL,                                    -- zero indexed, in the document
     end_char int NOT NULL,
     document_id bigint NOT NULL REFERENCES mandarin.document (id),    -- stanza.span.doc
     PRIMARY KEY (id)

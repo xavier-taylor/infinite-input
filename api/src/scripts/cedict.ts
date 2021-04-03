@@ -3,6 +3,12 @@ import readline from 'readline';
 import path from 'path';
 
 import hskLevelList from '../../data/wordLists.json';
+// TODO more generally check that I currently have the right set of words
+// tagged at each hsk level in this dataset!
+// This script is imperfect (or so it seems),
+// as the numbers don't quite add up. Maybe its because of
+// different senses of the same word at different levels? any case, must sort out!
+// TODO check that every HSK word was in CEdict!
 import { cc_cedict, cc_cedictInitializer, wordInitializer } from '../model';
 import { Pool, PoolClient } from 'pg';
 
@@ -173,7 +179,7 @@ export async function loadEntryIntoDB(
   ce: cc_cedictInitializer,
   client: PoolClient
 ): Promise<void> {
-  const INSERT_WORD = `INSERT INTO mandarin.word (hanzi, hsk_word_2010, hsk_char_2010)  VALUES ($1,$2,$3) ON CONFLICT DO NOTHING;`;
+  const INSERT_WORD = `;
   const wordSimp: wordInitializer = {
     hanzi: ce.simplified,
     hsk_word_2010: findWordLevel(simplifiedSets, ce.simplified),
@@ -246,3 +252,6 @@ if (require.main === module) {
   // like if name == main from python
   seedDB();
 }
+
+// TODO - document what this file does in english
+// I think it ingests CEDICt and also creates WORD entities for each CEDICT entry
