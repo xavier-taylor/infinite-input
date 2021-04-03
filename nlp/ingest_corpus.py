@@ -236,8 +236,8 @@ for subcorpus in corpus.sub_corpuses:
 
 
                 line_index = line_index + 1
-                if( line_index > 2000):
-                    break
+                # if( line_index > 2000):
+                    # break
         print(line_index)
         after = datetime.now()
         print('sentences: '+ str(line_index/2))
@@ -249,6 +249,6 @@ for subcorpus in corpus.sub_corpuses:
         if (delta.seconds > 0):
             print('sentences per second ', str(line_index/2/delta.seconds))
 
-        
+       # TODO undo set session_replication_role to replica;, which you did before running this for the subcorpus.  
             
 

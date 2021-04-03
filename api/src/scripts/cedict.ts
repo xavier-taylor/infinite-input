@@ -179,7 +179,7 @@ export async function loadEntryIntoDB(
   ce: cc_cedictInitializer,
   client: PoolClient
 ): Promise<void> {
-  const INSERT_WORD = `;
+  const INSERT_WORD = `INSERT INTO mandarin.word (hanzi, hsk_word_2010, hsk_char_2010)  VALUES ($1,$2,$3) ON CONFLICT DO NOTHING;`;
   const wordSimp: wordInitializer = {
     hanzi: ce.simplified,
     hsk_word_2010: findWordLevel(simplifiedSets, ce.simplified),

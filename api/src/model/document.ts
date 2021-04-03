@@ -17,6 +17,8 @@ export default interface document {
   english: string | null;
 
   chinese: string;
+
+  words_upos_not_punct: string[];
 }
 
 export interface documentInitializer {
@@ -35,4 +37,6 @@ export interface documentInitializer {
   english?: string | null;
 
   chinese: string;
+
+  words_upos_not_punct: string[];
 }
