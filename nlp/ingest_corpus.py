@@ -196,18 +196,31 @@ for sentence in doc.sentences:
             token.end_char,
             token.ner
         ))
+# -- -- -- FOR ent in sentence
+# -- -- -- -- insert named_entity
     for ent in sentence.ents:
         cur.execute('''
         INSERT INTO mandarin.named_entity (chinese, entity_type, start_char, end_char, document_id) 
         VALUES (%s, %s, %s, %s, %s) RETURNING id;
         ''',
         (ent.text, ent.type, ent.start_char, ent.end_char, document_id))
-        
-            
-# -- -- -- FOR ent in sentence
-# -- -- -- -- insert named_entity
+        entity_id = cur.fetchone()[0]
 # -- -- -- -- FOR word in ent
 # -- -- -- -- -- update sentence_word with named_entity
+        for word in ent.words:
+            cur.execute('''
+            UPDATE mandarin.sentence_word
+            SET named_entity_id = %s
+            WHERE 
+                id = %s AND
+                sentence_id = %s
+            ;
+            ''',
+            (entity_id, word.id, sentence_id))
+
+
+        
+            
 
 
 
