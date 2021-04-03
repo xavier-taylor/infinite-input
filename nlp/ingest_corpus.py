@@ -7,6 +7,7 @@ from psycopg2.extras import Json
 
 '''
 Notes: - can do nlp at rate of 21 sentences per sec
+- But with the below database ingestion and file i/o, seem to be able to do.... 1.6 per second. uh oh
 '''
 #word: stanza.models.common.doc.Word
 
@@ -70,7 +71,6 @@ corpus = Corpus(
     summary=um_summary,
     sub_corpuses=[SubCorpus(title='Education', path='Education/Bi-Education.txt', summary=um_ed_summary)])
 
-path = corpus.root_dir+corpus.sub_corpuses[0].path
 
 zh_nlp = stanza.Pipeline('zh')
 # records = cur.fetchall()
@@ -104,152 +104,151 @@ for subcorpus in corpus.sub_corpuses:
             'summary': subcorpus.summary
         }
         )
+    path = corpus.root_dir + subcorpus.path
+    with open(path) as f:
+        line_index = 0 
+        english = ''
+        chinese = ''
+        before = datetime.now()
+        document_id = None # the first document has a null reference for its previous_document ref
+        for line in f:
+            if (line_index%2 == 0):
+                english = line
+                line_index = line_index + 1
+            else:
+                chinese = line
 
-# -- FOR text in corpus
-# -- -- run nlp
-test = "香港中文大学首席研究员艾琳•黄说，“夫妇们的婚姻满足感可能取决于他们上下班的时候是否同路。”"
-doc = zh_nlp(test)
+                # -- FOR text in corpus
+                # -- -- run nlp
+                doc = zh_nlp(chinese)
+                print('about to process line ', (line_index +1 )/2)
 
-# -- -- insert document
-words = list(map((lambda x: x.text),filter((lambda x: x.upos !='PUNCT'),doc.iter_words())))
+                # -- -- insert document
+                words = list(map((lambda x: x.text),filter((lambda x: x.upos !='PUNCT'),doc.iter_words())))
 
-cur.execute('''
-    INSERT INTO mandarin.document (sub_corpus_title, corpus_title, english, chinese, words_upos_not_punct) 
-    VALUES (%s, %s, %s, %s, %s)
-    RETURNING id;''',
-    (subcorpus.title, corpus.title, '', test, words)
-    )
-document_id = cur.fetchone()[0]
-# -- -- FOR sentence in document
-for sentence in doc.sentences:
-# -- -- -- insert sentence
-    cur.execute('''
-        INSERT INTO mandarin.sentence (document_id, chinese, sentiment) 
-        VALUES (%s, %s, %s)
-        RETURNING id;''',
-        (document_id, sentence.text, sentence.sentiment)
-        )
-    sentence_id = cur.fetchone()[0]
-    assert(len(sentence.words) == len(sentence.tokens))
-# -- -- -- FOR word in sentence
-# -- -- -- -- upsert lemma
-# -- -- -- -- upsert word sycopg2.extras.execute_batch(cur, sql, argslist, page_size=100)
-# -- -- -- -- insert sentence_word https://www.psycopg.org/docs/extras.html#fast-exec
-    ## TODO need to write script to create 'hsk level' like the javascript I have
-    # TODO for now this is POTENTIALLY ERRONEOUSLY  declaring all as hsk 7!!
-    for i in range(len(sentence.words)):
-        word = sentence.words[i]
-        token = sentence.tokens[i]
-        feats = extract_feats(word)
-        cur.execute('''
-        INSERT INTO mandarin.word (hanzi, hsk_word_2010, hsk_char_2010) 
-        VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;
-        ''',
-        (word.text, 7, 7))
-        if(word.text != word.lemma):
-            cur.execute('''
-            INSERT INTO mandarin.word (hanzi, hsk_word_2010, hsk_char_2010) 
-            VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;
-            ''',
-            (word.lemma, 7, 7))
-        cur.execute('''
-        INSERT INTO mandarin.sentence_word (
-            id, 
-            sentence_id, 
-            word_hanzi,
-            lemma,
-            part_of_speech,
-            universal_part_of_speech,
-            head,
-            deprel,
-            feats,
-            start_char,
-            end_char,
-            ner
-        ) 
-        VALUES (
-            %s, 
-            %s, 
-            %s,
-            %s,
-            %s,
-            %s,
-            %s,
-            %s,
-            %s,
-            %s,
-            %s,
-            %s
-            );
-        ''',
-        (
-            word.id,
-            sentence_id,
-            word.text,
-            word.lemma,
-            word.xpos,
-            word.upos,
-            word.head,
-            word.deprel,
-            Json(feats),
-            token.start_char,
-            token.end_char,
-            token.ner
-        ))
-# -- -- -- FOR ent in sentence
-# -- -- -- -- insert named_entity
-    for ent in sentence.ents:
-        cur.execute('''
-        INSERT INTO mandarin.named_entity (chinese, entity_type, start_char, end_char, document_id) 
-        VALUES (%s, %s, %s, %s, %s) RETURNING id;
-        ''',
-        (ent.text, ent.type, ent.start_char, ent.end_char, document_id))
-        entity_id = cur.fetchone()[0]
-# -- -- -- -- FOR word in ent
-# -- -- -- -- -- update sentence_word with named_entity
-        for word in ent.words:
-            cur.execute('''
-            UPDATE mandarin.sentence_word
-            SET named_entity_id = %s
-            WHERE 
-                id = %s AND
-                sentence_id = %s
-            ;
-            ''',
-            (entity_id, word.id, sentence_id))
+                cur.execute('''
+                    INSERT INTO mandarin.document (sub_corpus_title, corpus_title, previous_document, english, chinese, words_upos_not_punct) 
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING id;''',
+                    (subcorpus.title, corpus.title, document_id, english, chinese, words)
+                    )
+                document_id = cur.fetchone()[0]
+                # -- -- FOR sentence in document
+                for sentence in doc.sentences:
+                # -- -- -- insert sentence
+                    cur.execute('''
+                        INSERT INTO mandarin.sentence (document_id, chinese, sentiment) 
+                        VALUES (%s, %s, %s)
+                        RETURNING id;''',
+                        (document_id, sentence.text, sentence.sentiment)
+                        )
+                    sentence_id = cur.fetchone()[0]
+                    assert(len(sentence.words) == len(sentence.tokens))
+                # -- -- -- FOR word in sentence
+                # -- -- -- -- upsert lemma
+                # -- -- -- -- upsert word sycopg2.extras.execute_batch(cur, sql, argslist, page_size=100)
+                # -- -- -- -- insert sentence_word https://www.psycopg.org/docs/extras.html#fast-exec
+                    ## TODO need to write script to create 'hsk level' like the javascript I have
+                    # TODO for now this is POTENTIALLY ERRONEOUSLY  declaring all as hsk 7!!
+                    for i in range(len(sentence.words)):
+                        word = sentence.words[i]
+                        token = sentence.tokens[i]
+                        feats = extract_feats(word)
+                        cur.execute('''
+                        INSERT INTO mandarin.word (hanzi, hsk_word_2010, hsk_char_2010) 
+                        VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;
+                        ''',
+                        (word.text, 7, 7))
+                        if(word.text != word.lemma):
+                            cur.execute('''
+                            INSERT INTO mandarin.word (hanzi, hsk_word_2010, hsk_char_2010) 
+                            VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;
+                            ''',
+                            (word.lemma, 7, 7))
+                        cur.execute('''
+                        INSERT INTO mandarin.sentence_word (
+                            id, 
+                            sentence_id, 
+                            word_hanzi,
+                            lemma,
+                            part_of_speech,
+                            universal_part_of_speech,
+                            head,
+                            deprel,
+                            feats,
+                            start_char,
+                            end_char,
+                            ner
+                        ) 
+                        VALUES (
+                            %s, 
+                            %s, 
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s
+                            );
+                        ''',
+                        (
+                            word.id,
+                            sentence_id,
+                            word.text,
+                            word.lemma,
+                            word.xpos,
+                            word.upos,
+                            word.head,
+                            word.deprel,
+                            Json(feats),
+                            token.start_char,
+                            token.end_char,
+                            token.ner
+                        ))
+                # -- -- -- FOR ent in sentence
+                # -- -- -- -- insert named_entity
+                    for ent in sentence.ents:
+                        cur.execute('''
+                        INSERT INTO mandarin.named_entity (chinese, entity_type, start_char, end_char, document_id) 
+                        VALUES (%s, %s, %s, %s, %s) RETURNING id;
+                        ''',
+                        (ent.text, ent.type, ent.start_char, ent.end_char, document_id))
+                        entity_id = cur.fetchone()[0]
+                # -- -- -- -- FOR word in ent
+                # -- -- -- -- -- update sentence_word with named_entity
+                        for word in ent.words:
+                            cur.execute('''
+                            UPDATE mandarin.sentence_word
+                            SET named_entity_id = %s
+                            WHERE 
+                                id = %s AND
+                                sentence_id = %s
+                            ;
+                            ''',
+                            (entity_id, word.id, sentence_id))
 
+
+
+
+                line_index = line_index + 1
+                if( line_index > 200):
+                    break
+
+        after = datetime.now()
+        print('sentences: '+ str(i/2))
+        print(after - before)
+        delta = after - before
+        print('seconds ' +str(delta.seconds))
+        print(delta.seconds / 60)
+        print(delta.seconds % 60)
+        if (delta.seconds > 0):
+            print('sentences per second ', str(i/2/delta.seconds))
 
         
             
 
 
-
-'''
-with open(path) as f:
-    i = 0 
-    english = ''
-    chinese = ''
-    before = datetime.now()
-    for line in f:
-        if (i%2 == 0):
-            english = line
-            i = i + 1
-        else:
-            chinese = line
-            doc = zh_nlp(chinese)
-            if (doc.num_tokens != doc.num_words):
-                print('tokens not same count as words')
-            # print(doc)
-            # print(line) 
-            i = i + 1
-            if( i > 5000):
-                break
-    after = datetime.now()
-    print('sentences: '+ str(i/2))
-    print(after - before)
-    delta = after - before
-    print('seconds ' +str(delta.seconds))
-    print(delta.seconds / 60)
-    print(delta.seconds % 60)
-    print('sentences per second ', str(i/2/delta.seconds))
-'''
