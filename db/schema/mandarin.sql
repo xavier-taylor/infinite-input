@@ -98,6 +98,7 @@ CREATE TABLE mandarin.document
     previous_document bigint NULL REFERENCES mandarin.document (id),
     english text NULL,
     chinese text NOT NULL,
+    -- TODO change this ones name to words lol 
     words_upos_not_punct text[] NOT NULL, -- distinct words TODO consider deleting this once have investigated quick query
     FOREIGN KEY (corpus_title, sub_corpus_title) REFERENCES mandarin.sub_corpus (corpus_title, title),
     PRIMARY KEY (id)

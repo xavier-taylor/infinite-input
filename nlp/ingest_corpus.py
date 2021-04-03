@@ -7,7 +7,7 @@ from psycopg2.extras import Json
 
 '''
 Notes: - can do nlp at rate of 21 sentences per sec
-- But with the below database ingestion and file i/o, seem to be able to do.... 1.6 per second. uh oh
+- But with the below database ingestion and file i/o, seem to be able to do.... 15.64 when inserted 1000 sentences.
 '''
 #word: stanza.models.common.doc.Word
 
@@ -81,6 +81,8 @@ conn = psycopg2.connect("dbname=infinite_input user=xavier password=localdb-4301
 conn.autocommit = True
 cur = conn.cursor()
 
+
+
 cur.execute('''
     INSERT INTO mandarin.corpus (title, licence, website, summary) 
     VALUES (%(title)s, %(licence)s, %(website)s, %(summary)s);''',
@@ -121,7 +123,6 @@ for subcorpus in corpus.sub_corpuses:
                 # -- FOR text in corpus
                 # -- -- run nlp
                 doc = zh_nlp(chinese)
-                print('about to process line ', (line_index +1 )/2)
 
                 # -- -- insert document
                 words = list(map((lambda x: x.text),filter((lambda x: x.upos !='PUNCT'),doc.iter_words())))
@@ -235,20 +236,19 @@ for subcorpus in corpus.sub_corpuses:
 
 
                 line_index = line_index + 1
-                if( line_index > 200):
+                if( line_index > 2000):
                     break
-
+        print(line_index)
         after = datetime.now()
-        print('sentences: '+ str(i/2))
+        print('sentences: '+ str(line_index/2))
         print(after - before)
         delta = after - before
         print('seconds ' +str(delta.seconds))
         print(delta.seconds / 60)
         print(delta.seconds % 60)
         if (delta.seconds > 0):
-            print('sentences per second ', str(i/2/delta.seconds))
+            print('sentences per second ', str(line_index/2/delta.seconds))
 
         
             
-
 

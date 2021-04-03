@@ -1,9 +1,8 @@
-SELECT count(*) from mandarin.cc_cedict;
-SELECT count(*) from mandarin.word;
-SELECT * from mandarin.corpus;
+-- psql xavier -d infinite_input -f delete.sql
 
-SELECT * from mandarin.sub_corpus;
+
 DELETE FROM mandarin.sentence_word;
+DELETE FROM mandarin.named_entity;
 DELETE FROM mandarin.sentence;
 DELETE FROM mandarin.document;
 DELETE FROM mandarin.sub_corpus;

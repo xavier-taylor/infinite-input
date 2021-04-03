@@ -1,4 +1,4 @@
-# Logging into postgres server locally
+ Logging into postgres server locally
 
 Switch to postgres account on ubuntu
 sudo -i -u postgres
@@ -34,3 +34,8 @@ its pretty cool, but it is incomplete - for example, it lacks unique constraint.
 psql xavier -d infinite_input -f mandarin.sql
 -d indicates the database, -f indicates the file, and xavier is the role
 This command runs that .sql file
+
+# disabling triggers etc 
+set session_replication_role to replica;
+then afterwards
+set session_replication_role to default;
