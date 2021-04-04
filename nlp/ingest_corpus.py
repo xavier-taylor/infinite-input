@@ -252,3 +252,13 @@ for subcorpus in corpus.sub_corpuses:
        # TODO undo set session_replication_role to replica;, which you did before running this for the subcorpus.  
             
 
+'''
+First ingestion run of um corpus education, with: set session_replication_role to replica;
+sentences: 450000.0
+6:14:39.901219
+seconds 22479
+374.65
+39
+sentences per second  20.01868410516482
+
+'''
