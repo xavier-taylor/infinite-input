@@ -84,6 +84,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
   const classes = useStyles();
   const gt600px = useMediaQuery((theme: any) => theme.breakpoints.up('sm')); // TODO typescript
 
+  //https://material.io/design/layout/responsive-layout-grid.html#ui-regions for def of perm vs tmp
   return (
     <Drawer
       variant={gt600px ? 'permanent' : 'temporary'}
