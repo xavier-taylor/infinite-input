@@ -18,3 +18,5 @@ WHERE NOT EXISTS (
 -- note that in reality we wont be searching by hsk level, instead by the inclusion of the words in a users known words,
 -- but I *think* this is a useful heuristic.
 -- also really important ASAP to get a few million documents in and see how these queries hold up.
+
+-- TODO at some point check that stack overflow I found - there might be options even faster than this 'not exists'
