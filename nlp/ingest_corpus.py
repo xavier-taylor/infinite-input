@@ -62,10 +62,10 @@ Reference
 um_ed_summary = 'The texts in this domain are acquired from online  teaching  materials,  such  as  language  teaching resources,  dictionaries,  etc.,  which  can  be  served  as language education'
 
 # I just so happened to ingest the 8 corpora (+ 1 test set) in these chunks, no significance in their order etc
-# A done, B and C tbd
+# A B done, C done
 #sub_corpora_a=[SubCorpus(title='Education', path='Education/Bi-Education.txt', summary=um_ed_summary)])
-sub_corpora_b = [SubCorpus(title='Laws', path='Laws/Bi-Laws.txt', summary='TBD'), SubCorpus(title='Microblog', path='Microblog/Bi-Microblog.txt', summary='TBD'), SubCorpus(title='News', path='News/Bi-News.txt', summary='TBD'), SubCorpus(title='Spoken', path='Spoken/Bi-Spoken.txt', summary='TBD') ]
-#sub_corpora_c = [SubCorpus(title='Science', path='Science/Bi-Science.txt', summary='TBD'), SubCorpus(title='Subtitles', path='Subtitles/Bi-Subtitles.txt', summary='TBD'), SubCorpus(title='Thesis', path='Thesis/Bi-Thesis.txt', summary='TBD'), SubCorpus(title='Testing', path='Testing/Testing-Data.txt', summary='Test data for the um corpus') ]
+#sub_corpora_b = [SubCorpus(title='Laws', path='Laws/Bi-Laws.txt', summary='TBD'), SubCorpus(title='Microblog', path='Microblog/Bi-Microblog.txt', summary='TBD'), SubCorpus(title='News', path='News/Bi-News.txt', summary='TBD'), SubCorpus(title='Spoken', path='Spoken/Bi-Spoken.txt', summary='TBD') ]
+sub_corpora_c = [SubCorpus(title='Science', path='Science/Bi-Science.txt', summary='TBD'), SubCorpus(title='Subtitles', path='Subtitles/Bi-Subtitles.txt', summary='TBD'), SubCorpus(title='Thesis', path='Thesis/Bi-Thesis.txt', summary='TBD'), SubCorpus(title='Testing', path='Testing/Testing-Data.txt', summary='Test data for the um corpus') ]
 
 corpus = Corpus(
     title='UM-Corpus', 
@@ -74,7 +74,7 @@ corpus = Corpus(
     website='http://nlp2ct.cis.umac.mo/um-corpus/',
     summary=um_summary,
     #sub_corpuses=[SubCorpus(title='Education', path='Education/Bi-Education.txt', summary=um_ed_summary)])
-    sub_corpuses=sub_corpora_b)
+    sub_corpuses=sub_corpora_c)
 
 zh_nlp = stanza.Pipeline('zh')
 # records = cur.fetchall()
@@ -85,22 +85,22 @@ conn = psycopg2.connect("dbname=infinite_input user=xavier password=localdb-4301
 conn.autocommit = True
 cur = conn.cursor()
 
-
-
-cur.execute('''
-    INSERT INTO mandarin.corpus (title, licence, website, summary) 
-    VALUES (%(title)s, %(licence)s, %(website)s, %(summary)s);''',
-    {
-        'title': corpus.title,
-        'licence': corpus.licence,
-        'website': corpus.website,
-        'summary': corpus.summary
-    }
-    )
+if (False):
+    cur.execute('''
+        INSERT INTO mandarin.corpus (title, licence, website, summary) 
+        VALUES (%(title)s, %(licence)s, %(website)s, %(summary)s);''',
+        {
+            'title': corpus.title,
+            'licence': corpus.licence,
+            'website': corpus.website,
+            'summary': corpus.summary
+        }
+        )
 
 # FOR subcorpus
 # -- INSERT subcorpus
 for subcorpus in corpus.sub_corpuses:
+    print('starting to process subcorpus: '+subcorpus.title)
     cur.execute('''
         INSERT INTO mandarin.sub_corpus (title, corpus_title, summary) 
         VALUES (%(title)s, %(corpus_title)s, %(summary)s);''',
@@ -117,7 +117,17 @@ for subcorpus in corpus.sub_corpuses:
         chinese = ''
         before = datetime.now()
         document_id = None # the first document has a null reference for its previous_document ref
+        # TODO the english and chinese for at least some sentences have unstripped newlines at their end, ie 溜达
+        # so need to strip those before ingestion
+
+
+        # TODO should probably delete or exclude sentences which just have a single word ie
+        # select * from mandarin.document join mandarin.sentence on document.id = sentence.document_id join mandarin.sentence_word on sentence_word.sentence_id = sentence.id
+        #where document.chinese = '溜达
+        #'; 
+        # which is clearly a bloody dictionary definition? Or maybe this is just more generally a case of 'um corpus is bad'.
         for line in f:
+
             if (line_index%2 == 0):
                 english = line
                 line_index = line_index + 1
@@ -264,5 +274,75 @@ seconds 22479
 374.65
 39
 sentences per second  20.01868410516482
+
+
+second run:
+starting to process subcorpus: Laws
+440000
+sentences: 220000.0
+5:14:20.435927
+seconds 18860
+314.3333333333333
+20
+sentences per second  11.664899257688228
+starting to process subcorpus: Microblog
+10000
+sentences: 5000.0
+0:04:58.521549
+seconds 298
+4.966666666666667
+58
+sentences per second  16.778523489932887
+starting to process subcorpus: News
+900000
+sentences: 450000.0
+8:55:38.378672
+seconds 32138
+535.6333333333333
+38
+sentences per second  14.00211587528782
+starting to process subcorpus: Spoken
+440000
+sentences: 220000.0
+2:43:13.488250
+seconds 9793
+163.21666666666667
+13
+sentences per second  22.465026039007455
+
+
+third lot:
+starting to process subcorpus: Science
+540000
+sentences: 270000.0
+4:10:53.951784
+seconds 15053
+250.88333333333333
+53
+sentences per second  17.93662392878496
+starting to process subcorpus: Subtitles
+600000
+sentences: 300000.0
+3:10:27.442756
+seconds 11427
+190.45
+27
+sentences per second  26.253609871357312
+starting to process subcorpus: Thesis
+600000
+sentences: 300000.0
+6:00:16.124225
+seconds 21616
+360.26666666666665
+16
+sentences per second  13.87860843819393
+starting to process subcorpus: Testing
+9998
+sentences: 4999.0
+0:04:50.749203
+seconds 290
+4.833333333333333
+50
+sentences per second  17.23793103448276
 
 '''
