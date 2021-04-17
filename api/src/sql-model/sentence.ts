@@ -8,6 +8,7 @@ export default interface sentence {
   /** Primary key. Index: sentence_pkey */
   id: sentenceId;
 
+  /** Index: idx_sentence_document_id */
   document_id: documentId;
 
   chinese: string;
@@ -22,6 +23,7 @@ export interface sentenceInitializer {
    */
   id?: sentenceId;
 
+  /** Index: idx_sentence_document_id */
   document_id: documentId;
 
   chinese: string;

@@ -18,6 +18,7 @@ export default interface document {
 
   chinese: string;
 
+  /** Index: idx_test */
   words_upos_not_punct: string[];
 }
 
@@ -38,5 +39,6 @@ export interface documentInitializer {
 
   chinese: string;
 
+  /** Index: idx_test */
   words_upos_not_punct: string[];
 }

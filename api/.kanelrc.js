@@ -19,7 +19,7 @@ module.exports = {
     {
       name: 'mandarin',
       ignore: ['knex_migrations', 'knex_migrations_lock'],
-      modelFolder: path.join(__dirname, 'src', 'model'),
+      modelFolder: path.join(__dirname, 'src', 'sql-model'),
     },
   ],
 };
