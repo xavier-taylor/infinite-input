@@ -1,15 +1,19 @@
-import { Pool, Client, PoolConfig } from 'pg';
+import { Pool, Client, PoolConfig, PoolClient } from 'pg';
 import { cc_cedictInitializer } from '../../model';
 import { CEDictEntry, parseLine, loadEntryIntoDB } from '../cedict';
 
 describe('cedict ingestion integration tests', () => {
   let pool: Pool;
-  beforeAll(() => {
+  let client: PoolClient;
+
+  beforeAll(async () => {
     pool = new Pool({
       database: 'test',
     });
+    client = await pool.connect();
   });
   afterAll(async () => {
+    client.release();
     await pool.end();
   });
 
@@ -37,7 +41,7 @@ describe('cedict ingestion integration tests', () => {
         pinyin: e.pinyinNumbers,
         definitions: e.definitions,
       };
-      await loadEntryIntoDB(init, pool);
+      await loadEntryIntoDB(init, client);
     }
     const words = await pool.query(`SELECT * FROM mandarin.word`);
 
