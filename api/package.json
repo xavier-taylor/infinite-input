@@ -6,13 +6,12 @@
     "cedict": "ts-node -r dotenv/config src/scripts/cedict.ts",
     "build": "tsc",
     "start": "node -r dotenv/config build/server.js",
-    "codegen": "npx kanel",
     "lint": "eslint --ext ts src/**",
     "test": "jest -c jest.config.js",
     "int": "psql xavier -d test -f ../db/schema/mandarin.sql && jest --setupFiles dotenv/config  -c jest.config.integration.js",
     "lint-fix": "eslint --ext ts --fix src",
     "rebuild-psql": "psql xavier -d infinite_input -f ../db/schema/mandarin.sql ",
-    "refresh": "npm run rebuild-psql && npm run codegen && npm run cedict"
+    "refresh": "npm run rebuild-psql && npm run cedict"
   },
   "devDependencies": {
     "@tsconfig/node14": "^1.0.0",
@@ -23,7 +22,6 @@
     "eslint": "7.22.0",
     "eslint-config-prettier": "^8.1.0",
     "jest": "^26.6.3",
-    "kanel": "^1.1.0",
     "prettier": "2.2.1",
     "ts-jest": "^26.5.3",
     "ts-node": "^9.1.1",

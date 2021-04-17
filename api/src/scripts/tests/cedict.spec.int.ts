@@ -1,5 +1,5 @@
 import { Pool, Client, PoolConfig, PoolClient } from 'pg';
-import { cc_cedictInitializer } from '../../model';
+import { cc_cedictInitializer } from '../cedict';
 import { CEDictEntry, parseLine, loadEntryIntoDB } from '../cedict';
 
 describe('cedict ingestion integration tests', () => {

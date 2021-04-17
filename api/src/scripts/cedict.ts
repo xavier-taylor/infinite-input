@@ -9,8 +9,21 @@ import hskLevelList from '../../data/wordLists.json';
 // as the numbers don't quite add up. Maybe its because of
 // different senses of the same word at different levels? any case, must sort out!
 // TODO check that every HSK word was in CEdict!
-import { cc_cedict, cc_cedictInitializer, wordInitializer } from '../model';
 import { Pool, PoolClient } from 'pg';
+
+export interface wordInitializer {
+  hanzi: string;
+  hsk_word_2010: number;
+  hsk_char_2010: number;
+}
+export default interface cc_cedict {
+  id: number;
+  simplified: string;
+  traditional: string;
+  pinyin: string;
+  definitions: string[];
+}
+export type cc_cedictInitializer = Omit<cc_cedict, 'id'>;
 
 // build maps HSK_level_N -> Set of words at level N
 const simplifiedSets: Record<string, Set<string>> = {};

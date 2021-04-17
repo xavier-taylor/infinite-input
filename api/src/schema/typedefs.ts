@@ -1,16 +1,29 @@
 import { gql } from 'apollo-server';
-// If/as this file grows, break it out
+// TODO If/as this file grows, break it out
 
 export const typeDefs = gql`
-    type SentenceWord {
+    type NamedEntity {
 
+    }
+    
+    type Definition {
+
+    }
+
+    # data from both sentence_word and word
+    type SentenceWord {
+        wordHanzi: String!
+        lemma: String!
+        partOfSpeech: String!
+        univeralPartOfSpeech: String!
+        definitions: [Definition]! # possible that some words lack definition
     }
     
     type Sentence {
-        words: [SentenceWord]
+        words: [SentenceWord!]!
     }
     
     type Document {
-        sentences: [Sentence]
+        sentences: [Sentence!]!
     }
 `;
