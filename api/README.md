@@ -2,7 +2,7 @@
 
 ## gql-model
 
-This folder contains typescript types that represent the domain model defined
+This folder contains typescript types that represent the model defined
 in the graphql schema.
 Hopefully these can be automatically generated (from the gql schema).
 
