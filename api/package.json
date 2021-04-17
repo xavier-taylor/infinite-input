@@ -7,14 +7,16 @@
     "build": "tsc",
     "start": "node -r dotenv/config build/server.js",
     "lint": "eslint --ext ts src/**",
-    "codegen": "npx kanel",
+    "gen-sql-types-broken": "npx kanel",
+    "gen-sql-types": "npx @rmp135/sql-ts -c sql-to-ts.json",
     "test": "jest -c jest.config.js",
     "int": "psql xavier -d test -f ../db/schema/mandarin.sql && jest --setupFiles dotenv/config  -c jest.config.integration.js",
     "lint-fix": "eslint --ext ts --fix src",
     "rebuild-psql": "psql xavier -d infinite_input -f ../db/schema/mandarin.sql ",
-    "refresh": "npm run rebuild-psql && npm run codegen && npm run cedict"
+    "refresh": "npm run rebuild-psql && npm run gen-sql-types && npm run cedict"
   },
   "devDependencies": {
+    "@rmp135/sql-ts": "^1.8.2",
     "@tsconfig/node14": "^1.0.0",
     "@types/jest": "^26.0.20",
     "@types/node": "^14.14.32",

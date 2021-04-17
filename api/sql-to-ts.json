@@ -1,0 +1,16 @@
+{
+  "client": "pg",
+  "connection": {
+    "host": "localhost",
+    "user": "xavier",
+    "password": "localdb-4301",
+    "database": "infinite_input"
+  },
+  "folder": "src/repository/",
+  "schemas": ["mandarin"],
+  "typeOverrides": {
+    "mandarin.cc_cedict.definitions": "string[]"
+  },
+  "interfaceNameFormat": "${table}",
+  "filename": "sql-model"
+}
