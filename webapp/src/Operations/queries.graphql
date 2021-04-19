@@ -1,0 +1,11 @@
+query DocumentsEnglishOnly {
+  documents {
+    english
+  }
+}
+
+query DocumentsEnglishOnly {
+  documents {
+    english
+  }
+}

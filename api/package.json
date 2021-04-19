@@ -13,9 +13,18 @@
     "int": "psql xavier -d test -f ../db/schema/mandarin.sql && jest --setupFiles dotenv/config  -c jest.config.integration.js",
     "lint-fix": "eslint --ext ts --fix src",
     "rebuild-psql": "psql xavier -d infinite_input -f ../db/schema/mandarin.sql ",
-    "refresh": "npm run rebuild-psql && npm run gen-sql-types && npm run cedict"
+    "refresh": "npm run rebuild-psql && npm run gen-sql-types && npm run cedict",
+    "gen-gql-types": "graphql-codegen --config codegen.yml",
+    "delete": "graphql-codegen --config server.yml",
+    "deelte": "graphql-codegen --config fe.yml"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^1.21.3",
+    "@graphql-codegen/introspection": "1.18.1",
+    "@graphql-codegen/typescript": "^1.21.1",
+    "@graphql-codegen/typescript-operations": "^1.17.15",
+    "@graphql-codegen/typescript-react-apollo": "2.2.3",
+    "@graphql-codegen/typescript-resolvers": "1.19.0",
     "@rmp135/sql-ts": "^1.8.2",
     "@tsconfig/node14": "^1.0.0",
     "@types/jest": "^26.0.20",
@@ -33,6 +42,8 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
+    "@graphql-codegen/typed-document-node": "^1.18.4",
+    "@graphql-typed-document-node/core": "^3.1.0",
     "@types/pg": "^7.14.11",
     "apollo-server": "^2.23.0",
     "dotenv": "^8.2.0",

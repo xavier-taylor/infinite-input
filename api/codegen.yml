@@ -1,0 +1,13 @@
+overwrite: true
+schema: 'http://localhost:4000'
+documents: '../webapp/src/Operations/**/*.graphql'
+generates:
+  src/schema/gql-model.ts:
+    plugins:
+      - 'typescript'
+      - 'typescript-resolvers'
+  ../webapp/src/schema/generated.ts:
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - typed-document-node

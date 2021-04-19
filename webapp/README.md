@@ -2,6 +2,10 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Generated code.
+
+I use the graphql codegen library over in the API project. This project just has @graphql-typed-document-node/core in its dependencies and generated code in generated.ts
+
 ## Available Scripts
 
 In the project directory, you can run:
