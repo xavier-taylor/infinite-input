@@ -2,11 +2,12 @@ import { gql } from 'apollo-server';
 // TODO If/as this file grows, break it out types/queries/mutations?
 
 export const typeDefs = gql`
+  # TODO add id fields for cacheable objects
   type NamedEntity {
     chinese: String!
     entityType: String!
-    start: Number!
-    end: Number!
+    start: Int!
+    end: Int!
   }
 
   type CCCEDefinition {
@@ -18,8 +19,8 @@ export const typeDefs = gql`
 
   type Word {
     hanzi: String!
-    hskWord2010: Number!
-    hskChar2010: Number!
+    hskWord2010: Int!
+    hskChar2010: Int!
     definitions: [CCCEDefinition]! # possible that some words lack definition
   }
 
@@ -44,8 +45,8 @@ export const typeDefs = gql`
   }
 
   type Query {
-    word: Word
-    document: Document
+    #word: Word
+    #document: Document
     documents: [Document!]!
   }
 `;
