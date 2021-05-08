@@ -4,8 +4,8 @@ query DocumentsEnglishOnly {
   }
 }
 
-query DocumentsEnglishOnly {
+query DocumentsChineseOnly {
   documents {
-    english
+    chinese
   }
 }

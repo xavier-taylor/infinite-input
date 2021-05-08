@@ -84,5 +84,17 @@ export type DocumentsEnglishOnlyQuery = (
   )> }
 );
 
+export type DocumentsChineseOnlyQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DocumentsChineseOnlyQuery = (
+  { __typename?: 'Query' }
+  & { documents: Array<(
+    { __typename?: 'Document' }
+    & Pick<Document, 'chinese'>
+  )> }
+);
+
 
 export const DocumentsEnglishOnlyDocument: DocumentNode<DocumentsEnglishOnlyQuery, DocumentsEnglishOnlyQueryVariables> = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DocumentsEnglishOnly"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"documents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"english"}}]}}]}}]};
+export const DocumentsChineseOnlyDocument: DocumentNode<DocumentsChineseOnlyQuery, DocumentsChineseOnlyQueryVariables> = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DocumentsChineseOnly"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"documents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"chinese"}}]}}]}}]};
