@@ -6,6 +6,10 @@ SET search_path TO mandarin;
 --SELECT distinct(hanzi),1, 0, 1, CURRENT_DATE, CURRENT_DATE ,0,0  from mandarin.word JOIN mandarin.cc_cedict ON hanzi = simplified WHERE hsk_word_2010 =2;
 --INSERT INTO student_word_read (word_hanzi, student_id, f1, f2, due, previous, understood_count, understood_distinct_documents_count)
 --SELECT distinct(hanzi),1, 0, 1, CURRENT_DATE+180, CURRENT_DATE+180 ,0,0  from mandarin.word JOIN mandarin.cc_cedict ON hanzi = simplified WHERE hsk_word_2010 in (1,3,4);
+--above simulated a person knowing hsk 4.
+-- now I simulate a person knowing hsk 6
+INSERT INTO student_word_read (word_hanzi, student_id, f1, f2, due, previous, understood_count, understood_distinct_documents_count)
+SELECT distinct(hanzi),1, 0, 1, CURRENT_DATE+180, CURRENT_DATE+180 ,0,0  from mandarin.word JOIN mandarin.cc_cedict ON hanzi = simplified WHERE hsk_word_2010 in (5,6);
 
 
 
@@ -25,17 +29,19 @@ SET search_path TO mandarin;
  -- fetch all my due cards
  
 --1. 
+
 /*
-SELECT id, chinese FROM document WHERE
+SELECT id FROM (SELECT distinct document_id as id from document_word join student_word_read on word_hanzi = word
+ WHERE student_id = 1  AND due <= CURRENT_DATE)as document WHERE
 NOT EXISTS (
 	SELECT 1 from sentence 
 	JOIN sentence_word on sentence.id = sentence_word.sentence_id AND sentence.document_id = document.id AND sentence_word.universal_part_of_speech NOT IN ('PUNCT', 'NUM') 
-	AND sentence_word.ner = 'O' 
+	
 	LEFT JOIN student_word_read ON student_word_read.word_hanzi = sentence_word.word_hanzi AND student_word_read.student_id = 1
 	WHERE student_word_read.word_hanzi is null
 	
-); -- 27 seconds 20,449 documents returned
-*/
+);*/ -- 27 seconds 20,449 documents returned
+
 -- TODO, before move on to below materialized view attempt, check that above query has required indexes (including attempt with hash indexes)
 
 
@@ -73,14 +79,14 @@ GROUP BY document.id)
 WITH DATA; -- took 1 minute
 */
 
-WITH known AS ( 
+/*WITH known AS ( 
 	SELECT array_agg(word_hanzi) as lexicon, student_id from student_word_read Where student_id = 1 GROUP by student_id
 ),
  due as (
 SELECT array_agg(word_hanzi) as items FROM student_word_read WHERE student_id = 1 AND due <= CURRENT_DATE
 )
 select words from mandarin.document_with_words where words && (select items from due) and    ( SELECT lexicon from known ) @> words
-; -- 17 seconds but only 17274 rows returns without indexes. need to work out why returns 3000 less documents than query 1!
+; */-- 17 seconds but only 17274 rows returns without indexes. need to work out why returns 3000 less documents than query 1!
 -- took 1 min and 14 seconds with the GIN index (again 17274 rows)
 
 -- 23 seconds for 10515 results when added the due words search with no index

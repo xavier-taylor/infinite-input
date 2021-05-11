@@ -18,6 +18,7 @@ SELECT sentence.chinese, sentence.id, sentence_word.word_hanzi, student_word_rea
 --  CREATE INDEX idx_swr_word_hanzi ON student_word_read  (word_hanzi);
 -- CREATE INDEX idx_swr_student_id ON student_word_read USING HASH (student_id);
 
-SELECT word_hanzi FROM student_word_read WHERE student_id = 1 AND due <= CURRENT_DATE
+SELECT word_hanzi FROM student_word_read WHERE student_id = 1  AND due <= CURRENT_DATE
+
 
 

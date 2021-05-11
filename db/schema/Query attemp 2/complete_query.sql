@@ -33,10 +33,11 @@ NOT EXISTS (
 	and document_word.document_id = document.id
 	) ),
 due as (SELECT word_hanzi FROM student_word_read WHERE student_id = 1 AND due <= CURRENT_DATE)
-
 -- exists a word that is due today
-select id, chinese, english, count(word_hanzi), array_agg(word_hanzi)as due from candidates JOIN document_word on candidates.id = document_word.document_id
-JOIN due on document_word.word = due.word_hanzi group by id, chinese, english order by count(word_hanzi) desc
+-- Potentially can use a recursive CTE to reuse the expensive 'candidates' query to get the
+-- list of all the sentences needed to read
+select id, chinese, english, count(word_hanzi), array_agg(word_hanzi)as due, cast(count(word_hanzi) as float)/cast((length(chinese)-1) as float) as fraction_due from candidates JOIN document_word on candidates.id = document_word.document_id
+JOIN due on document_word.word = due.word_hanzi group by id, chinese, english order by count(word_hanzi) desc, fraction_due desc
 ;
 
 -- with -SET max_parallel_workers_per_gather = 8;   --SET max_parallel_workers = 8; and max_worker_processes at 8
