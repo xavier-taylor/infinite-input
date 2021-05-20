@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Drawer,
   IconButton,
@@ -83,6 +83,11 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
   const { pageIndex, setPage } = props.page;
   const classes = useStyles();
   const gt600px = useMediaQuery((theme: any) => theme.breakpoints.up('sm')); // TODO typescript
+  useEffect(() => {
+    if (!gt600px) {
+      setDrawer(false);
+    }
+  }, [gt600px]);
 
   //https://material.io/design/layout/responsive-layout-grid.html#ui-regions for def of perm vs tmp
   return (
