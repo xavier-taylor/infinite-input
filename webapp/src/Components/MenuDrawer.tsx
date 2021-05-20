@@ -87,7 +87,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
     if (!gt600px) {
       setDrawer(false);
     }
-  }, [gt600px]);
+  }, [gt600px, setDrawer]);
 
   //https://material.io/design/layout/responsive-layout-grid.html#ui-regions for def of perm vs tmp
   return (

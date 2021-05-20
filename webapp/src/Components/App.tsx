@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
     height: '100vh',
     overflow: 'auto',
   },
-  appBarSpacer: theme.mixins.toolbar,
+  appBarSpacer: theme.mixins.toolbar, // TODO review whether this is doing anything for us
 }));
 
 export interface DrawerState {
