@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
+import {
+  makeStyles,
+  createStyles,
+  Theme,
+  useTheme,
+} from '@material-ui/core/styles';
 import {
   Button,
   ButtonGroup,
@@ -10,8 +15,16 @@ import {
   Typography,
   Link,
   Card,
+  useMediaQuery,
+  CardActions,
+  CardHeader,
+  CardContent,
+  IconButton,
 } from '@material-ui/core';
 import clsx from 'clsx';
+import { ThumbDown } from '@material-ui/icons';
+
+// TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff
 
 const sentences = [
   {
@@ -111,9 +124,25 @@ const sentences = [
     ],
   },
 ];
-
+// TODO break this study component out into multiple components, and take the appropriate part of this
+// mamoth makeStyles with them. In particuarl, for things like 'cardHeaderRoot', ideally that should be a 'root' within a CreateStyles
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    cardHeaderRoot: {
+      padding: theme.spacing(1),
+      paddingBottom: '0px',
+    },
+    cardHeaderAction: {
+      padding: theme.spacing(0.5),
+    },
+    cardContentRoot: {
+      padding: theme.spacing(1),
+      // TODO making this paddingBottom work, currently it is getting overwritten by some pseudo class or something
+      paddingBottom: '0px',
+    },
+    sentenceHanzi: {
+      fontSize: '1.5rem',
+    },
     rowContainer: {
       height: `calc(33% - ${theme.spacing(1)}px)`,
       margin: theme.spacing(1),
@@ -130,6 +159,18 @@ const useStyles = makeStyles((theme: Theme) =>
       //position: 'relative', NOTE there might be a way to do this using position rather than the hacky height thing above...
       // bottom: 0,
       // top: 0,
+    },
+    definition: {
+      overflowY: 'auto',
+      borderRadius: 7.5,
+      margin: theme.spacing(0.5),
+      height: '100%',
+    },
+    definitionContainer: {
+      height: '100%',
+    },
+    definitionsContainer: {
+      height: `calc(100% - ${theme.spacing(1)}px)`,
     },
   })
 );
@@ -157,6 +198,15 @@ const Study: React.FC<StudyProps> = (props) => {
   // TODO: since I am not really using the grid, perhaps remove it and just have a simple flexbox?
 
   // NEXT UP - make the number of word cards rendered a function of the screen size, perhaps using media query?
+  const theme = useTheme();
+
+  const xs = useMediaQuery(theme.breakpoints.down('xs'));
+  const sm = useMediaQuery(theme.breakpoints.down('sm'));
+  const md = useMediaQuery(theme.breakpoints.down('md'));
+  const lg = useMediaQuery(theme.breakpoints.down('lg'));
+  const numberToShow = xs ? 1 : sm ? 2 : md ? 3 : lg ? 4 : 6; // if it wasn't large, it was xl
+  const wordsToShow = sentence.words.slice(0, numberToShow);
+
   return (
     <Grid
       container
@@ -167,23 +217,52 @@ const Study: React.FC<StudyProps> = (props) => {
     >
       <Grid className={classes.rowContainer} item>
         <Card className={classes.row} elevation={2}>
-          <div>{sentence.hanzi}</div>
-          <div>{sentence.english}</div>
+          <Typography
+            className={classes.sentenceHanzi}
+            variant="body1"
+            gutterBottom
+            align="center"
+          >
+            {sentence.hanzi}
+          </Typography>
+          <Typography variant="body1" gutterBottom align="center">
+            {sentence.english}
+          </Typography>
         </Card>
       </Grid>
       <Grid className={classes.rowContainer} item>
         <Paper className={classes.row} elevation={2}>
-          <Grid container>
-            {sentences[i].words.map((word) => (
-              <Grid item xs={12} sm={6} md={3} lg={2} xl={1}>
-                <Card>
-                  <div>{word.hanzi}</div>
-                  <div>{word.pinyin}</div>
-                  <div>
+          <Grid className={classes.definitionsContainer} container>
+            {wordsToShow.map((word) => (
+              <Grid
+                className={classes.definitionContainer}
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                lg={3}
+                xl={2}
+              >
+                <Card className={classes.definition}>
+                  {/* TODO add an action, whether in CardHeader or CardActions that goes to a concordance view for the word, ideally sorted by sentences the user understands */}
+                  <CardHeader
+                    classes={{
+                      action: classes.cardHeaderAction,
+                      root: classes.cardHeaderRoot,
+                    }}
+                    title={word.hanzi}
+                    subheader={word.pinyin}
+                    action={
+                      <IconButton>
+                        <ThumbDown color="error" />
+                      </IconButton>
+                    }
+                  />
+                  <CardContent classes={{ root: classes.cardContentRoot }}>
                     {word.definitions.map((d) => (
-                      <span>{d}</span>
+                      <Typography variant="body2">{d}</Typography>
                     ))}
-                  </div>
+                  </CardContent>
                 </Card>
               </Grid>
             ))}
