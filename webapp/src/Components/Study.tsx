@@ -41,6 +41,11 @@ const sentences = [
         pinyin: 'ni3',
       },
       {
+        hanzi: '你',
+        definitions: ['you (informal, as opposed to courteous 您[nin2])'],
+        pinyin: 'ni3',
+      },
+      {
         hanzi: '刚才', // note how in cedict there are two rows for this word!
         review: true, // review cards are prioritized for view on small viewports
         definitions: ['(just) a moment ago', 'just now / a moment ago '],
@@ -126,8 +131,15 @@ const sentences = [
 ];
 // TODO break this study component out into multiple components, and take the appropriate part of this
 // mamoth makeStyles with them. In particuarl, for things like 'cardHeaderRoot', ideally that should be a 'root' within a CreateStyles
+// TODO tidy up the CSS - it got pretty disorderly - even the layout of the first two rows is needlessly messy and complicated
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    buttonGroupGrouped: {
+      fontFamily: "'Roboto Mono', monospace",
+    },
+    cardActionRoot: {
+      justifyContent: 'center',
+    },
     cardHeaderRoot: {
       padding: theme.spacing(1),
       paddingBottom: '0px',
@@ -143,16 +155,26 @@ const useStyles = makeStyles((theme: Theme) =>
     sentenceHanzi: {
       fontSize: '1.5rem',
     },
+    sentenceRowRoot: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+    },
     rowContainer: {
       height: `calc(33% - ${theme.spacing(1)}px)`,
       margin: theme.spacing(1),
       marginBottom: 0,
+      flexWrap: 'nowrap',
+      width: `calc(100% - ${theme.spacing(2)}px)`,
     },
-    row: {
-      height: '100%',
+    rowCard: {
       borderRadius: 15,
       padding: theme.spacing(1),
     },
+    row: {
+      height: '100%',
+    },
+
     gridContainer: {
       height: 'calc(100% - 64px)', // TODO improve this, get rid of reliance on hardcode 64px (which is height of appbar ONLY IN SOME SITUATIONS)
       // the minus should instead come from theme.mixins.toolbar/ from the height of the appbar
@@ -163,25 +185,40 @@ const useStyles = makeStyles((theme: Theme) =>
     definition: {
       overflowY: 'auto',
       borderRadius: 7.5,
-      margin: theme.spacing(0.5),
       height: '100%',
     },
     definitionContainer: {
-      height: '100%',
-    },
-    definitionsContainer: {
       height: `calc(100% - ${theme.spacing(1)}px)`,
+      margin: theme.spacing(0.5),
+      '&:nth-child(1)': {
+        marginLeft: '0px',
+      },
+      '&:last-child': {
+        marginRight: '0px',
+      },
     },
   })
 );
 
-interface StudyProps {}
+interface StudyProps {
+  drawerOpen: boolean;
+}
 
-const Study: React.FC<StudyProps> = (props) => {
+const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
   const classes = useStyles();
   const [i, setI] = useState(0); // todo improve var name
   const [selectedWordIndexes, updateSWI] = useState<number[]>([]);
-  // this selectWord guy exists within a given sentence
+  type studyStates = 'study' | 'check';
+  const [studyState, setStudyState] = useState<studyStates>('study'); // whether you are reading/listening, or looking at translation etc
+  const leftButtonText: Record<studyStates, string> = {
+    study: 'Undo',
+    check: 'Hide',
+  };
+  const rightButtonText: Record<studyStates, string> = {
+    study: 'Show',
+    check: 'Next',
+  };
+  // this selectWord guy clsxexists within a given sentence
   const selectWord = (i: number) =>
     updateSWI((prev) => {
       const next = prev.filter((n) => n !== i);
@@ -197,14 +234,15 @@ const Study: React.FC<StudyProps> = (props) => {
   const sentence = sentences[i];
   // TODO: since I am not really using the grid, perhaps remove it and just have a simple flexbox?
 
-  // NEXT UP - make the number of word cards rendered a function of the screen size, perhaps using media query?
   const theme = useTheme();
 
   const xs = useMediaQuery(theme.breakpoints.down('xs'));
+
   const sm = useMediaQuery(theme.breakpoints.down('sm'));
   const md = useMediaQuery(theme.breakpoints.down('md'));
   const lg = useMediaQuery(theme.breakpoints.down('lg'));
-  const numberToShow = xs ? 1 : sm ? 2 : md ? 3 : lg ? 4 : 6; // if it wasn't large, it was xl
+  let numberToShow = xs ? 1 : sm ? 2 : md ? 3 : lg ? 4 : 6; // if it wasn't large, it was xl
+
   const wordsToShow = sentence.words.slice(0, numberToShow);
 
   return (
@@ -216,59 +254,86 @@ const Study: React.FC<StudyProps> = (props) => {
       className={classes.gridContainer}
     >
       <Grid className={classes.rowContainer} item>
-        <Card className={classes.row} elevation={2}>
-          <Typography
-            className={classes.sentenceHanzi}
-            variant="body1"
-            gutterBottom
-            align="center"
-          >
-            {sentence.hanzi}
-          </Typography>
-          <Typography variant="body1" gutterBottom align="center">
-            {sentence.english}
-          </Typography>
+        <Card
+          className={classes.row}
+          classes={{ root: classes.sentenceRowRoot }}
+          elevation={2}
+        >
+          <CardContent>
+            <Typography
+              className={classes.sentenceHanzi}
+              variant="body1"
+              gutterBottom
+              align="center"
+            >
+              {sentence.hanzi}
+            </Typography>
+            <Typography variant="body1" gutterBottom align="center">
+              {sentence.english}
+            </Typography>
+          </CardContent>
+          <CardActions classes={{ root: classes.cardActionRoot }}>
+            <ButtonGroup classes={{ grouped: classes.buttonGroupGrouped }}>
+              <Button
+                onClick={() =>
+                  setStudyState(studyState === 'check' ? 'study' : 'check')
+                }
+                variant="outlined"
+                color="default"
+                size="medium"
+              >
+                {leftButtonText[studyState]}
+              </Button>
+              <Button
+                onClick={() =>
+                  setStudyState(studyState === 'check' ? 'study' : 'check')
+                }
+                variant="contained"
+                color="primary"
+                size="medium"
+              >
+                {rightButtonText[studyState]}
+              </Button>
+            </ButtonGroup>
+          </CardActions>
         </Card>
       </Grid>
-      <Grid className={classes.rowContainer} item>
-        <Paper className={classes.row} elevation={2}>
-          <Grid className={classes.definitionsContainer} container>
-            {wordsToShow.map((word) => (
-              <Grid
-                className={classes.definitionContainer}
-                item
-                xs={12}
-                sm={6}
-                md={4}
-                lg={3}
-                xl={2}
-              >
-                <Card className={classes.definition}>
-                  {/* TODO add an action, whether in CardHeader or CardActions that goes to a concordance view for the word, ideally sorted by sentences the user understands */}
-                  <CardHeader
-                    classes={{
-                      action: classes.cardHeaderAction,
-                      root: classes.cardHeaderRoot,
-                    }}
-                    title={word.hanzi}
-                    subheader={word.pinyin}
-                    action={
-                      <IconButton>
-                        <ThumbDown color="error" />
-                      </IconButton>
-                    }
-                  />
-                  <CardContent classes={{ root: classes.cardContentRoot }}>
-                    {word.definitions.map((d) => (
-                      <Typography variant="body2">{d}</Typography>
-                    ))}
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+      <Grid className={classes.rowContainer} item container>
+        {wordsToShow.map((word) => (
+          <Grid
+            className={classes.definitionContainer}
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            lg={3}
+            xl={2}
+          >
+            <Card className={classes.definition}>
+              {/* TODO add an action, whether in CardHeader or CardActions that goes to a concordance view for the word, ideally sorted by sentences the user understands */}
+              <CardHeader
+                classes={{
+                  action: classes.cardHeaderAction,
+                  root: classes.cardHeaderRoot,
+                }}
+                title={word.hanzi}
+                subheader={word.pinyin}
+                action={
+                  <IconButton>
+                    <ThumbDown color="error" />
+                  </IconButton>
+                }
+              />
+              <CardContent classes={{ root: classes.cardContentRoot }}>
+                {word.definitions.map((d) => (
+                  <Typography variant="body2">{d}</Typography>
+                ))}
+              </CardContent>
+            </Card>
           </Grid>
-        </Paper>
+        ))}
       </Grid>
+
       <Grid className={classes.rowContainer} item>
         <Card className={classes.row} elevation={2}>
           <div>'Some Grammar or other information</div>

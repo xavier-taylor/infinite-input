@@ -41,7 +41,7 @@ const App: React.FC = () => {
         <MenuDrawer drawer={drawer} page={page}></MenuDrawer>
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
-          <Study></Study>
+          <Study drawerOpen={drawerOpen}></Study>
         </main>
       </div>
     </ThemeProvider>
