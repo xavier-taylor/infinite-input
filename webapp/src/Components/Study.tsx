@@ -23,6 +23,7 @@ import {
 } from '@material-ui/core';
 import clsx from 'clsx';
 import { ThumbDown } from '@material-ui/icons';
+import Concordance from './Concordance';
 
 // TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff
 
@@ -134,6 +135,9 @@ const sentences = [
 // TODO tidy up the CSS - it got pretty disorderly - even the layout of the first two rows is needlessly messy and complicated
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    hanzi: {
+      fontFamily: "'Noto Serif SC', serif",
+    },
     buttonGroupGrouped: {
       fontFamily: "'Roboto Mono', monospace",
     },
@@ -151,6 +155,9 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: theme.spacing(1),
       // TODO making this paddingBottom work, currently it is getting overwritten by some pseudo class or something
       paddingBottom: '0px',
+      '&:last-child': {
+        paddingBottom: '0px',
+      },
     },
     sentenceHanzi: {
       fontSize: '1.5rem',
@@ -261,7 +268,7 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
         >
           <CardContent>
             <Typography
-              className={classes.sentenceHanzi}
+              className={clsx(classes.sentenceHanzi, classes.hanzi)}
               variant="body1"
               gutterBottom
               align="center"
@@ -315,6 +322,7 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
                 classes={{
                   action: classes.cardHeaderAction,
                   root: classes.cardHeaderRoot,
+                  title: classes.hanzi,
                 }}
                 title={word.hanzi}
                 subheader={word.pinyin}
@@ -335,10 +343,7 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
       </Grid>
 
       <Grid className={classes.rowContainer} item>
-        <Card className={classes.row} elevation={2}>
-          <div>'Some Grammar or other information</div>
-          <div>'Perhaps, until I add it, a pretty picture</div>
-        </Card>
+        <Concordance></Concordance>
       </Grid>
     </Grid>
   );
