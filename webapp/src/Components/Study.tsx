@@ -139,7 +139,8 @@ const useStyles = makeStyles((theme: Theme) =>
       fontFamily: "'Noto Serif SC', serif",
     },
     buttonGroupGrouped: {
-      fontFamily: "'Roboto Mono', monospace",
+      // fontFamily: "'Roboto Mono', monospace",
+      width: '50%', // works for 2 buttons with similar length labels
     },
     cardActionRoot: {
       justifyContent: 'center',
