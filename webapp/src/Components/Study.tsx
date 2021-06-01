@@ -135,9 +135,6 @@ const sentences = [
 // TODO tidy up the CSS - it got pretty disorderly - even the layout of the first two rows is needlessly messy and complicated
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    hanzi: {
-      fontFamily: "'Noto Serif SC', serif",
-    },
     buttonGroupGrouped: {
       // fontFamily: "'Roboto Mono', monospace",
       width: '50%', // works for 2 buttons with similar length labels
@@ -269,12 +266,12 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
         >
           <CardContent>
             <Typography
-              className={clsx(classes.sentenceHanzi, classes.hanzi)}
+              className={classes.sentenceHanzi}
               variant="body1"
               gutterBottom
               align="center"
             >
-              {sentence.hanzi}
+              <p lang="zh">{sentence.hanzi}</p>
             </Typography>
             <Typography variant="body1" gutterBottom align="center">
               {sentence.english}
@@ -323,9 +320,8 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
                 classes={{
                   action: classes.cardHeaderAction,
                   root: classes.cardHeaderRoot,
-                  title: classes.hanzi,
                 }}
-                title={word.hanzi}
+                title={<span lang="zh">{word.hanzi}</span>}
                 subheader={word.pinyin}
                 action={
                   <IconButton>

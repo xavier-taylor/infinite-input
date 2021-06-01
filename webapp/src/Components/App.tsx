@@ -7,7 +7,18 @@ import Study from './Study';
 import { ThemeProvider } from '@material-ui/styles';
 import { createMuiTheme } from '@material-ui/core';
 
-const baseTheme = createMuiTheme();
+const baseTheme = createMuiTheme({
+  overrides: {
+    MuiCssBaseline: {
+      '@global': {
+        ':lang(zh)': {
+          // any component with lang='zh' will get this font
+          fontFamily: "'Noto Serif SC', serif",
+        },
+      },
+    },
+  },
+});
 
 const useStyles = makeStyles((theme) => ({
   root: {

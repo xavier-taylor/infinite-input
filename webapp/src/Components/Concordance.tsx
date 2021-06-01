@@ -1,27 +1,10 @@
-import React, { useState } from 'react';
-import {
-  makeStyles,
-  createStyles,
-  Theme,
-  useTheme,
-} from '@material-ui/core/styles';
+import React from 'react';
+import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 
-import { ThumbDown } from '@material-ui/icons';
 import {
-  Button,
-  ButtonGroup,
-  Container,
-  Grid,
-  Paper,
-  Box,
-  Typography,
-  Link,
   Card,
-  useMediaQuery,
-  CardActions,
   CardHeader,
   CardContent,
-  IconButton,
   FormControlLabel,
   Switch,
 } from '@material-ui/core';
@@ -103,14 +86,20 @@ const sentences = [
     ],
   },
 ];
+
+interface word {
+  hanzi: string;
+}
+interface accumulator {
+  before: word[];
+  first: word | undefined;
+  after: word[];
+}
+
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     card: {
       height: '100%',
-    },
-    hanzi: {
-      // TODO move this into the theme
-      fontFamily: "'Noto Serif SC', serif",
     },
     cardHeaderRoot: {
       padding: theme.spacing(1),
@@ -135,7 +124,6 @@ const useStyles = makeStyles((theme: Theme) =>
       color: 'purple',
     },
     table: {
-      //   tableLayout: 'auto',
       width: '100%',
       borderSpacing: '0px',
     },
@@ -145,17 +133,13 @@ const useStyles = makeStyles((theme: Theme) =>
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
-      width: '50%', // TODO this insane combination of width and maxWidth works, but
+      width: '50%', // NOTE this insane combination of width and maxWidth works, but
       // doesnt seem like something I should rely on. Can I get advise on how to do this in a different way?
       maxWidth: '0',
-      //   overflowX: 'auto',
-      //   textOverflow: 'clip', // ellipsis is broken in Chrome! TODO look at fix
-      //   whiteSpace: 'nowrap', //everything said i need to use this for textOverflow, but actually dont seem to?
     },
     keyWord: {
       padding: '0px',
       whiteSpace: 'nowrap',
-      //   overflowX: 'auto',
     },
     before: {
       direction: 'rtl',
@@ -184,9 +168,8 @@ const Concordance: React.FC<ConcordanceProps> = ({}) => {
         classes={{
           action: classes.cardHeaderAction,
           root: classes.cardHeaderRoot,
-          title: classes.hanzi, // TODO how can I put common rules like this hanzi one in the theme etc?
         }}
-        title={searchWord}
+        title={<span lang="zh">{searchWord}</span>}
         action={
           <FormControlLabel
             control={
@@ -209,14 +192,6 @@ const Concordance: React.FC<ConcordanceProps> = ({}) => {
             <col className={classes.context} />
           </colgroup>
           {sentences.map((sentence, i) => {
-            interface word {
-              hanzi: string;
-            }
-            interface accumulator {
-              before: word[];
-              first: word | undefined;
-              after: word[];
-            }
             const a = sentence.words.reduce<accumulator>(
               (acc, cur, i) => {
                 // TODO proofread this logic, I was tired
@@ -235,7 +210,7 @@ const Concordance: React.FC<ConcordanceProps> = ({}) => {
             // for the 'center' to work, we need to still render something...
             // TODO these keys aren't proper keys!!!
             return (
-              <tr className={classes.sentence}>
+              <tr lang="zh" className={classes.sentence}>
                 <td
                   //   style={{ width: '200px' }}
                   className={clsx(classes.sentenceFragment, classes.before)}
@@ -262,36 +237,6 @@ const Concordance: React.FC<ConcordanceProps> = ({}) => {
                   ))}
                 </td>
               </tr>
-
-              //   <div className={classes.sentence} key={i}>
-              //     {sentence.words.map(
-              //       function (
-              //         this: { searchWordFirstI: number | undefined },
-              //         word,
-              //         i
-              //       ) {
-              //         // TODO make this more beautiful, perhaps move to helper function
-              //         const isSearchWord = word.hanzi === searchWord;
-              //         let isFirstSW = false;
-              //         if (this.searchWordFirstI === undefined && isSearchWord) {
-              //           this.searchWordFirstI = i;
-              //           isFirstSW = true;
-              //         }
-
-              //         return (
-              //           <span
-              //             className={clsx(
-              //               isSearchWord && classes.searchWord,
-              //               isFirstSW && classes.firstSW
-              //             )}
-              //           >
-              //             {word.hanzi}
-              //           </span>
-              //         );
-              //       },
-              //       { searchWordFirstI: undefined }
-              //     )}
-              //   </div>
             );
           })}
         </table>
