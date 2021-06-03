@@ -286,6 +286,7 @@ const useStyles = makeStyles((theme: Theme) =>
     ccRootAligned: {
       display: 'flex',
       justifyContent: 'center',
+      overflowY: 'auto',
     },
     ccRootList: {
       overflowX: 'auto',

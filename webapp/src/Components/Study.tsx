@@ -161,9 +161,10 @@ const useStyles = makeStyles((theme: Theme) =>
       fontSize: '1.5rem',
     },
     sentenceRowRoot: {
+      height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-between',
+      justifyContent: 'space-around',
     },
     rowContainer: {
       height: `calc(33% - ${theme.spacing(1)}px)`,
@@ -176,10 +177,6 @@ const useStyles = makeStyles((theme: Theme) =>
       borderRadius: 15,
       padding: theme.spacing(1),
     },
-    row: {
-      height: '100%',
-    },
-
     gridContainer: {
       height: 'calc(100% - 64px)', // TODO improve this, get rid of reliance on hardcode 64px (which is height of appbar ONLY IN SOME SITUATIONS)
       // the minus should instead come from theme.mixins.toolbar/ from the height of the appbar
@@ -259,19 +256,50 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
       className={classes.gridContainer}
     >
       <Grid className={classes.rowContainer} item>
-        <Card
-          className={classes.row}
-          classes={{ root: classes.sentenceRowRoot }}
-          elevation={2}
-        >
-          <CardContent>
+        <Card classes={{ root: classes.sentenceRowRoot }} elevation={2}>
+          <Typography
+            className={classes.sentenceHanzi}
+            variant="body1"
+            align="center"
+          >
+            <span lang="zh">{sentence.hanzi}</span>
+          </Typography>
+          <Typography variant="body1" align="center">
+            {sentence.english}
+          </Typography>
+          <CardActions classes={{ root: classes.cardActionRoot }}>
+            <ButtonGroup classes={{ grouped: classes.buttonGroupGrouped }}>
+              <Button
+                onClick={() =>
+                  setStudyState(studyState === 'check' ? 'study' : 'check')
+                }
+                variant="outlined"
+                color="default"
+                size="medium"
+              >
+                {leftButtonText[studyState]}
+              </Button>
+              <Button
+                onClick={() =>
+                  setStudyState(studyState === 'check' ? 'study' : 'check')
+                }
+                variant="contained"
+                color="primary"
+                size="medium"
+              >
+                {rightButtonText[studyState]}
+              </Button>
+            </ButtonGroup>
+          </CardActions>
+
+          {/* <CardContent>
             <Typography
               className={classes.sentenceHanzi}
               variant="body1"
               gutterBottom
               align="center"
             >
-              <p lang="zh">{sentence.hanzi}</p>
+              <span lang="zh">{sentence.hanzi}</span>
             </Typography>
             <Typography variant="body1" gutterBottom align="center">
               {sentence.english}
@@ -300,7 +328,7 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
                 {rightButtonText[studyState]}
               </Button>
             </ButtonGroup>
-          </CardActions>
+          </CardActions> */}
         </Card>
       </Grid>
       <Grid className={classes.rowContainer} item container>
