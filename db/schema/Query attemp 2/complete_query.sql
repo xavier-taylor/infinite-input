@@ -23,6 +23,7 @@ WITH DATA;
  
 -- CREATE index d_chinese on document (chinese);
 -- CREATE index d_id on document (id);
+-- TODO possible tweak this to make more correct in line with materialized_idea ?? (which returns more rows - is it more correct?)
 with candidates as ( 
 SELECT chinese,id, english from document WHERE
 -- doesn't exist a word I don't know

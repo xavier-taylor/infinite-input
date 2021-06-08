@@ -12,6 +12,10 @@ import {
 import KeyWordInContext from './KWICView';
 import ListView from './ListView';
 
+// TODO add english of sentence:
+// in list view, just after.
+// in aligned view, as a mouse over? or an accordion? https://material-ui.com/components/accordion/
+
 const searchWord = 'Ab'; //TODO change it to key word
 const sentences = [
   {

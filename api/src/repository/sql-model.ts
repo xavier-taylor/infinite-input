@@ -28,21 +28,22 @@ export interface document {
   "chinese": string 
   "words_upos_not_punct": any 
 }
-export interface document_word {
+export interface document_augmented {
   "document_id": any | null 
   "document_chinese": string | null 
   "document_english": string | null 
-  "sentence_id": any | null 
-  "word": string | null 
-  "word_upos": string | null 
-  "ner": string | null 
+  "unique_words_no_punct": any | null 
+  "unique_words_no_num_no_punct": any | null 
 }
-export interface full_sentence_word {
+export interface document_with_words {
   "document_id": any | null 
-  "sentence_id": any | null 
-  "word_hanzi": string | null 
-  "word_upos": string | null 
-  "ner": string | null 
+  "document_chinese": string | null 
+  "document_english": string | null 
+  "words": any | null 
+}
+export interface document_word {
+  "document_id": any | null 
+  "word": string | null 
 }
 export interface listen_log {
   "date_time": Date 
