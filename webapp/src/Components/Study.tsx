@@ -24,108 +24,165 @@ import {
 import clsx from 'clsx';
 import { ThumbDown } from '@material-ui/icons';
 import Concordance from './Concordance';
+import { DocumentsAllQuery, DocumentsAllDocument } from '../schema/generated';
+import { useQuery } from '@apollo/client';
+import { Document, SentenceWord } from '../schema/generated';
 
 // TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff
 
-const sentences = [
+const hardcodedDocuments: Document[] = [
   {
-    hanzi: '你刚才说什么了？', // actually we don't pass this around, instead pass around list of words
-    pinyin: 'Nǐ gāngcái shuō shénme le?', // ui shouldnt actually have a line of pinyin like this
+    chinese: '你刚才说什么了？', // actually we don't pass this around, instead pass around list of words
     english: 'What did you just say?',
-    words: [
-      // TODO make these words more realistiic given the data. just like this for basic UI layout
-      // ie each hanzi maps to many simp/trad/pinyin/definition sets
-      // in fact, just see these words in the database to see what I mean
+    sentences: [
       {
-        hanzi: '你',
-        definitions: ['you (informal, as opposed to courteous 您[nin2])'],
-        pinyin: 'ni3',
-      },
-      {
-        hanzi: '你',
-        definitions: ['you (informal, as opposed to courteous 您[nin2])'],
-        pinyin: 'ni3',
-      },
-      {
-        hanzi: '刚才', // note how in cedict there are two rows for this word!
-        review: true, // review cards are prioritized for view on small viewports
-        definitions: ['(just) a moment ago', 'just now / a moment ago '],
-        pinyin: 'gang1 cai2',
-        // in reality, a definition, at least a cedict one, is a mapping from
-        //(trad,simp, pinyin)-> definitions, so a given simp hanzi itself can
-        // map to multiple of these rows! - UI must handle this!
-        // in reality the 'definition' card will be a little complex.
-      },
-      {
-        hanzi: '说', //in cedict, an example of same chars but dif pinyin meriting 2 rows，then a third row for a trad variant!
-        definitions: [
-          'to speak',
-          'to say',
-          'to explain',
-          'to scold',
-          'to tell off',
-          'a theory (typically the last character in a compound, as in 日心說|日心说 heliocentric theory)',
-        ],
-        /*
+        chinese: 'omitted',
+        words: [
+          // TODO make these words more realistiic given the data. just like this for basic UI layout
+          // ie each hanzi maps to many simp/trad/pinyin/definition sets
+          // in fact, just see these words in the database to see what I mean
+          {
+            lemma: 'l',
+            partOfSpeech: 'pos',
+            universalPartOfSpeech: 'upos',
+            due: false,
+            word: {
+              hskChar2010: 1,
+              hskWord2010: 1,
+              hanzi: '你',
+              ccceDefinitions: [
+                {
+                  simplified: 'a',
+                  traditional: 'b',
+                  definitions: [
+                    'you (informal, as opposed to courteous 您[nin2])',
+                  ],
+                  pinyin: 'ni3',
+                },
+              ],
+            },
+          },
+          {
+            lemma: 'l',
+            partOfSpeech: 'pos',
+            universalPartOfSpeech: 'upos',
+            due: false,
+            word: {
+              hanzi: '你',
+              hskChar2010: 1,
+              hskWord2010: 1,
+              ccceDefinitions: [
+                {
+                  simplified: 'a',
+                  traditional: 'b',
+                  definitions: [
+                    'you (informal, as opposed to courteous 您[nin2])',
+                  ],
+                  pinyin: 'ni3',
+                },
+              ],
+            },
+          },
+          {
+            lemma: 'l',
+            partOfSpeech: 'pos',
+            universalPartOfSpeech: 'upos',
+            due: false,
+            word: {
+              hanzi: '刚才', // note how in cedict there are two rows for this word!
+              hskChar2010: 1,
+              hskWord2010: 1,
+              ccceDefinitions: [
+                {
+                  simplified: 'a',
+                  traditional: 'b',
+                  definitions: [
+                    '(just) a moment ago',
+                    'just now / a moment ago ',
+                  ],
+                  pinyin: 'gang1 cai2',
+                  // in reality, a definition, at least a cedict one, is a mapping from
+                  //(trad,simp, pinyin)-> definitions, so a given simp hanzi itself can
+                  // map to multiple of these rows! - UI must handle this!
+                  // in reality the 'definition' card will be a little complex.
+                },
+              ],
+            },
+          },
+          {
+            lemma: 'l',
+            partOfSpeech: 'pos',
+            universalPartOfSpeech: 'upos',
+            due: false,
+            word: {
+              hanzi: '说', //in cedict, an example of same chars but dif pinyin meriting 2 rows，then a third row for a trad variant!
+              hskChar2010: 1,
+              hskWord2010: 1,
+              ccceDefinitions: [
+                {
+                  simplified: 'a',
+                  traditional: 'b',
+                  definitions: [
+                    'to speak',
+                    'to say',
+                    'to explain',
+                    'to scold',
+                    'to tell off',
+                    'a theory (typically the last character in a compound, as in 日心說|日心说 heliocentric theory)',
+                  ],
+                  /*
           96691	"说"	"說"	"shui4"	"{""to persuade""}"
 96692	"说"	"說"	"shuo1"	"{""to speak"",""to say"",""to explain"",""to scold"",""to tell off"",""a theory (typically the last character in a compound, as in 日心說|日心说 heliocentric theory)""}"
 96775	"说"	"説"	"shuo1"	"{""variant of 說|说[shuo1]""}"
           */
-        pinyin: 'shuo1',
-      },
-      {
-        hanzi: '什么',
-        definitions: ['what', 'something', 'anything'],
-        pinyin: 'shen2 me5',
-      },
-      {
-        hanzi: '了',
-        pinyin: 'le5',
-        definitions: [
-          '(completed action marker)',
-          '(modal particle indicating change of state, situation now)',
-          '(modal particle intensifying preceding clause)',
+                  pinyin: 'shuo1',
+                },
+              ],
+            },
+          },
+          {
+            lemma: 'l',
+            partOfSpeech: 'pos',
+            universalPartOfSpeech: 'upos',
+            due: false,
+            word: {
+              hskChar2010: 1,
+              hskWord2010: 1,
+              hanzi: '什么',
+              ccceDefinitions: [
+                {
+                  simplified: 'a',
+                  traditional: 'b',
+                  definitions: ['what', 'something', 'anything'],
+                  pinyin: 'shen2 me5',
+                },
+              ],
+            },
+          },
+          {
+            lemma: 'l',
+            partOfSpeech: 'pos',
+            universalPartOfSpeech: 'upos',
+            due: false,
+            word: {
+              hskChar2010: 1,
+              hskWord2010: 1,
+              hanzi: '了',
+              ccceDefinitions: [
+                {
+                  simplified: 'a',
+                  traditional: 'b',
+                  pinyin: 'le5',
+                  definitions: [
+                    '(completed action marker)',
+                    '(modal particle indicating change of state, situation now)',
+                    '(modal particle intensifying preceding clause)',
+                  ],
+                },
+              ],
+            },
+          },
         ],
-        review: true,
-      },
-    ],
-  },
-  {
-    hanzi: '刚才谁来了',
-    pinyin: 'Gāngcái shéi lái le? ',
-    english: 'Who came just now?',
-    words: [
-      {
-        hanzi: '刚才',
-        review: true,
-        definitions: ['(just) a moment ago', 'just now / a moment ago '],
-        pinyin: 'gang1 cai2',
-      },
-      {
-        hanzi: '谁',
-        definitions: ['who', 'also pr. [shui2]'],
-        pinyin: 'shei2',
-      },
-      {
-        hanzi: '来',
-        pinyin: 'lai2',
-        definitions: [
-          'to come',
-          'to arrive',
-          'to come round',
-          'ever since',
-          'next',
-        ],
-      },
-      {
-        hanzi: '了',
-        pinyin: 'le5',
-        definitions: [
-          '(completed action marker)',
-          '(modal particle indicating change of state, situation now)',
-          '(modal particle intensifying preceding clause)',
-        ],
-        review: true,
       },
     ],
   },
@@ -207,6 +264,14 @@ interface StudyProps {
 }
 
 const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
+  // Just practising getting the end to end data flow
+  const res = useQuery(DocumentsAllDocument);
+  const documents = [...hardcodedDocuments];
+  if (res.loading === false && res.data) {
+    documents.push(...res.data.documents);
+  }
+  console.log('!!!!!!', res);
+
   const classes = useStyles();
   const [i, setI] = useState(0); // todo improve var name
   const [selectedWordIndexes, updateSWI] = useState<number[]>([]);
@@ -232,8 +297,14 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
   //if (loading) return <div>loading</div>;
   //if (error) return <div>error</div>;
 
-  const next = () => setI((i + 1) % sentences.length);
-  const sentence = sentences[i];
+  const next = () => setI((i + 1) % documents.length);
+  const doc = documents[i];
+  const words: SentenceWord[] = [];
+  // TODO don't want to ahve to do this kind of iteration in front end
+  // probably should consider having a flat array of sentencewords coming back from the gql server as part of the Document type
+  for (let s of doc.sentences) {
+    words.push(...s.words);
+  }
   // TODO: since I am not really using the grid, perhaps remove it and just have a simple flexbox?
 
   const theme = useTheme();
@@ -245,7 +316,7 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
   const lg = useMediaQuery(theme.breakpoints.down('lg'));
   let numberToShow = xs ? 1 : sm ? 2 : md ? 3 : lg ? 4 : 6; // if it wasn't large, it was xl
 
-  const wordsToShow = sentence.words.slice(0, numberToShow);
+  const wordsToShow = words.slice(0, numberToShow);
 
   return (
     <Grid
@@ -262,17 +333,20 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
             variant="body1"
             align="center"
           >
-            <span lang="zh">{sentence.hanzi}</span>
+            <span lang="zh">{doc.chinese}</span>
           </Typography>
           <Typography variant="body1" align="center">
-            {sentence.english}
+            {doc.english}
           </Typography>
           <CardActions classes={{ root: classes.cardActionRoot }}>
             <ButtonGroup classes={{ grouped: classes.buttonGroupGrouped }}>
               <Button
-                onClick={() =>
-                  setStudyState(studyState === 'check' ? 'study' : 'check')
-                }
+                onClick={() => {
+                  if (studyState === 'study') {
+                    next();
+                  }
+                  setStudyState(studyState === 'check' ? 'study' : 'check');
+                }}
                 variant="outlined"
                 color="default"
                 size="medium"
@@ -280,9 +354,12 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
                 {leftButtonText[studyState]}
               </Button>
               <Button
-                onClick={() =>
-                  setStudyState(studyState === 'check' ? 'study' : 'check')
-                }
+                onClick={() => {
+                  if (studyState === 'check') {
+                    next();
+                  }
+                  setStudyState(studyState === 'check' ? 'study' : 'check');
+                }}
                 variant="contained"
                 color="primary"
                 size="medium"
@@ -349,8 +426,8 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
                   action: classes.cardHeaderAction,
                   root: classes.cardHeaderRoot,
                 }}
-                title={<span lang="zh">{word.hanzi}</span>}
-                subheader={word.pinyin}
+                title={<span lang="zh">{word.word.hanzi}</span>}
+                subheader={word.word.ccceDefinitions[0]?.pinyin}
                 action={
                   <IconButton>
                     <ThumbDown color="error" />
@@ -358,7 +435,7 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
                 }
               />
               <CardContent classes={{ root: classes.cardContentRoot }}>
-                {word.definitions.map((d) => (
+                {word.word.ccceDefinitions[0]?.definitions.map((d) => (
                   <Typography variant="body2">{d}</Typography>
                 ))}
               </CardContent>

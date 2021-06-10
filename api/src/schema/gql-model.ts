@@ -20,7 +20,7 @@ export type CcceDefinition = {
   simplified: Scalars['String'];
   traditional: Scalars['String'];
   pinyin: Scalars['String'];
-  meanings: Array<Scalars['String']>;
+  definitions: Array<Scalars['String']>;
 };
 
 export enum CacheControlScope {
@@ -56,12 +56,12 @@ export type Sentence = {
 
 export type SentenceWord = {
   __typename?: 'SentenceWord';
-  wordHanzi: Scalars['String'];
   lemma: Scalars['String'];
   partOfSpeech: Scalars['String'];
-  univeralPartOfSpeech: Scalars['String'];
+  universalPartOfSpeech: Scalars['String'];
   namedEntity?: Maybe<NamedEntity>;
   word: Word;
+  due: Scalars['Boolean'];
 };
 
 
@@ -70,7 +70,7 @@ export type Word = {
   hanzi: Scalars['String'];
   hskWord2010: Scalars['Int'];
   hskChar2010: Scalars['Int'];
-  definitions: Array<Maybe<CcceDefinition>>;
+  ccceDefinitions: Array<Maybe<CcceDefinition>>;
 };
 
 
@@ -160,9 +160,9 @@ export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>;
   Sentence: ResolverTypeWrapper<Sentence>;
   SentenceWord: ResolverTypeWrapper<SentenceWord>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   Upload: ResolverTypeWrapper<Scalars['Upload']>;
   Word: ResolverTypeWrapper<Word>;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -175,9 +175,9 @@ export type ResolversParentTypes = {
   Query: {};
   Sentence: Sentence;
   SentenceWord: SentenceWord;
+  Boolean: Scalars['Boolean'];
   Upload: Scalars['Upload'];
   Word: Word;
-  Boolean: Scalars['Boolean'];
 };
 
 export type CacheControlDirectiveArgs = {   maxAge?: Maybe<Scalars['Int']>;
@@ -189,7 +189,7 @@ export type CcceDefinitionResolvers<ContextType = any, ParentType extends Resolv
   simplified?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   traditional?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   pinyin?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  meanings?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  definitions?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -219,12 +219,12 @@ export type SentenceResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type SentenceWordResolvers<ContextType = any, ParentType extends ResolversParentTypes['SentenceWord'] = ResolversParentTypes['SentenceWord']> = {
-  wordHanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   lemma?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   partOfSpeech?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  univeralPartOfSpeech?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  universalPartOfSpeech?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namedEntity?: Resolver<Maybe<ResolversTypes['NamedEntity']>, ParentType, ContextType>;
   word?: Resolver<ResolversTypes['Word'], ParentType, ContextType>;
+  due?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -236,7 +236,7 @@ export type WordResolvers<ContextType = any, ParentType extends ResolversParentT
   hanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   hskWord2010?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   hskChar2010?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  definitions?: Resolver<Array<Maybe<ResolversTypes['CCCEDefinition']>>, ParentType, ContextType>;
+  ccceDefinitions?: Resolver<Array<Maybe<ResolversTypes['CCCEDefinition']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

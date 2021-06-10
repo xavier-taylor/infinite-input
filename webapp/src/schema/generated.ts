@@ -20,7 +20,7 @@ export type CcceDefinition = {
   simplified: Scalars['String'];
   traditional: Scalars['String'];
   pinyin: Scalars['String'];
-  meanings: Array<Scalars['String']>;
+  definitions: Array<Scalars['String']>;
 };
 
 export enum CacheControlScope {
@@ -56,12 +56,12 @@ export type Sentence = {
 
 export type SentenceWord = {
   __typename?: 'SentenceWord';
-  wordHanzi: Scalars['String'];
   lemma: Scalars['String'];
   partOfSpeech: Scalars['String'];
-  univeralPartOfSpeech: Scalars['String'];
+  universalPartOfSpeech: Scalars['String'];
   namedEntity?: Maybe<NamedEntity>;
   word: Word;
+  due: Scalars['Boolean'];
 };
 
 
@@ -70,7 +70,7 @@ export type Word = {
   hanzi: Scalars['String'];
   hskWord2010: Scalars['Int'];
   hskChar2010: Scalars['Int'];
-  definitions: Array<Maybe<CcceDefinition>>;
+  ccceDefinitions: Array<Maybe<CcceDefinition>>;
 };
 
 export type DocumentsEnglishOnlyQueryVariables = Exact<{ [key: string]: never; }>;
@@ -95,6 +95,37 @@ export type DocumentsChineseOnlyQuery = (
   )> }
 );
 
+export type DocumentsAllQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DocumentsAllQuery = (
+  { __typename?: 'Query' }
+  & { documents: Array<(
+    { __typename?: 'Document' }
+    & Pick<Document, 'english' | 'chinese'>
+    & { sentences: Array<(
+      { __typename?: 'Sentence' }
+      & Pick<Sentence, 'chinese'>
+      & { words: Array<(
+        { __typename?: 'SentenceWord' }
+        & Pick<SentenceWord, 'lemma' | 'partOfSpeech' | 'universalPartOfSpeech' | 'due'>
+        & { namedEntity?: Maybe<(
+          { __typename?: 'NamedEntity' }
+          & Pick<NamedEntity, 'chinese' | 'entityType' | 'start' | 'end'>
+        )>, word: (
+          { __typename?: 'Word' }
+          & Pick<Word, 'hanzi' | 'hskWord2010' | 'hskChar2010'>
+          & { ccceDefinitions: Array<Maybe<(
+            { __typename?: 'CCCEDefinition' }
+            & Pick<CcceDefinition, 'simplified' | 'traditional' | 'pinyin' | 'definitions'>
+          )>> }
+        ) }
+      )> }
+    )> }
+  )> }
+);
+
 
 export const DocumentsEnglishOnlyDocument: DocumentNode<DocumentsEnglishOnlyQuery, DocumentsEnglishOnlyQueryVariables> = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DocumentsEnglishOnly"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"documents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"english"}}]}}]}}]};
 export const DocumentsChineseOnlyDocument: DocumentNode<DocumentsChineseOnlyQuery, DocumentsChineseOnlyQueryVariables> = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DocumentsChineseOnly"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"documents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"chinese"}}]}}]}}]};
+export const DocumentsAllDocument: DocumentNode<DocumentsAllQuery, DocumentsAllQueryVariables> = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DocumentsAll"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"documents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"english"}},{"kind":"Field","name":{"kind":"Name","value":"chinese"}},{"kind":"Field","name":{"kind":"Name","value":"sentences"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"chinese"}},{"kind":"Field","name":{"kind":"Name","value":"words"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"lemma"}},{"kind":"Field","name":{"kind":"Name","value":"partOfSpeech"}},{"kind":"Field","name":{"kind":"Name","value":"universalPartOfSpeech"}},{"kind":"Field","name":{"kind":"Name","value":"due"}},{"kind":"Field","name":{"kind":"Name","value":"namedEntity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"chinese"}},{"kind":"Field","name":{"kind":"Name","value":"entityType"}},{"kind":"Field","name":{"kind":"Name","value":"start"}},{"kind":"Field","name":{"kind":"Name","value":"end"}}]}},{"kind":"Field","name":{"kind":"Name","value":"word"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hanzi"}},{"kind":"Field","name":{"kind":"Name","value":"hskWord2010"}},{"kind":"Field","name":{"kind":"Name","value":"hskChar2010"}},{"kind":"Field","name":{"kind":"Name","value":"ccceDefinitions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"simplified"}},{"kind":"Field","name":{"kind":"Name","value":"traditional"}},{"kind":"Field","name":{"kind":"Name","value":"pinyin"}},{"kind":"Field","name":{"kind":"Name","value":"definitions"}}]}}]}}]}}]}}]}}]}}]};

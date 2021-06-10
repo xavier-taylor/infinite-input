@@ -9,3 +9,36 @@ query DocumentsChineseOnly {
     chinese
   }
 }
+
+query DocumentsAll {
+  documents {
+    english
+    chinese
+    sentences {
+      chinese
+      words {
+        lemma
+        partOfSpeech
+        universalPartOfSpeech
+        due
+        namedEntity {
+          chinese
+          entityType
+          start
+          end
+        }
+        word {
+          hanzi
+          hskWord2010
+          hskChar2010
+          ccceDefinitions {
+            simplified
+            traditional
+            pinyin
+            definitions
+          }
+        }
+      }
+    }
+  }
+}
