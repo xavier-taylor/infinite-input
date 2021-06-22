@@ -30,6 +30,7 @@ export enum CacheControlScope {
 
 export type Document = {
   __typename?: 'Document';
+  id: Scalars['String'];
   sentences: Array<Sentence>;
   english?: Maybe<Scalars['String']>;
   chinese: Scalars['String'];
@@ -50,6 +51,7 @@ export type Query = {
 
 export type Sentence = {
   __typename?: 'Sentence';
+  id: Scalars['String'];
   words: Array<SentenceWord>;
   chinese: Scalars['String'];
 };
@@ -194,6 +196,7 @@ export type CcceDefinitionResolvers<ContextType = any, ParentType extends Resolv
 };
 
 export type DocumentResolvers<ContextType = any, ParentType extends ResolversParentTypes['Document'] = ResolversParentTypes['Document']> = {
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   sentences?: Resolver<Array<ResolversTypes['Sentence']>, ParentType, ContextType>;
   english?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   chinese?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -213,6 +216,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
 };
 
 export type SentenceResolvers<ContextType = any, ParentType extends ResolversParentTypes['Sentence'] = ResolversParentTypes['Sentence']> = {
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   words?: Resolver<Array<ResolversTypes['SentenceWord']>, ParentType, ContextType>;
   chinese?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

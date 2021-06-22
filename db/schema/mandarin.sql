@@ -107,7 +107,16 @@ CREATE TABLE mandarin.document
 
 CREATE TABLE mandarin.sentence
 (
-    id bigserial,
+    id bigserial, -- serial creates a sequence, and since I created sentences in order
+    -- this 'id' can be used to sort the sentences in the same order as they appear
+    -- in their document.
+    -- however, TODO add 'index int' field, where index = 0 means this was the first sentence
+    -- in the document, index = 2 means this was teh second sentence in the document etc.
+    -- TODO adjust script to populate this field when importing corpus
+    -- TODO adjust existing data via some clever update query to have this set based on
+    -- the order implicit in the id field - ideally in pure sql, but worst can scenario can do it in a script
+    -- TODO adjust types, regenerate types etc throughout project as required.
+    -- add constraint that document_id and index = composite unique, but keep the id field, so can use in apollo cache etc 
     document_id bigint NOT NULL REFERENCES mandarin.document (id),
     chinese text NOT NULL,
     sentiment text NOT NULL, -- http://a1-www.is.tokushima-u.ac.jp/member/ren/Ren-CECps1.0/Ren-CECps1.0.html
@@ -128,7 +137,7 @@ CREATE TABLE mandarin.sentence_word
 ( -- note we map 1 token to 1 word to 1 sentence_word because in the chinese model 1 token = 1 word
  -- the combination of head and deprel makes the sentence.dependencies data redundant, so we will not store it. 
  -- however, i am not sure if the ner field makes the entire NER representation (the Span) redundant, so will store it in named_entity
-    id int,                                                     --standa.word.id 1 based index of word in sentence
+    id int,   --consider renaming this to index                 --standa.word.id 1 based index of word in sentence
     sentence_id bigint REFERENCES mandarin.sentence (id),
     word_hanzi text NOT NULL REFERENCES mandarin.word (hanzi),  -- stanza.word.text
     lemma text NOT NULL REFERENCES mandarin.word (hanzi),                -- stanza.word.lemma

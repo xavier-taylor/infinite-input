@@ -36,11 +36,13 @@ export const typeDefs = gql`
   }
 
   type Sentence {
+    id: String!
     words: [SentenceWord!]!
     chinese: String!
   }
 
   type Document {
+    id: String!
     sentences: [Sentence!]!
     english: String
     chinese: String!

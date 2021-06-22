@@ -151,6 +151,7 @@ for subcorpus in corpus.sub_corpuses:
                 # -- -- FOR sentence in document
                 for sentence in doc.sentences:
                 # -- -- -- insert sentence
+                    # add sentence index TODO (ie a field called index that has value 0 for first sentence in a document)
                     cur.execute('''
                         INSERT INTO mandarin.sentence (document_id, chinese, sentiment) 
                         VALUES (%s, %s, %s)

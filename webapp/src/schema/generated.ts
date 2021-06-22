@@ -30,6 +30,7 @@ export enum CacheControlScope {
 
 export type Document = {
   __typename?: 'Document';
+  id: Scalars['String'];
   sentences: Array<Sentence>;
   english?: Maybe<Scalars['String']>;
   chinese: Scalars['String'];
@@ -50,6 +51,7 @@ export type Query = {
 
 export type Sentence = {
   __typename?: 'Sentence';
+  id: Scalars['String'];
   words: Array<SentenceWord>;
   chinese: Scalars['String'];
 };
