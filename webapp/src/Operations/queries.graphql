@@ -12,9 +12,11 @@ query DocumentsChineseOnly {
 
 query DocumentsAll {
   documents {
+    id
     english
     chinese
     sentences {
+      id
       chinese
       words {
         lemma

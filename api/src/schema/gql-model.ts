@@ -1,4 +1,5 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
+import { document } from '../repository/sql-model';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
@@ -156,7 +157,7 @@ export type ResolversTypes = {
   CCCEDefinition: ResolverTypeWrapper<CcceDefinition>;
   String: ResolverTypeWrapper<Scalars['String']>;
   CacheControlScope: CacheControlScope;
-  Document: ResolverTypeWrapper<Document>;
+  Document: ResolverTypeWrapper<document>;
   NamedEntity: ResolverTypeWrapper<NamedEntity>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Query: ResolverTypeWrapper<{}>;
@@ -171,7 +172,7 @@ export type ResolversTypes = {
 export type ResolversParentTypes = {
   CCCEDefinition: CcceDefinition;
   String: Scalars['String'];
-  Document: Document;
+  Document: document;
   NamedEntity: NamedEntity;
   Int: Scalars['Int'];
   Query: {};

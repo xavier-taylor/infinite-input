@@ -34,8 +34,10 @@ const hardcodedDocuments: Document[] = [
   {
     chinese: '你刚才说什么了？', // actually we don't pass this around, instead pass around list of words
     english: 'What did you just say?',
+    id: 'test',
     sentences: [
       {
+        id: '1',
         chinese: 'omitted',
         words: [
           // TODO make these words more realistiic given the data. just like this for basic UI layout
@@ -270,7 +272,6 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
   if (res.loading === false && res.data) {
     documents.push(...res.data.documents);
   }
-  console.log('!!!!!!', res);
 
   const classes = useStyles();
   const [i, setI] = useState(0); // todo improve var name
@@ -368,44 +369,6 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
               </Button>
             </ButtonGroup>
           </CardActions>
-
-          {/* <CardContent>
-            <Typography
-              className={classes.sentenceHanzi}
-              variant="body1"
-              gutterBottom
-              align="center"
-            >
-              <span lang="zh">{sentence.hanzi}</span>
-            </Typography>
-            <Typography variant="body1" gutterBottom align="center">
-              {sentence.english}
-            </Typography>
-          </CardContent>
-          <CardActions classes={{ root: classes.cardActionRoot }}>
-            <ButtonGroup classes={{ grouped: classes.buttonGroupGrouped }}>
-              <Button
-                onClick={() =>
-                  setStudyState(studyState === 'check' ? 'study' : 'check')
-                }
-                variant="outlined"
-                color="default"
-                size="medium"
-              >
-                {leftButtonText[studyState]}
-              </Button>
-              <Button
-                onClick={() =>
-                  setStudyState(studyState === 'check' ? 'study' : 'check')
-                }
-                variant="contained"
-                color="primary"
-                size="medium"
-              >
-                {rightButtonText[studyState]}
-              </Button>
-            </ButtonGroup>
-          </CardActions> */}
         </Card>
       </Grid>
       <Grid className={classes.rowContainer} item container>
@@ -450,21 +413,5 @@ const Study: React.FC<StudyProps> = ({ drawerOpen }) => {
     </Grid>
   );
 };
-
-/**
-           <Paper className={fixedHeightPaper}>
-            <p>{sentences[i].hanzi}</p>
-            <p>{sentences[i].pinyin}</p>
-            <p>{sentences[i].english}</p>
-            <ButtonGroup variant="outlined" color="primary">
-              <Button onClick={next} size="large" color="secondary">
-                Again
-              </Button>
-              <Button onClick={next} size="large">
-                Good
-              </Button>
-            </ButtonGroup>
-          </Paper>
- */
 
 export default Study;
