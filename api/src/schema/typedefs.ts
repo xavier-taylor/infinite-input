@@ -1,5 +1,4 @@
 import { gql } from 'apollo-server';
-// TODO If/as this file grows, break it out types/queries/mutations?
 
 // TODO analyse fields against sql and stanza - are the right things nullable?
 export const typeDefs = gql`
