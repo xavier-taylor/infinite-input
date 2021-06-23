@@ -11,6 +11,9 @@
   "typeOverrides": {
     "mandarin.cc_cedict.definitions": "string[]"
   },
+  "typeMap": {
+    "string": ["bigint", "int8"]
+  },
   "interfaceNameFormat": "${table}",
   "filename": "sql-model"
 }
