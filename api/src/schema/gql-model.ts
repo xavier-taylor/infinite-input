@@ -4,6 +4,7 @@ export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -48,6 +49,12 @@ export type NamedEntity = {
 export type Query = {
   __typename?: 'Query';
   documents: Array<Document>;
+  concordanceDocs: Array<Document>;
+};
+
+
+export type QueryConcordanceDocsArgs = {
+  word: Scalars['String'];
 };
 
 export type Sentence = {
@@ -59,6 +66,9 @@ export type Sentence = {
 
 export type SentenceWord = {
   __typename?: 'SentenceWord';
+  sentenceId: Scalars['String'];
+  index: Scalars['Int'];
+  id: Scalars['String'];
   wordHanzi: Scalars['String'];
   lemma: Scalars['String'];
   partOfSpeech: Scalars['String'];
@@ -215,6 +225,7 @@ export type NamedEntityResolvers<ContextType = any, ParentType extends Resolvers
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   documents?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType>;
+  concordanceDocs?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryConcordanceDocsArgs, 'word'>>;
 };
 
 export type SentenceResolvers<ContextType = any, ParentType extends ResolversParentTypes['Sentence'] = ResolversParentTypes['Sentence']> = {
@@ -225,6 +236,9 @@ export type SentenceResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type SentenceWordResolvers<ContextType = any, ParentType extends ResolversParentTypes['SentenceWord'] = ResolversParentTypes['SentenceWord']> = {
+  sentenceId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  index?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   wordHanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   lemma?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   partOfSpeech?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

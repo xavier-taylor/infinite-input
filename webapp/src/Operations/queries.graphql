@@ -1,12 +1,17 @@
-query DocumentsEnglishOnly {
-  documents {
+query Concordance($word: String!) {
+  concordanceDocs(word: $word) {
+    id
     english
-  }
-}
-
-query DocumentsChineseOnly {
-  documents {
-    chinese
+    sentences {
+      words {
+        id
+        sentenceId
+        index
+        wordHanzi
+        partOfSpeech
+        universalPartOfSpeech
+      }
+    }
   }
 }
 
@@ -19,6 +24,9 @@ query DocumentsAll {
       id
       chinese
       words {
+        id
+        sentenceId
+        index
         wordHanzi
         lemma
         partOfSpeech

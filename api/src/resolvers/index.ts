@@ -16,6 +16,9 @@ export const resolvers: Resolvers<IContextType> = {
       dataSources.db.getCCCE(hanzi),
   },
   SentenceWord: {
+    sentenceId: ({ sentence_id }) => sentence_id,
+    index: ({ id }) => id,
+    id: ({ sentence_id, id }) => `${sentence_id}-${id}`,
     wordHanzi: ({ word_hanzi }) => word_hanzi,
     lemma: ({ lemma }) => lemma,
     partOfSpeech: ({ part_of_speech }) => part_of_speech,
@@ -46,5 +49,8 @@ export const resolvers: Resolvers<IContextType> = {
     // use the user id
     documents: (_parent, _args, context, _info) =>
       context.dataSources.db.getDueDocuments(),
+    concordanceDocs: (_parent, { word }, context, _info) =>
+      context.dataSources.db.getDocuments({ including: [word] }),
+    // TODO add document_word or whatever this query is relying on to source control
   },
 };

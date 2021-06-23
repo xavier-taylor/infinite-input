@@ -54,44 +54,46 @@ const KeyWordInContext: React.FC<ConcordanceViewProps> = ({
         <col />
         <col />
       </colgroup>
-      {documents.map((document, i) => {
-        // TODO handle cases where before or after are empty arrays
-        // for the 'center' to work, we need to still render something...
-        // TODO these keys aren't proper keys!!!
-        return (
-          <tr lang="zh">
-            <td
-              //   style={{ width: '200px' }}
-              className={clsx(classes.sentenceFragment, classes.before)}
-            >
-              {document.before.map((w, i) => (
-                <Typography component="span" key={i}>
-                  {w.hanzi}
-                </Typography>
-              ))}
-            </td>
-            <td className={classes.keyWord}>
-              <Typography
-                component="span"
-                className={clsx(classes.searchWord, classes.firstSW)}
+      <tbody>
+        {documents.map((document, i) => {
+          // TODO handle cases where before or after are empty arrays
+          // for the 'center' to work, we need to still render something...
+          // TODO these keys aren't proper keys!!!
+          return (
+            <tr key={i} lang="zh">
+              <td
+                //   style={{ width: '200px' }}
+                className={clsx(classes.sentenceFragment, classes.before)}
               >
-                {document.first?.hanzi}
-              </Typography>
-            </td>
-            <td className={classes.sentenceFragment}>
-              {document.after.map((w, i) => (
+                {document.before.map((w, i) => (
+                  <Typography component="span" key={i}>
+                    {w.wordHanzi}
+                  </Typography>
+                ))}
+              </td>
+              <td className={classes.keyWord}>
                 <Typography
                   component="span"
-                  className={clsx(w.hanzi === word && classes.searchWord)}
-                  key={i}
+                  className={clsx(classes.searchWord, classes.firstSW)}
                 >
-                  {w.hanzi}
+                  {document.first?.wordHanzi}
                 </Typography>
-              ))}
-            </td>
-          </tr>
-        );
-      })}
+              </td>
+              <td className={classes.sentenceFragment}>
+                {document.after.map((w, i) => (
+                  <Typography
+                    component="span"
+                    className={clsx(w.wordHanzi === word && classes.searchWord)}
+                    key={i}
+                  >
+                    {w.wordHanzi}
+                  </Typography>
+                ))}
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
     </table>
   );
 };

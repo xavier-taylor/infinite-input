@@ -24,21 +24,21 @@ const ListView: React.FC<ConcordanceViewProps> = ({ documents, word }) => {
         <div lang="zh">
           {doc.before.map((w, i) => (
             <Typography component="span" key={i}>
-              {w.hanzi}
+              {w.wordHanzi}
             </Typography>
           ))}
           {
             <Typography component="span" key={word} className={classes.firstSW}>
-              {doc.first?.hanzi}
+              {doc.first?.wordHanzi}
             </Typography>
           }
           {doc.after.map((w, i) => (
             <Typography
-              className={clsx(w.hanzi === word && classes.searchWord)}
+              className={clsx(w.wordHanzi === word && classes.searchWord)}
               component="span"
               key={i}
             >
-              {w.hanzi}
+              {w.wordHanzi}
             </Typography>
           ))}
         </div>

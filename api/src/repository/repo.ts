@@ -3,6 +3,7 @@ import { Document, SentenceWord, Word } from '../schema/gql-model';
 import {
   cc_cedict,
   document,
+  document_word,
   sentence,
   sentence_word,
   word,
@@ -42,8 +43,30 @@ export class PostgresqlRepo extends SQLDataSource {
   ): Promise<document[]> {
     // make a 'word to document' function for single word reviews.
     // get the actual list of due words, then work thru results from this query etc
-    const res = this.knex.select<document[]>('*').from('document').limit(2);
+    const res = this.knex.select<document[]>('*').from('document').limit(10);
     return res;
+  }
+  async getDocuments(options: { including: string[] }): Promise<document[]> {
+    // make a 'word to document' function for single word reviews.
+    // get the actual list of due words, then work thru results from this query etc
+
+    // const raw = `select id, sub_corpus_title, corpus_title, previous_document, english, chinese from document join document_word on document.id = document_id limit 5;`
+    // return this.knex.r
+
+    return this.knex('document')
+      .join('document_word', 'document.id', '=', 'document_word.document_id')
+      .limit(10)
+      .select(
+        'id',
+        'sub_corpus_title',
+        'corpus_title',
+        'previous_document',
+        'english',
+        'chinese'
+      )
+      .whereIn('word', options.including);
+    // .limit(10); // TODO fix this so that if arg is not passed the wherein is not applied
+    // TODO make this just return unique documents!
   }
 
   async getSentences(documentId: string) {

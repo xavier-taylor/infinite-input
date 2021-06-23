@@ -3,7 +3,7 @@ import { CssBaseline } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Header from './Header';
 import MenuDrawer from './MenuDrawer';
-import Study from './Study';
+import StudyContainer from './Study/StudyContainer';
 import { ThemeProvider } from '@material-ui/styles';
 import { createMuiTheme } from '@material-ui/core';
 
@@ -52,7 +52,8 @@ const App: React.FC = () => {
         <MenuDrawer drawer={drawer} page={page}></MenuDrawer>
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
-          <Study drawerOpen={drawerOpen}></Study>
+          <StudyContainer drawerOpen={drawerOpen}></StudyContainer>
+          {/* TODO put drawerOpen into a global context */}
         </main>
       </div>
     </ThemeProvider>
