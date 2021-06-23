@@ -25,7 +25,7 @@ export const typeDefs = gql`
   }
 
   type SentenceWord {
-    # wordHanzi: String! redundant coz in Word as hanzi
+    wordHanzi: String!
     lemma: String!
     partOfSpeech: String!
     universalPartOfSpeech: String!

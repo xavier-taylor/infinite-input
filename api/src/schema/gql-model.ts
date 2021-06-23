@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { document } from '../repository/sql-model';
+import { document, sentence, sentence_word, word, cc_cedict } from '../repository/sql-model';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
@@ -59,6 +59,7 @@ export type Sentence = {
 
 export type SentenceWord = {
   __typename?: 'SentenceWord';
+  wordHanzi: Scalars['String'];
   lemma: Scalars['String'];
   partOfSpeech: Scalars['String'];
   universalPartOfSpeech: Scalars['String'];
@@ -154,33 +155,33 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
-  CCCEDefinition: ResolverTypeWrapper<CcceDefinition>;
+  CCCEDefinition: ResolverTypeWrapper<cc_cedict>;
   String: ResolverTypeWrapper<Scalars['String']>;
   CacheControlScope: CacheControlScope;
   Document: ResolverTypeWrapper<document>;
   NamedEntity: ResolverTypeWrapper<NamedEntity>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Query: ResolverTypeWrapper<{}>;
-  Sentence: ResolverTypeWrapper<Sentence>;
-  SentenceWord: ResolverTypeWrapper<SentenceWord>;
+  Sentence: ResolverTypeWrapper<sentence>;
+  SentenceWord: ResolverTypeWrapper<sentence_word>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   Upload: ResolverTypeWrapper<Scalars['Upload']>;
-  Word: ResolverTypeWrapper<Word>;
+  Word: ResolverTypeWrapper<word>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
-  CCCEDefinition: CcceDefinition;
+  CCCEDefinition: cc_cedict;
   String: Scalars['String'];
   Document: document;
   NamedEntity: NamedEntity;
   Int: Scalars['Int'];
   Query: {};
-  Sentence: Sentence;
-  SentenceWord: SentenceWord;
+  Sentence: sentence;
+  SentenceWord: sentence_word;
   Boolean: Scalars['Boolean'];
   Upload: Scalars['Upload'];
-  Word: Word;
+  Word: word;
 };
 
 export type CacheControlDirectiveArgs = {   maxAge?: Maybe<Scalars['Int']>;
@@ -224,6 +225,7 @@ export type SentenceResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type SentenceWordResolvers<ContextType = any, ParentType extends ResolversParentTypes['SentenceWord'] = ResolversParentTypes['SentenceWord']> = {
+  wordHanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   lemma?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   partOfSpeech?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   universalPartOfSpeech?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

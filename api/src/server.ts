@@ -1,16 +1,32 @@
 import { ApolloServer } from 'apollo-server';
 import { typeDefs } from './schema/typedefs';
 import { resolvers } from './resolvers';
-import { PostgresqlRepo, ILanguageRepository } from './repository';
-import { Pool } from 'pg';
+import { PostgresqlRepo } from './repository/repo';
+import { ConnectionConfig, Pool } from 'pg';
 
 const message = 'Hello world';
 console.log(message);
 console.log(process.env.TEST);
 
 export interface IContextType {
-  repo: ILanguageRepository;
+  test: string;
+  dataSources: {
+    db: PostgresqlRepo;
+  };
 }
+
+const connection = {
+  host: 'localhost',
+  user: 'xavier',
+  password: 'localdb-4301',
+  database: 'infinite_input',
+};
+
+const knexConfig = {
+  client: 'pg',
+  connection,
+  searchPath: ['mandarin'],
+};
 
 // the plan is to just use pool.query, which apparently automatically handlers
 // releasing the connection etc. spend time to understand these docs better!
@@ -22,12 +38,10 @@ const server = new ApolloServer({
   resolvers,
   // https://www.apollographql.com/docs/apollo-server/data/resolvers/#the-context-argument
   // this argument is called for each request!
-  context: async (): Promise<IContextType> => {
-    const repo = new PostgresqlRepo(pool);
-    return {
-      repo,
-    };
+  context: async (): Promise<Omit<IContextType, 'dataSources'>> => {
+    return { test: 'TEST' };
   },
+  dataSources: () => ({ db: new PostgresqlRepo(knexConfig) }),
 });
 // note context can be async so can connect to db etc
 // context: async ({req}) => ({

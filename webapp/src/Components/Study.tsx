@@ -46,6 +46,7 @@ const hardcodedDocuments: Document[] = [
           {
             lemma: 'l',
             partOfSpeech: 'pos',
+            wordHanzi: '你',
             universalPartOfSpeech: 'upos',
             due: false,
             word: {
@@ -69,6 +70,7 @@ const hardcodedDocuments: Document[] = [
             partOfSpeech: 'pos',
             universalPartOfSpeech: 'upos',
             due: false,
+            wordHanzi: '你',
             word: {
               hanzi: '你',
               hskChar2010: 1,
@@ -88,6 +90,7 @@ const hardcodedDocuments: Document[] = [
           {
             lemma: 'l',
             partOfSpeech: 'pos',
+            wordHanzi: '刚才', // note how in cedict there are two rows for this word!WORD
             universalPartOfSpeech: 'upos',
             due: false,
             word: {
@@ -116,6 +119,7 @@ const hardcodedDocuments: Document[] = [
             partOfSpeech: 'pos',
             universalPartOfSpeech: 'upos',
             due: false,
+            wordHanzi: '说', //in cedict, an example of same chars but dif pinyin meriting 2 rows，then a third row for a trad variant!
             word: {
               hanzi: '说', //in cedict, an example of same chars but dif pinyin meriting 2 rows，then a third row for a trad variant!
               hskChar2010: 1,
@@ -146,6 +150,7 @@ const hardcodedDocuments: Document[] = [
             lemma: 'l',
             partOfSpeech: 'pos',
             universalPartOfSpeech: 'upos',
+            wordHanzi: '什么',
             due: false,
             word: {
               hskChar2010: 1,
@@ -164,6 +169,7 @@ const hardcodedDocuments: Document[] = [
           {
             lemma: 'l',
             partOfSpeech: 'pos',
+            wordHanzi: '了',
             universalPartOfSpeech: 'upos',
             due: false,
             word: {

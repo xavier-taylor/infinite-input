@@ -19,6 +19,7 @@ query DocumentsAll {
       id
       chinese
       words {
+        wordHanzi
         lemma
         partOfSpeech
         universalPartOfSpeech

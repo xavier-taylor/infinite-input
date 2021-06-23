@@ -6,6 +6,10 @@ generates:
     config:
       mappers:
         Document: ../repository/sql-model#document
+        Sentence: ../repository/sql-model#sentence
+        SentenceWord: ../repository/sql-model#sentence_word
+        Word: ../repository/sql-model#word
+        CCCEDefinition: ../repository/sql-model#cc_cedict
     plugins:
       - 'typescript'
       - 'typescript-resolvers'
