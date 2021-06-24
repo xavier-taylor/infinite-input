@@ -13,6 +13,9 @@ const useStyles = makeStyles((theme: Theme) =>
     firstSW: {
       color: theme.palette.success.dark,
     },
+    pair: {
+      borderBottom: `1px solid lightGrey`,
+    },
   })
 );
 
@@ -20,8 +23,8 @@ const ListView: React.FC<ConcordanceViewProps> = ({ documents, word }) => {
   const classes = useStyles();
   return (
     <>
-      {documents.map((doc) => (
-        <>
+      {documents.map((doc, i) => (
+        <div className={classes.pair}>
           <div lang="zh">
             {doc.before.map((w, i) => (
               <Typography component="span" key={i}>
@@ -52,7 +55,7 @@ const ListView: React.FC<ConcordanceViewProps> = ({ documents, word }) => {
               {doc.english}
             </Typography>
           </div>
-        </>
+        </div>
       ))}
     </>
   );

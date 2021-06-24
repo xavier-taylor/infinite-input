@@ -8,6 +8,7 @@ import {
   CardContent,
   FormControlLabel,
   Switch,
+  LinearProgress,
 } from '@material-ui/core';
 import KeyWordInContext from './KWICView';
 import ListView from './ListView';
@@ -119,7 +120,7 @@ const Concordance: React.FC<ConcordanceProps> = ({ word }) => {
   };
 
   if (loading) {
-    return <div>loading</div>;
+    return <LinearProgress />;
   } else if (data) {
     const parsedDocument = data.concordanceDocs.map((doc) =>
       parseDocument(doc, word)

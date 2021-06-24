@@ -114,7 +114,6 @@ interface StudyProps {
   next: () => void;
 }
 // TODO strip newlines from sentences in database! - ie update ingestion script?
-// TODO filter out sentencewords that are just punctuation from being shown as definition cards
 
 const Study: React.FC<StudyProps> = ({ drawerOpen, document, next }) => {
   const classes = useStyles();
@@ -156,7 +155,9 @@ const Study: React.FC<StudyProps> = ({ drawerOpen, document, next }) => {
   }
   // TODO: since I am not really using the grid, perhaps remove it and just have a simple flexbox?
 
-  const wordsToShow = words.slice(0, numberToShow);
+  const wordsToShow = words
+    .filter((w) => w.universalPartOfSpeech !== 'PUNCT')
+    .slice(0, numberToShow);
 
   return (
     <Grid
