@@ -11,6 +11,7 @@ export const typeDefs = gql`
   }
 
   type CCCEDefinition {
+    id: String!
     simplified: String!
     traditional: String!
     pinyin: String!
@@ -21,7 +22,7 @@ export const typeDefs = gql`
     hanzi: String!
     hskWord2010: Int!
     hskChar2010: Int!
-    ccceDefinitions: [CCCEDefinition]! # possible that some words lack definition
+    ccceDefinitions: [CCCEDefinition!]! # possible that some words lack definition - in that case, we just get an empty array here.
   }
 
   type SentenceWord {

@@ -41,10 +41,26 @@ export class PostgresqlRepo extends SQLDataSource {
     _type: ReviewType = 'Reading',
     _studentId: string = '1'
   ): Promise<document[]> {
-    // make a 'word to document' function for single word reviews.
-    // get the actual list of due words, then work thru results from this query etc
-    const res = this.knex.select<document[]>('*').from('document').limit(10);
-    return res;
+    // based on complete_query.sql, just for testing/mucking around purposes
+    const candidates = `SELECT chinese,id, english, sub_corpus_title, corpus_title from document WHERE
+-- doesn't exist a word I don't know
+NOT EXISTS (
+	Select 1 FROM document_word
+	left join student_word_read ON student_word_read.word_hanzi = document_word.word AND student_word_read.student_id = 1
+	WHERE student_word_read.word_hanzi is null
+	and document_word.document_id = document.id
+	) `;
+    const due = `SELECT word_hanzi FROM student_word_read WHERE student_id = 1 AND due <= CURRENT_DATE`;
+
+    return this.knex
+      .with('candidates', this.knex.raw(candidates))
+      .with('due', this.knex.raw(due))
+      .select('id', 'sub_corpus_title', 'corpus_title', 'english', 'chinese')
+      .from('candidates')
+      .join('document_word', 'candidates.id', '=', 'document_word.document_id')
+      .join('due', 'document_word.word', '=', 'due.word_hanzi')
+      .groupBy('id', 'chinese', 'english', 'sub_corpus_title', 'corpus_title')
+      .limit(20);
   }
   async getDocuments(options: { including: string[] }): Promise<document[]> {
     // make a 'word to document' function for single word reviews.

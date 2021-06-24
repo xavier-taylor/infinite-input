@@ -19,6 +19,7 @@ export type Scalars = {
 
 export type CcceDefinition = {
   __typename?: 'CCCEDefinition';
+  id: Scalars['String'];
   simplified: Scalars['String'];
   traditional: Scalars['String'];
   pinyin: Scalars['String'];
@@ -84,7 +85,7 @@ export type Word = {
   hanzi: Scalars['String'];
   hskWord2010: Scalars['Int'];
   hskChar2010: Scalars['Int'];
-  ccceDefinitions: Array<Maybe<CcceDefinition>>;
+  ccceDefinitions: Array<CcceDefinition>;
 };
 
 
@@ -200,6 +201,7 @@ export type CacheControlDirectiveArgs = {   maxAge?: Maybe<Scalars['Int']>;
 export type CacheControlDirectiveResolver<Result, Parent, ContextType = any, Args = CacheControlDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export type CcceDefinitionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CCCEDefinition'] = ResolversParentTypes['CCCEDefinition']> = {
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   simplified?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   traditional?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   pinyin?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -257,7 +259,7 @@ export type WordResolvers<ContextType = any, ParentType extends ResolversParentT
   hanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   hskWord2010?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   hskChar2010?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  ccceDefinitions?: Resolver<Array<Maybe<ResolversTypes['CCCEDefinition']>>, ParentType, ContextType>;
+  ccceDefinitions?: Resolver<Array<ResolversTypes['CCCEDefinition']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

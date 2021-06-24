@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import MenuBookIcon from '@material-ui/icons/MenuBook';
+import RecordVoiceOverIcon from '@material-ui/icons/RecordVoiceOver';
 import {
   makeStyles,
   createStyles,
@@ -56,6 +58,7 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: theme.spacing(1),
       // TODO making this paddingBottom work, currently it is getting overwritten by some pseudo class or something
       paddingBottom: '0px',
+      paddingTop: '0px',
       '&:last-child': {
         paddingBottom: '0px',
       },
@@ -111,6 +114,7 @@ interface StudyProps {
   next: () => void;
 }
 // TODO strip newlines from sentences in database! - ie update ingestion script?
+// TODO filter out sentencewords that are just punctuation from being shown as definition cards
 
 const Study: React.FC<StudyProps> = ({ drawerOpen, document, next }) => {
   const classes = useStyles();
@@ -122,6 +126,10 @@ const Study: React.FC<StudyProps> = ({ drawerOpen, document, next }) => {
   let numberToShow = xs ? 1 : sm ? 2 : md ? 3 : lg ? 4 : 6; // if it wasn't large, it was xl
   type studyStates = 'study' | 'check';
   const [studyState, setStudyState] = useState<studyStates>('study'); // whether you are reading/listening, or looking at translation etc
+  const [concordanceWord, setConcordanceWord] = useState<string | undefined>(
+    undefined
+  );
+  console.log(concordanceWord);
 
   const [selectedWordIndexes, updateSWI] = useState<number[]>([]);
 
@@ -141,17 +149,11 @@ const Study: React.FC<StudyProps> = ({ drawerOpen, document, next }) => {
     });
   //const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
-  // TODO whatever weirdness is happening here - the words array is somehow not
-  // getting recreated
   const words: SentenceWord[] = [];
-  console.log(words);
   // CONSIDER have the api return a flat array of sentence words
-  console.log(document.sentences[0].chinese);
-  console.log(document.sentences[0].words[0].wordHanzi);
   for (let s of document.sentences) {
     words.push(...s.words);
   }
-  console.log(words);
   // TODO: since I am not really using the grid, perhaps remove it and just have a simple flexbox?
 
   const wordsToShow = words.slice(0, numberToShow);
@@ -178,6 +180,7 @@ const Study: React.FC<StudyProps> = ({ drawerOpen, document, next }) => {
                 </span>
               ))}
             </span>
+            {/* // TODO add part of speech etc */}
           </Typography>
           <Typography variant="body1" align="center">
             {document.english}
@@ -200,6 +203,7 @@ const Study: React.FC<StudyProps> = ({ drawerOpen, document, next }) => {
               <Button
                 onClick={() => {
                   if (studyState === 'check') {
+                    setConcordanceWord(undefined);
                     next();
                   }
                   setStudyState(studyState === 'check' ? 'study' : 'check');
@@ -215,43 +219,78 @@ const Study: React.FC<StudyProps> = ({ drawerOpen, document, next }) => {
         </Card>
       </Grid>
       <Grid className={classes.rowContainer} item container>
-        {wordsToShow.map((word) => (
-          <Grid
-            className={classes.definitionContainer}
-            item
-            xs={12}
-            sm={6}
-            md={4}
-            lg={3}
-            xl={2}
-          >
-            <Card className={classes.definition}>
-              {/* TODO add an action, whether in CardHeader or CardActions that goes to a concordance view for the word, ideally sorted by sentences the user understands */}
-              <CardHeader
-                classes={{
-                  action: classes.cardHeaderAction,
-                  root: classes.cardHeaderRoot,
-                }}
-                title={<span lang="zh">{word.word.hanzi}</span>}
-                subheader={word.word.ccceDefinitions[0]?.pinyin}
-                action={
-                  <IconButton>
-                    <ThumbDown color="error" />
-                  </IconButton>
-                }
-              />
-              <CardContent classes={{ root: classes.cardContentRoot }}>
-                {word.word.ccceDefinitions[0]?.definitions.map((d) => (
+        {studyState === 'check' &&
+          wordsToShow.map((word) => (
+            <Grid
+              className={classes.definitionContainer}
+              item
+              xs={12}
+              sm={6}
+              md={4}
+              lg={3}
+              xl={2}
+            >
+              <Card className={classes.definition}>
+                {/* TODO make cardheader fixed (ie doesnt move when scrolling thru card contents - might be as simple as setting overflow behaviour on card contents...) */}
+                <CardHeader
+                  classes={{
+                    action: classes.cardHeaderAction,
+                    root: classes.cardHeaderRoot,
+                  }}
+                  title={<span lang="zh">{word.word.hanzi}</span>}
+                  action={
+                    <ButtonGroup>
+                      <IconButton
+                        onClick={() => setConcordanceWord(word.word.hanzi)}
+                      >
+                        <MenuBookIcon color="action"></MenuBookIcon>
+                      </IconButton>
+                      <IconButton>
+                        <RecordVoiceOverIcon color="action" />
+                      </IconButton>
+                      <IconButton>
+                        <ThumbDown color="error" />
+                      </IconButton>
+                    </ButtonGroup>
+                  }
+                />
+                <CardContent classes={{ root: classes.cardContentRoot }}>
+                  {word.word.ccceDefinitions.map((def) => {
+                    return (
+                      <>
+                        <Typography
+                          key={def.id}
+                          color="textSecondary"
+                          variant="body1"
+                        >
+                          {def.pinyin}
+                        </Typography>
+                        {def.definitions.map((d, i) => (
+                          <Typography key={`${def.id}-${i}`} variant="body2">
+                            {d}
+                          </Typography>
+                        ))}
+                      </>
+                    );
+                  })}
+                  {/* {word.word.ccceDefinitions[0]?.definitions.map((d) => (
                   <Typography variant="body2">{d}</Typography>
-                ))}
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+                ))} */}
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
       </Grid>
 
       <Grid className={classes.rowContainer} item>
-        <Concordance word={words[0].wordHanzi}></Concordance>
+        {
+          concordanceWord ? (
+            <Concordance word={concordanceWord}></Concordance>
+          ) : (
+            <Card></Card>
+          )
+          // TODO make the concordance handle undefined concordance word, and check that it handles concordance words that it cant find..
+        }
       </Grid>
     </Grid>
   );

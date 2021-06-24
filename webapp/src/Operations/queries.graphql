@@ -43,6 +43,7 @@ query DocumentsAll {
           hskWord2010
           hskChar2010
           ccceDefinitions {
+            id
             simplified
             traditional
             pinyin

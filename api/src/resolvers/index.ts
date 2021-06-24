@@ -7,6 +7,7 @@ export const resolvers: Resolvers<IContextType> = {
     traditional: ({ traditional }) => traditional,
     pinyin: ({ pinyin }) => pinyin,
     definitions: ({ definitions }) => definitions,
+    id: ({ id }) => id as string, // once again, this is just a limitation of the library. TODO - type the repositiory with a WithId<> generic
   },
   Word: {
     hanzi: ({ hanzi }) => hanzi,

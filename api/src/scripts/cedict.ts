@@ -268,3 +268,5 @@ if (require.main === module) {
 
 // TODO - document what this file does in english
 // I think it ingests CEDICt and also creates WORD entities for each CEDICT entry
+
+// TODO redo this script with pinyin tone marks instead of pinyin numbers?
