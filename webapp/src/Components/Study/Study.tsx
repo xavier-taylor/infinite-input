@@ -10,12 +10,8 @@ import {
 import {
   Button,
   ButtonGroup,
-  Container,
   Grid,
-  Paper,
-  Box,
   Typography,
-  Link,
   Card,
   useMediaQuery,
   CardActions,
@@ -23,14 +19,8 @@ import {
   CardContent,
   IconButton,
 } from '@material-ui/core';
-import clsx from 'clsx';
 import { ThumbDown } from '@material-ui/icons';
 import Concordance from '../Concordance';
-import {
-  DocumentsAllQuery,
-  DocumentsAllDocument,
-} from '../../schema/generated';
-import { useQuery } from '@apollo/client';
 import { Document, SentenceWord } from '../../schema/generated';
 
 // TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff

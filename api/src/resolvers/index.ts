@@ -13,8 +13,8 @@ export const resolvers: Resolvers<IContextType> = {
     hanzi: ({ hanzi }) => hanzi,
     hskChar2010: ({ hsk_char_2010 }) => hsk_char_2010,
     hskWord2010: ({ hsk_word_2010 }) => hsk_word_2010,
-    ccceDefinitions: ({ hanzi }, _args, { dataSources }) =>
-      dataSources.db.getCCCE(hanzi),
+    ccceDefinitions: ({ hanzi }, _args, { dataLoaders }) =>
+      dataLoaders.ccceLoader.load(hanzi),
   },
   SentenceWord: {
     sentenceId: ({ sentence_id }) => sentence_id,

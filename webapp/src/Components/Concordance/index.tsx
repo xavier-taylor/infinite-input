@@ -121,6 +121,7 @@ const Concordance: React.FC<ConcordanceProps> = ({ word }) => {
 
   if (loading) {
     return <LinearProgress />;
+    // TODO replace this with https://material-ui.com/components/skeleton/
   } else if (data) {
     const parsedDocument = data.concordanceDocs.map((doc) =>
       parseDocument(doc, word)

@@ -2,14 +2,48 @@ import { ApolloServer } from 'apollo-server';
 import { typeDefs } from './schema/typedefs';
 import { resolvers } from './resolvers';
 import { PostgresqlRepo } from './repository/repo';
-import { ConnectionConfig, Pool } from 'pg';
+import Knex from 'knex';
+import DataLoader from 'dataloader';
+import { cc_cedict } from './repository/sql-model';
 
-const message = 'Hello world';
-console.log(message);
-console.log(process.env.TEST);
+// CONTINUE HERE
+// for some reason, the dataloader batching isnt working - even when I passed it in from here.
+// weak hypothesis - if I get rid of the datasource stuff it will start working.
+
+const batch = async (
+  hanzis: Readonly<string[]>,
+  knex: Knex
+): Promise<Array<cc_cedict[]>> => {
+  // because each chineseword can have multiple cc_cedict entrys, the return value is an array of arrays
+  // can either have the sequel query return a flat list of cc_cedict boiz, and map them myself?
+  // or could have the sql query return it in [[cc_cedict]]. even better if it could return
+  // a map?
+
+  // this is the most naive approach and requires some logic here in the code
+  // TODO improve this so that more of that logic takes place in sql?
+
+  const defs = await knex
+    .select<cc_cedict[]>('*')
+    .from('cc_cedict')
+    .whereIn('simplified', hanzis);
+  const map: Record<string, cc_cedict[]> = defs.reduce((acc, cur) => {
+    if (acc[cur.simplified]) {
+      acc[cur.simplified].push(cur);
+    } else {
+      acc[cur.simplified] = [cur];
+    }
+    return acc;
+  }, {} as Record<string, cc_cedict[]>);
+  return hanzis.map((h) => map[h] ?? []);
+};
 
 export interface IContextType {
   test: string;
+
+  db: Knex;
+  dataLoaders: {
+    ccceLoader: DataLoader<string, cc_cedict[]>;
+  };
   dataSources: {
     db: PostgresqlRepo;
   };
@@ -22,16 +56,11 @@ const connection = {
   database: 'infinite_input',
 };
 
-const knexConfig = {
+const knexConfig: Knex.Config = {
   client: 'pg',
   connection,
   searchPath: ['mandarin'],
 };
-
-// the plan is to just use pool.query, which apparently automatically handlers
-// releasing the connection etc. spend time to understand these docs better!
-const pool = new Pool();
-// TODO run pool.end() at appropriate time?
 
 const server = new ApolloServer({
   typeDefs,
@@ -39,7 +68,16 @@ const server = new ApolloServer({
   // https://www.apollographql.com/docs/apollo-server/data/resolvers/#the-context-argument
   // this argument is called for each request!
   context: async (): Promise<Omit<IContextType, 'dataSources'>> => {
-    return { test: 'TEST' };
+    const db = Knex(knexConfig); // TODO work out if need to delete/close etc this instance
+    return {
+      test: 'TEST',
+      db,
+      dataLoaders: {
+        ccceLoader: new DataLoader((
+          keys: Readonly<string[]> // TODO obviously move the dataloader stuff somewhere
+        ) => batch(keys, db)),
+      },
+    };
   },
   dataSources: () => ({ db: new PostgresqlRepo(knexConfig) }),
 });
