@@ -47,8 +47,14 @@ export type NamedEntity = {
 
 export type Query = {
   __typename?: 'Query';
+  words: Array<Word>;
   documents: Array<Document>;
   concordanceDocs: Array<Document>;
+};
+
+
+export type QueryWordsArgs = {
+  words: Array<Scalars['String']>;
 };
 
 

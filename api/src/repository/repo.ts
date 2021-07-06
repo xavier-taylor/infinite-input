@@ -8,7 +8,6 @@ import {
   sentence_word,
   word,
 } from './sql-model';
-import { SQLDataSource } from 'datasource-sql';
 import Knex from 'knex';
 import DataLoader from 'dataloader';
 
@@ -18,9 +17,6 @@ import DataLoader from 'dataloader';
 // Avoid multiple requests from different users using the DataLoader instance, which could result in cached data incorrectly appearing in each request. Typically, DataLoader instances are created when a Request begins, and are not used once the Request ends.
 
 export type ReviewType = 'Reading' | 'Listening';
-
-const MINUTE = 60; // TODO understand this cache feature and decide which if any fields it is appropriate for
-// (also how can the cache work if you are making a new instance of each query.)
 
 // TODO replace the datasource approach with the data loader approach
 // Why? The SQL datasource doesn't handle batching, which is the main reason I want it.
@@ -34,19 +30,22 @@ const MINUTE = 60; // TODO understand this cache feature and decide which if any
 // actually, apparently you can use dataloader on top of this library.
 
 // TODO explore more TS support
-export class PostgresqlRepo extends SQLDataSource {
-  ccceLoader: DataLoader<unknown, any, unknown>;
+export class PostgresqlRepo {
+  private ccceLoader: DataLoader<unknown, any, unknown>;
 
-  constructor(config: Knex.Config) {
-    super(config);
-
+  constructor(private knex: Knex) {
     this.ccceLoader = new DataLoader((keys: Readonly<string[]>) =>
       this.batchGetCCCE.bind(this)(keys)
     ); // todo remember bind and check if necassary
   }
 
+  // these 'batch' methods are just the callbacks to my DataLoader calls, and could be moved into
+  // some other code, ie 'create data loaders' ???
+
   // This needs to match the constraints mentioned here: https://github.com/graphql/dataloader
-  async batchGetCCCE(hanzis: Readonly<string[]>): Promise<Array<cc_cedict[]>> {
+  private async batchGetCCCE(
+    hanzis: Readonly<string[]>
+  ): Promise<Array<cc_cedict[]>> {
     // because each chineseword can have multiple cc_cedict entrys, the return value is an array of arrays
     // can either have the sequel query return a flat list of cc_cedict boiz, and map them myself?
     // or could have the sql query return it in [[cc_cedict]]. even better if it could return
@@ -75,23 +74,51 @@ export class PostgresqlRepo extends SQLDataSource {
   async getCCCE(hanzi: string) {
     return this.ccceLoader.load(hanzi);
     // There can be more than one
+
+    // just testin n+1
+    // success - using the above rather than the below
+    // batches the call to sql for
+    /*
+# Write your query or mutation here
+ {
+  words(words: ["他" "她"]) {
+    ccceDefinitions {
+     simplified 
+    }
+  	
+	}
+}
+    */
+    // CONTINUE HERE
+    // now just need to work out why the sql call for cc definitions
+    // doesnt appear to be batched on the documents query!!
+
+    // is it because i need to add dataloaders upstream??
+
+    //return this.getCCCEUnbatched(hanzi);
   }
 
-  async getWord(hanzi: string) {
+  // temporary method for testin n+1 thingo
+  async getCCCEUnbatched(hanzi: string) {
+    return this.knex
+      .select<cc_cedict[]>('*')
+      .from('cc_cedict')
+      .where({ hanzi });
+  }
+
+  async getWord(hanzi: string): Promise<word> {
     return this.knex
       .select<word>('*')
       .from('word')
       .where({ hanzi })
-      .first()
-      .cache(MINUTE) as Promise<word>;
-    // TODO think about this - probably safer to adjust types and accept undefined? - but hanzi is a PK and all sentencewords hanzi get created as hanzi in my db
+      .first() as Promise<word>;
+    // TODO is this as safe?
   }
   async getSentenceWords(sentenceId: string) {
     return this.knex
       .select<sentence_word[]>('*')
       .from('sentence_word')
-      .where({ sentence_id: sentenceId })
-      .cache(MINUTE);
+      .where({ sentence_id: sentenceId });
     // TODO sort this
   }
   async getDueDocuments(
@@ -118,6 +145,9 @@ NOT EXISTS (
       .join('due', 'document_word.word', '=', 'due.word_hanzi')
       .groupBy('id', 'chinese', 'english', 'sub_corpus_title', 'corpus_title')
       .limit(20);
+  }
+  async getWords(words: string[]) {
+    return this.knex.select<word[]>('*').from('word').whereIn('hanzi', words);
   }
   async getDocuments(options: { including: string[] }): Promise<document[]> {
     // make a 'word to document' function for single word reviews.
@@ -147,7 +177,6 @@ NOT EXISTS (
     return this.knex
       .select<sentence[]>('*')
       .from('sentence')
-      .where({ document_id: documentId })
-      .cache(MINUTE);
+      .where({ document_id: documentId });
   }
 }

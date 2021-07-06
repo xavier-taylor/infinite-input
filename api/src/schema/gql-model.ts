@@ -49,8 +49,14 @@ export type NamedEntity = {
 
 export type Query = {
   __typename?: 'Query';
+  words: Array<Word>;
   documents: Array<Document>;
   concordanceDocs: Array<Document>;
+};
+
+
+export type QueryWordsArgs = {
+  words: Array<Scalars['String']>;
 };
 
 
@@ -226,6 +232,7 @@ export type NamedEntityResolvers<ContextType = any, ParentType extends Resolvers
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  words?: Resolver<Array<ResolversTypes['Word']>, ParentType, ContextType, RequireFields<QueryWordsArgs, 'words'>>;
   documents?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType>;
   concordanceDocs?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryConcordanceDocsArgs, 'word'>>;
 };

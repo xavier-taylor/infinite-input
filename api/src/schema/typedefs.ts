@@ -52,6 +52,7 @@ export const typeDefs = gql`
   }
 
   type Query {
+    words(words: [String!]!): [Word!]! # the param words is the hanzi strins
     #word: Word
     #document: Document
     documents: [Document!]!
