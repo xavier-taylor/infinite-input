@@ -1,3 +1,4 @@
+import { tickNum } from 'event-loop-ticks'; // for debugging only
 import { Pool } from 'pg';
 import { Document, SentenceWord, Word } from '../schema/gql-model';
 import {
@@ -32,11 +33,47 @@ export type ReviewType = 'Reading' | 'Listening';
 // TODO explore more TS support
 export class PostgresqlRepo {
   private ccceLoader: DataLoader<unknown, any, unknown>;
+  private wordLoader: DataLoader<unknown, any, unknown>;
+  private sentenceWordLoader: DataLoader<unknown, any, unknown>;
+  private sentenceLoader: DataLoader<unknown, any, unknown>;
 
   constructor(private knex: Knex) {
-    this.ccceLoader = new DataLoader((keys: Readonly<string[]>) =>
-      this.batchGetCCCE.bind(this)(keys)
+    this.ccceLoader = new DataLoader(
+      (keys: Readonly<string[]>) =>
+        this.batchGetCCCE.bind(this)(
+          keys
+        ) /* ,
+      {
+        batchScheduleFn: (callback) => setTimeout(callback, 10),
+      } */
     ); // todo remember bind and check if necassary
+    this.wordLoader = new DataLoader(
+      (keys: Readonly<string[]>) =>
+        this.batchGetWord.bind(this)(
+          keys
+        ) /* ,
+      {
+        batchScheduleFn: (callback) => setTimeout(callback, 10),
+      } */
+    );
+    this.sentenceWordLoader = new DataLoader(
+      (keys: Readonly<string[]>) =>
+        this.batchGetSentenceWords.bind(this)(
+          keys
+        ) /* ,
+      {
+        batchScheduleFn: (callback) => setTimeout(callback, 10),
+      } */
+    );
+    this.sentenceLoader = new DataLoader(
+      (keys: Readonly<string[]>) =>
+        this.batchGetSentences.bind(this)(
+          keys
+        ) /* ,
+      {
+        batchScheduleFn: (callback) => setTimeout(callback, 10),
+      } */
+    );
   }
 
   // these 'batch' methods are just the callbacks to my DataLoader calls, and could be moved into
@@ -53,7 +90,7 @@ export class PostgresqlRepo {
 
     // this is the most naive approach and requires some logic here in the code
     // TODO improve this so that more of that logic takes place in sql?
-
+    // TODO why is this based on simplified?
     const defs = await this.knex
       .select<cc_cedict[]>('*')
       .from('cc_cedict')
@@ -69,57 +106,76 @@ export class PostgresqlRepo {
     return hanzis.map((h) => map[h] ?? []);
   }
 
+  private async batchGetWord(hanzis: Readonly<string[]>): Promise<Array<word>> {
+    const words = await this.knex
+      .select<word[]>('*')
+      .from('word')
+      .whereIn('hanzi', hanzis);
+    const map: Record<string, word> = words.reduce((acc, cur) => {
+      // hanzi is the primary key of word, so each cur.hanzi can only appear once
+      acc[cur.hanzi] = cur;
+      return acc;
+    }, {} as Record<string, word>);
+    return hanzis.map(
+      (h) => map[h] ?? new Error(` couldn't find word with hanzi ${h}`)
+    );
+  }
+  // for each sentence id, this returns an array of sentence words
+  private async batchGetSentenceWords(
+    sentenceIds: Readonly<string[]>
+  ): Promise<Array<sentence_word[]>> {
+    const sWords = await this.knex
+      .select<sentence_word[]>('*')
+      .from('sentence_word')
+      .whereIn('sentence_id', sentenceIds);
+    const map: Record<string, sentence_word[]> = sWords.reduce((acc, cur) => {
+      if (acc[cur.sentence_id]) {
+        acc[cur.sentence_id].push(cur);
+      } else {
+        acc[cur.sentence_id] = [cur];
+      }
+      return acc;
+    }, {} as Record<string, sentence_word[]>);
+    return sentenceIds.map((h) => map[h] ?? []);
+  }
+  // for each sentence id, this returns an array of sentence words
+  private async batchGetSentences(
+    documentIds: Readonly<string[]>
+  ): Promise<Array<sentence[]>> {
+    const sentences = await this.knex
+      .select<sentence[]>('*')
+      .from('sentence')
+      .whereIn('document_id', documentIds);
+    const map: Record<string, sentence[]> = sentences.reduce((acc, cur) => {
+      if (acc[cur.document_id]) {
+        acc[cur.document_id].push(cur);
+      } else {
+        acc[cur.document_id] = [cur];
+      }
+      return acc;
+    }, {} as Record<string, sentence[]>);
+    return documentIds.map((h) => map[h] ?? []);
+  }
+
   // prior to data loader we were doing seperate calls for each, including
   // for the same word over and over
   async getCCCE(hanzi: string) {
+    console.log('tick: ', tickNum(), hanzi); // for testing only TODO
     return this.ccceLoader.load(hanzi);
-    // There can be more than one
-
-    // just testin n+1
-    // success - using the above rather than the below
-    // batches the call to sql for
-    /*
-# Write your query or mutation here
- {
-  words(words: ["他" "她"]) {
-    ccceDefinitions {
-     simplified 
-    }
-  	
-	}
-}
-    */
-    // CONTINUE HERE
-    // now just need to work out why the sql call for cc definitions
-    // doesnt appear to be batched on the documents query!!
-
-    // is it because i need to add dataloaders upstream??
-
-    //return this.getCCCEUnbatched(hanzi);
-  }
-
-  // temporary method for testin n+1 thingo
-  async getCCCEUnbatched(hanzi: string) {
-    return this.knex
-      .select<cc_cedict[]>('*')
-      .from('cc_cedict')
-      .where({ hanzi });
   }
 
   async getWord(hanzi: string): Promise<word> {
-    return this.knex
-      .select<word>('*')
-      .from('word')
-      .where({ hanzi })
-      .first() as Promise<word>;
-    // TODO is this as safe?
+    return this.wordLoader.load(hanzi);
+    // TODO the use of 'first' in that loader safe?
   }
+
   async getSentenceWords(sentenceId: string) {
-    return this.knex
-      .select<sentence_word[]>('*')
-      .from('sentence_word')
-      .where({ sentence_id: sentenceId });
-    // TODO sort this
+    return this.sentenceWordLoader.load(sentenceId);
+    // TODO sort this - in sql land?
+  }
+  async getSentences(documentId: string) {
+    // TODO make this sorted (at sql level or here at js by sentence id)
+    return this.sentenceLoader.load(documentId);
   }
   async getDueDocuments(
     _type: ReviewType = 'Reading',
@@ -146,6 +202,7 @@ NOT EXISTS (
       .groupBy('id', 'chinese', 'english', 'sub_corpus_title', 'corpus_title')
       .limit(20);
   }
+  // This is an undata loaded/ unbatched. just for testing.
   async getWords(words: string[]) {
     return this.knex.select<word[]>('*').from('word').whereIn('hanzi', words);
   }
@@ -170,13 +227,5 @@ NOT EXISTS (
       .whereIn('word', options.including);
     // .limit(10); // TODO fix this so that if arg is not passed the wherein is not applied
     // TODO make this just return unique documents!
-  }
-
-  async getSentences(documentId: string) {
-    // TODO make this sorted (at sql level or here at js by sentence id)
-    return this.knex
-      .select<sentence[]>('*')
-      .from('sentence')
-      .where({ document_id: documentId });
   }
 }
