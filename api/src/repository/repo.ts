@@ -177,6 +177,9 @@ export class PostgresqlRepo {
     // TODO make this sorted (at sql level or here at js by sentence id)
     return this.sentenceLoader.load(documentId);
   }
+  // TODO in future - do a big beautiful join myself, or use a lib like monster join
+  // see if that is 'faster' than using resolvers at each level as I have here
+  // NOTE - that is an optimization. don't do until mvp is usable!
   async getDueDocuments(
     _type: ReviewType = 'Reading',
     _studentId: string = '1'

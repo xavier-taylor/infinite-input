@@ -8,11 +8,13 @@ import {
   ApolloProvider,
   useQuery,
   gql,
+  InMemoryCacheConfig,
 } from '@apollo/client';
+import { cache } from './cache';
 
 const client = new ApolloClient({
   uri: 'http://localhost:4000/graphql',
-  cache: new InMemoryCache(),
+  cache,
   connectToDevTools: true, // process.env.NODE_ENV === ‘development’
 });
 
