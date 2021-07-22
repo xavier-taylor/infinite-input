@@ -3,8 +3,14 @@ import React, { useState } from 'react';
 import { DocumentsAllDocument } from '../../schema/generated';
 import Study from './Study';
 
+export enum StudyType {
+  READ = 'READ',
+  LISTEN = 'LISTEN',
+}
+
 interface StudyContainerProps {
   drawerOpen: boolean;
+  mode: StudyType;
 }
 const StudyContainer: React.FC<StudyContainerProps> = ({ drawerOpen }) => {
   const { data, loading, error } = useQuery(DocumentsAllDocument);

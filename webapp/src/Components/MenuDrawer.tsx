@@ -20,19 +20,26 @@ import KeyboardIcon from '@material-ui/icons/Keyboard';
 import BrushIcon from '@material-ui/icons/Brush';
 import { DrawerState } from './App';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { useHistory } from 'react-router-dom';
+
+// because I couldn't understand the baloney here: https://material-ui.com/guides/typescript/#usage-of-component-prop
+// I didn't end up using the react Router Link (for example, as a component prop to the ListItems), instead I use the useHistory hook hehehe
 
 const mainMenu = [
   {
     name: 'Read',
     icon: <MenuBookIcon />,
+    path: '/read',
   },
   {
     name: 'Listen',
     icon: <HearingIcon />,
+    path: '/listen',
   },
   {
     name: 'Browse',
     icon: <SearchIcon />,
+    path: '/browse',
   },
 ];
 
@@ -71,16 +78,11 @@ const useStyles = makeStyles((theme) => ({
 
 interface DrawerProps {
   drawer: DrawerState;
-  page: {
-    pageIndex: number;
-    setPage: Function;
-  };
 }
 
 const MenuDrawer: React.FC<DrawerProps> = (props) => {
   const { drawerOpen, setDrawer } = props.drawer;
-  // eslint-disable-next-line
-  const { pageIndex, setPage } = props.page;
+  const history = useHistory();
   const classes = useStyles();
   const gt600px = useMediaQuery((theme: any) => theme.breakpoints.up('sm')); // TODO typescript
   useEffect(() => {
@@ -110,7 +112,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
       <div>
         <List>
           {mainMenu.map((m, i) => (
-            <ListItem onClick={() => setPage(i)} key={i} button>
+            <ListItem onClick={() => history.push(m.path)} key={i} button>
               <ListItemIcon>{m.icon}</ListItemIcon>
               <ListItemText primary={m.name} />
             </ListItem>
@@ -121,19 +123,19 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
       <div>
         <List>
           <ListSubheader inset>Settings</ListSubheader>
-          <ListItem button>
+          <ListItem onClick={() => history.push('/settings/appearance')} button>
             <ListItemIcon>
               <BrushIcon />
             </ListItemIcon>
             <ListItemText primary="Appearance" />
           </ListItem>
-          <ListItem button>
+          <ListItem onClick={() => history.push('/settings/keyboard')} button>
             <ListItemIcon>
               <KeyboardIcon />
             </ListItemIcon>
             <ListItemText primary="Keyboard Shortcuts" />
           </ListItem>
-          <ListItem button>
+          <ListItem onClick={() => history.push('/settings/study')} button>
             <ListItemIcon>
               <SettingsApplicationsIcon />
             </ListItemIcon>
