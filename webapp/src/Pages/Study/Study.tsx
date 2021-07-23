@@ -20,8 +20,8 @@ import {
   IconButton,
 } from '@material-ui/core';
 import { ThumbDown } from '@material-ui/icons';
-import Concordance from '../Concordance';
-import { Document, SentenceWord } from '../../schema/generated';
+import Concordance from '../../Components/Concordance';
+import { Document, SentenceWord, StudyType } from '../../schema/generated';
 
 // TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff
 
@@ -101,6 +101,7 @@ const useStyles = makeStyles((theme: Theme) =>
 interface StudyProps {
   drawerOpen: boolean; // TODO determine if we need this prop!
   document: Document;
+  mode: StudyType;
   next: () => void;
 }
 // TODO strip newlines from sentences in database! - ie update ingestion script?

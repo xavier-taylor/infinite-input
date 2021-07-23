@@ -18,7 +18,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications';
 import KeyboardIcon from '@material-ui/icons/Keyboard';
 import BrushIcon from '@material-ui/icons/Brush';
-import { DrawerState } from './App';
+import { DrawerState } from '../Pages/App';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useHistory } from 'react-router-dom';
 

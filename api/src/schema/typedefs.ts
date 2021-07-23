@@ -51,11 +51,18 @@ export const typeDefs = gql`
     chinese: String!
   }
 
+  enum StudyType {
+    READ
+    LISTEN
+    LISTEN_HUMAN
+  }
+
   type Query {
     words(words: [String!]!): [Word!]! # the param words is the hanzi strins
     #word: Word
     #document: Document
-    documents: [Document!]!
+    documentsDue(studyType: StudyType!): [Document!]!
+    documents(documentIds: [String!]!): [Document!]!
     concordanceDocs(word: String!): [Document!]!
   }
 `;

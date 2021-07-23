@@ -6,9 +6,10 @@ import {
   Typography,
 } from '@material-ui/core';
 import React from 'react';
-import { DrawerState } from './App';
+import { DrawerState } from '../Pages/App';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import MenuIcon from '@material-ui/icons/Menu';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   toolbar: {
@@ -40,6 +41,7 @@ export interface HeaderProps {
 const Header: React.FC<HeaderProps> = (props) => {
   const classes = useStyles();
   const { drawerOpen, setDrawer } = props.drawer;
+  const history = useHistory();
   return (
     <AppBar position={'absolute'} color={'primary'} className={classes.appBar}>
       <Toolbar className={classes.toolbar}>
@@ -62,7 +64,7 @@ const Header: React.FC<HeaderProps> = (props) => {
         >
           Infinite Input
         </Typography>
-        <IconButton color="inherit">
+        <IconButton onClick={() => history.push('/user')} color="inherit">
           <AccountCircleIcon />
         </IconButton>
       </Toolbar>

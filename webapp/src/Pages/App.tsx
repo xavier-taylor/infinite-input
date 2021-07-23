@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { CssBaseline } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import Header from './Header';
-import MenuDrawer from './MenuDrawer';
-import StudyContainer, { StudyType } from './Study/StudyContainer';
+import Header from '../Components/Header';
+import MenuDrawer from '../Components/MenuDrawer';
+import StudyContainer from './Study/StudyContainer';
 import { ThemeProvider } from '@material-ui/styles';
 import { createMuiTheme } from '@material-ui/core';
 
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { StudyType } from '../schema/generated';
 
 const baseTheme = createMuiTheme({
   overrides: {
@@ -57,7 +58,7 @@ const App: React.FC = () => {
             <Switch>
               <Route path="/read">
                 <StudyContainer
-                  mode={StudyType.READ}
+                  mode={StudyType.Read}
                   drawerOpen={drawerOpen}
                 ></StudyContainer>
               </Route>
@@ -77,6 +78,9 @@ const App: React.FC = () => {
               </Route>
               <Route path="/settings/study">
                 <div>study settings</div>
+              </Route>
+              <Route path="/user">
+                <div>user profile</div>
               </Route>
             </Switch>
           </main>

@@ -50,6 +50,7 @@ export type NamedEntity = {
 export type Query = {
   __typename?: 'Query';
   words: Array<Word>;
+  documentsDue: Array<Document>;
   documents: Array<Document>;
   concordanceDocs: Array<Document>;
 };
@@ -57,6 +58,16 @@ export type Query = {
 
 export type QueryWordsArgs = {
   words: Array<Scalars['String']>;
+};
+
+
+export type QueryDocumentsDueArgs = {
+  studyType: StudyType;
+};
+
+
+export type QueryDocumentsArgs = {
+  documentIds: Array<Scalars['String']>;
 };
 
 
@@ -84,6 +95,12 @@ export type SentenceWord = {
   word: Word;
   due: Scalars['Boolean'];
 };
+
+export enum StudyType {
+  Read = 'READ',
+  Listen = 'LISTEN',
+  ListenHuman = 'LISTEN_HUMAN'
+}
 
 
 export type Word = {
@@ -182,6 +199,7 @@ export type ResolversTypes = {
   Sentence: ResolverTypeWrapper<sentence>;
   SentenceWord: ResolverTypeWrapper<sentence_word>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  StudyType: StudyType;
   Upload: ResolverTypeWrapper<Scalars['Upload']>;
   Word: ResolverTypeWrapper<word>;
 };
@@ -233,7 +251,8 @@ export type NamedEntityResolvers<ContextType = any, ParentType extends Resolvers
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   words?: Resolver<Array<ResolversTypes['Word']>, ParentType, ContextType, RequireFields<QueryWordsArgs, 'words'>>;
-  documents?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType>;
+  documentsDue?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryDocumentsDueArgs, 'studyType'>>;
+  documents?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryDocumentsArgs, 'documentIds'>>;
   concordanceDocs?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryConcordanceDocsArgs, 'word'>>;
 };
 
