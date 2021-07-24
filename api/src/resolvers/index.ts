@@ -18,7 +18,6 @@ export const resolvers: Resolvers<IContextType> = {
   SentenceWord: {
     sentenceId: ({ sentence_id }) => sentence_id,
     index: ({ id }) => id,
-    id: ({ sentence_id, id }) => `${sentence_id}-${id}`,
     wordHanzi: ({ word_hanzi }) => word_hanzi,
     lemma: ({ lemma }) => lemma,
     partOfSpeech: ({ part_of_speech }) => part_of_speech,
@@ -49,7 +48,9 @@ export const resolvers: Resolvers<IContextType> = {
     // TODO - the query from the front end does *not* pass in the user id!
     // that would be abusable. instead, here at the backend we have some kind of auth thingo whichi gives
     // use the user id
-    documents: (_parent, _args, { repo }, _info) => repo.getDueDocuments(),
+    documentsDue: (_parent, { studyType }, { repo }, _info) =>
+      repo.getDueDocuments(studyType),
+    document: (_parent, { id }, { repo }, _info) => repo.documentById(id),
     concordanceDocs: (_parent, { word }, { repo }, _info) =>
       repo.getDocuments({ including: [word] }),
     // TODO add document_word or whatever this query is relying on to source control

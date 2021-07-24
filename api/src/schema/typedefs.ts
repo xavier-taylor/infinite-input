@@ -28,7 +28,6 @@ export const typeDefs = gql`
   type SentenceWord {
     sentenceId: String!
     index: Int! # this corresponds to what is currently 'id' on sentence_word, which is the index of the word in this sentence
-    id: String! # this is *not* the id from sentence_word, but instead a unique id made by adding sentence_words id and sentence_id
     wordHanzi: String!
     lemma: String!
     partOfSpeech: String!
@@ -62,7 +61,7 @@ export const typeDefs = gql`
     #word: Word
     #document: Document
     documentsDue(studyType: StudyType!): [Document!]!
-    documents(documentIds: [String!]!): [Document!]!
+    document(id: String!): Document!
     concordanceDocs(word: String!): [Document!]!
   }
 `;

@@ -51,7 +51,7 @@ export type Query = {
   __typename?: 'Query';
   words: Array<Word>;
   documentsDue: Array<Document>;
-  documents: Array<Document>;
+  document: Document;
   concordanceDocs: Array<Document>;
 };
 
@@ -66,8 +66,8 @@ export type QueryDocumentsDueArgs = {
 };
 
 
-export type QueryDocumentsArgs = {
-  documentIds: Array<Scalars['String']>;
+export type QueryDocumentArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -84,16 +84,16 @@ export type Sentence = {
 
 export type SentenceWord = {
   __typename?: 'SentenceWord';
-  sentenceId: Scalars['String'];
-  index: Scalars['Int'];
-  id: Scalars['String'];
-  wordHanzi: Scalars['String'];
-  lemma: Scalars['String'];
-  partOfSpeech: Scalars['String'];
-  universalPartOfSpeech: Scalars['String'];
-  namedEntity?: Maybe<NamedEntity>;
-  word: Word;
   due: Scalars['Boolean'];
+  index: Scalars['Int'];
+  lastClicked: Scalars['Int'];
+  lemma: Scalars['String'];
+  namedEntity?: Maybe<NamedEntity>;
+  partOfSpeech: Scalars['String'];
+  sentenceId: Scalars['String'];
+  universalPartOfSpeech: Scalars['String'];
+  word: Word;
+  wordHanzi: Scalars['String'];
 };
 
 export enum StudyType {
@@ -252,7 +252,7 @@ export type NamedEntityResolvers<ContextType = any, ParentType extends Resolvers
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   words?: Resolver<Array<ResolversTypes['Word']>, ParentType, ContextType, RequireFields<QueryWordsArgs, 'words'>>;
   documentsDue?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryDocumentsDueArgs, 'studyType'>>;
-  documents?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryDocumentsArgs, 'documentIds'>>;
+  document?: Resolver<ResolversTypes['Document'], ParentType, ContextType, RequireFields<QueryDocumentArgs, 'id'>>;
   concordanceDocs?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryConcordanceDocsArgs, 'word'>>;
 };
 
@@ -264,16 +264,16 @@ export type SentenceResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type SentenceWordResolvers<ContextType = any, ParentType extends ResolversParentTypes['SentenceWord'] = ResolversParentTypes['SentenceWord']> = {
-  sentenceId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  index?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  wordHanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  lemma?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  partOfSpeech?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  universalPartOfSpeech?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  namedEntity?: Resolver<Maybe<ResolversTypes['NamedEntity']>, ParentType, ContextType>;
-  word?: Resolver<ResolversTypes['Word'], ParentType, ContextType>;
   due?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  index?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  lastClicked?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  lemma?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  namedEntity?: Resolver<Maybe<ResolversTypes['NamedEntity']>, ParentType, ContextType>;
+  partOfSpeech?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  sentenceId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  universalPartOfSpeech?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  word?: Resolver<ResolversTypes['Word'], ParentType, ContextType>;
+  wordHanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

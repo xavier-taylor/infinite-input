@@ -21,7 +21,14 @@ import {
 } from '@material-ui/core';
 import { ThumbDown } from '@material-ui/icons';
 import Concordance from '../../Components/Concordance';
-import { Document, SentenceWord, StudyType } from '../../schema/generated';
+import {
+  Document,
+  DocumentByIdDocument,
+  Sentence,
+  SentenceWord,
+  StudyType,
+} from '../../schema/generated';
+import { useQuery } from '@apollo/client';
 
 // TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff
 
@@ -100,13 +107,29 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface StudyProps {
   drawerOpen: boolean; // TODO determine if we need this prop!
-  document: Document;
+  // document: Document;
+  documentId: string;
   mode: StudyType;
   next: () => void;
+  previous: () => void;
+  nextAvailable: boolean;
+  prevAvailable: boolean;
 }
 // TODO strip newlines from sentences in database! - ie update ingestion script?
 
-const Study: React.FC<StudyProps> = ({ drawerOpen, document, next }) => {
+const Study: React.FC<StudyProps> = ({
+  next,
+  previous,
+  drawerOpen,
+  documentId,
+  nextAvailable,
+  prevAvailable,
+}) => {
+  // OPTIMIZATION if I just make this query grab top level sentence words, and leave fetching
+  // the word definitions to this definition cards, I can use the front end cache. OPTIMIZATION
+  const { data, loading, error } = useQuery(DocumentByIdDocument, {
+    variables: { id: documentId },
+  });
   const classes = useStyles();
   const theme = useTheme();
   const xs = useMediaQuery(theme.breakpoints.down('xs'));
@@ -119,9 +142,24 @@ const Study: React.FC<StudyProps> = ({ drawerOpen, document, next }) => {
   const [concordanceWord, setConcordanceWord] = useState<string | undefined>(
     undefined
   );
-  console.log(concordanceWord);
 
-  const [selectedWordIndexes, updateSWI] = useState<number[]>([]);
+  //   // // This maps keeps track of things we care about happening for a given sentence word. has to be 2d since data is 2d
+  //   // // initially use this for showing definitions, later could use it for things like marking a word as unknown
+  //   // interface SentenceWordData {
+  //   //   lastClicked: Date;
+  //   // }
+  //   // type SentenceWordMap = Record<SentenceWord['sentenceId'], Record<SentenceWord['index'], SentenceWordData>>;
+  //   // // TODO work out what happens with this state when a new document renders (and understand react better)
+  //   // // I want this to be 'fresh' for each new document...
+  //   // const [sentenceWordData, updateSWI] = useState<SentenceWordMap>({});
+  // const selectWord = (i: number) =>
+  //   updateSWI((prev) => {
+  //     const next = prev.filter((n) => n !== i);
+  //     next.push(i);
+  //     return next;
+  //   });
+
+  // No - all this stuff should be kept in the apollo cache as local state - extra cool - when we click 'prev', the old study state is still there!
 
   const leftButtonText: Record<studyStates, string> = {
     study: 'Undo',
@@ -131,24 +169,28 @@ const Study: React.FC<StudyProps> = ({ drawerOpen, document, next }) => {
     study: 'Show',
     check: 'Next',
   };
-  const selectWord = (i: number) =>
-    updateSWI((prev) => {
-      const next = prev.filter((n) => n !== i);
-      next.push(i);
-      return next;
-    });
   //const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+  if (loading) return <div></div>;
+  // TODO don't want to render loading here. skeleton or indicator. // fix this as part of pulling out the components from this page
+  else if (error) return <div>error</div>;
+  else if (!data) return <div>no data?</div>;
+
+  const { document } = data;
 
   const words: SentenceWord[] = [];
-  // CONSIDER have the api return a flat array of sentence words
+  // OPTIMIZATION have the api return a flat array of sentence words
   for (let s of document.sentences) {
     words.push(...s.words);
   }
-  // TODO: since I am not really using the grid, perhaps remove it and just have a simple flexbox?
+  // OPTIMIZATION: since I am not really using the grid, perhaps remove it and just have a simple flexbox?
 
   const wordsToShow = words
     .filter((w) => w.universalPartOfSpeech !== 'PUNCT')
     .slice(0, numberToShow);
+
+  function handleWordClick(word: SentenceWord) {}
+  // CONTINUE HERE - work out how to increment the lastClicked property on the sentence word
+  // THEN make sure we see the latest ones
 
   return (
     <Grid
@@ -167,7 +209,10 @@ const Study: React.FC<StudyProps> = ({ drawerOpen, document, next }) => {
           >
             <span key={document.id} lang="zh">
               {words.map((w) => (
-                <span key={`${w.wordHanzi}-${w.id}-${w.sentenceId}`}>
+                <span
+                  onClick={() => handleWordClick(w)}
+                  key={`${w.wordHanzi}-${w.index}-${w.sentenceId}`}
+                >
                   {w.wordHanzi}
                 </span>
               ))}
@@ -175,14 +220,19 @@ const Study: React.FC<StudyProps> = ({ drawerOpen, document, next }) => {
             {/* // TODO add part of speech etc */}
           </Typography>
           <Typography variant="body1" align="center">
-            {document.english}
+            {
+              studyState === 'check'
+                ? document.english
+                : '⠀' /*invis char for spacing*/
+            }
           </Typography>
           <CardActions classes={{ root: classes.cardActionRoot }}>
             <ButtonGroup classes={{ grouped: classes.buttonGroupGrouped }}>
               <Button
+                disabled={!prevAvailable && studyState === 'study'}
                 onClick={() => {
                   if (studyState === 'study') {
-                    next();
+                    previous();
                   }
                   setStudyState(studyState === 'check' ? 'study' : 'check');
                 }}
@@ -193,6 +243,7 @@ const Study: React.FC<StudyProps> = ({ drawerOpen, document, next }) => {
                 {leftButtonText[studyState]}
               </Button>
               <Button
+                disabled={!nextAvailable && studyState === 'check'}
                 onClick={() => {
                   if (studyState === 'check') {
                     setConcordanceWord(undefined);

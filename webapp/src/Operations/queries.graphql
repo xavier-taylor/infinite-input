@@ -4,7 +4,7 @@ query Concordance($word: String!) {
     english
     sentences {
       words {
-        id
+        lastClicked @client #not intending to use this on concordance just yet
         sentenceId
         index
         wordHanzi
@@ -20,43 +20,47 @@ query DocumentsDue($studyType: StudyType!) {
   }
 }
 
-query DocumentsAll($ids: [String!]!) {
-  documents(documentIds: $ids) {
+fragment EntireDocument on Document {
+  id
+  english
+  chinese
+  sentences {
     id
-    english
     chinese
-    sentences {
-      id
-      chinese
-      words {
-        id
-        sentenceId
-        index
-        wordHanzi
-        lemma
-        partOfSpeech
-        universalPartOfSpeech
-        due
-        namedEntity {
-          chinese
-          entityType
-          start
-          end
-        }
-        word {
-          hanzi
-          hskWord2010
-          hskChar2010
-          ccceDefinitions {
-            id
-            simplified
-            traditional
-            pinyin
-            definitions
-          }
+    words {
+      sentenceId
+      index
+      lastClicked @client
+      wordHanzi
+      lemma
+      partOfSpeech
+      universalPartOfSpeech
+      due
+      namedEntity {
+        chinese
+        entityType
+        start
+        end
+      }
+      word {
+        hanzi
+        hskWord2010
+        hskChar2010
+        ccceDefinitions {
+          id
+          simplified
+          traditional
+          pinyin
+          definitions
         }
       }
     }
+  }
+}
+
+query DocumentById($id: String!) {
+  document(id: $id) {
+    ...EntireDocument
   }
 }
 

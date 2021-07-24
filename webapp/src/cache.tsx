@@ -1,11 +1,17 @@
 import { InMemoryCache, InMemoryCacheConfig, makeVar } from '@apollo/client';
 import { Document, TypedTypePolicies } from './schema/generated';
 
+// OPTIMIZATION - consider storying these properties in the cache somehow?
 export type DocumentIdList = Array<Document['id']>;
-
+// we read these 'to read' docs starting at index 0
 export const docsToReadVar = makeVar<DocumentIdList>([]);
+// these 'already read' docs have the most recently read arr[length-1]
 export const readDocsVar = makeVar<DocumentIdList>([]);
 export const haveFetchedDocsToReadVar = makeVar<boolean>(false);
+
+export const docsToListenVar = makeVar<DocumentIdList>([]);
+export const listenedDocsVar = makeVar<DocumentIdList>([]);
+export const haveFetchedDocsToListenVar = makeVar<boolean>(false);
 
 // TODO are the results of a query against reading typed?
 // if not, maybe use useReactiveVar directly?
@@ -56,13 +62,36 @@ const typePolicies: TypedTypePolicies = {
           return readDocsVar();
         },
       },
+      haveFetchedDocsToListen: {
+        read() {
+          return haveFetchedDocsToListenVar();
+        },
+      },
+      docsToListen: {
+        read() {
+          return docsToListenVar();
+        },
+      },
+      listenedDocs: {
+        read() {
+          return listenedDocsVar();
+        },
+      },
     },
   },
   Word: {
     keyFields: ['hanzi'],
   },
   SentenceWord: {
-    keyFields: ['id', 'sentenceId'],
+    keyFields: ['index', 'sentenceId'],
+    fields: {
+      lastClicked: {
+        read(lastClicked = 0) {
+          // a default value of zero means it hasn't been clicked on yet
+          return lastClicked;
+        },
+      },
+    },
   },
 };
 
@@ -70,6 +99,13 @@ const config: InMemoryCacheConfig = {
   typePolicies,
 };
 
-interface Test {}
-
 export const cache = new InMemoryCache(config);
+
+// TODO learn how to modify the cache of a sentence word.
+// I want to add a 'lastClicked' whose value is new Date().getTime()
+
+// TODO are there size limits on the in memory cache that I should worry about?
+
+// TODO can I write a 'local schema' which gets picked up by my graphql codegen?? allowing me to have TypedDocumentNode including local only fields?
+
+// I probably need that/want that for my Document compponent (think of case of going 'prev' and grabbing previous state on SentenceWords)

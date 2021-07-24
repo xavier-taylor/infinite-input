@@ -1,6 +1,6 @@
 import { tickNum } from 'event-loop-ticks'; // for debugging only
 import { Pool } from 'pg';
-import { Document, SentenceWord, Word } from '../schema/gql-model';
+import { Document, SentenceWord, StudyType, Word } from '../schema/gql-model';
 import {
   cc_cedict,
   document,
@@ -16,8 +16,6 @@ import DataLoader from 'dataloader';
 // so cannot use datasource instance across requests.
 // this begs the question - why use data source? - possibly need to rip data source out
 // Avoid multiple requests from different users using the DataLoader instance, which could result in cached data incorrectly appearing in each request. Typically, DataLoader instances are created when a Request begins, and are not used once the Request ends.
-
-export type ReviewType = 'Reading' | 'Listening';
 
 // TODO replace the datasource approach with the data loader approach
 // Why? The SQL datasource doesn't handle batching, which is the main reason I want it.
@@ -181,23 +179,28 @@ export class PostgresqlRepo {
   // see if that is 'faster' than using resolvers at each level as I have here
   // NOTE - that is an optimization. don't do until mvp is usable!
   async getDueDocuments(
-    _type: ReviewType = 'Reading',
-    _studentId: string = '1'
+    type: StudyType,
+    studentId: string = '1'
   ): Promise<document[]> {
     // based on complete_query.sql, just for testing/mucking around purposes
     const candidates = `SELECT chinese,id, english, sub_corpus_title, corpus_title from document WHERE
 -- doesn't exist a word I don't know
 NOT EXISTS (
 	Select 1 FROM document_word
-	left join student_word_read ON student_word_read.word_hanzi = document_word.word AND student_word_read.student_id = 1
-	WHERE student_word_read.word_hanzi is null
+	left join :student_word: ON :student_word:.word_hanzi = document_word.word AND :student_word:.student_id = :studentId
+	WHERE :student_word:.word_hanzi is null
 	and document_word.document_id = document.id
 	) `;
-    const due = `SELECT word_hanzi FROM student_word_read WHERE student_id = 1 AND due <= CURRENT_DATE`;
-
+    const cVars = {
+      student_word:
+        type === StudyType.Read ? 'student_word_read' : 'student_word_listen',
+      studentId,
+    };
+    const due = `SELECT word_hanzi FROM :student_word: WHERE student_id = :studentId AND due <= CURRENT_DATE`;
+    const dVars = { ...cVars }; // its the same, for now
     return this.knex
-      .with('candidates', this.knex.raw(candidates))
-      .with('due', this.knex.raw(due))
+      .with('candidates', this.knex.raw(candidates, cVars))
+      .with('due', this.knex.raw(due, dVars))
       .select('id', 'sub_corpus_title', 'corpus_title', 'english', 'chinese')
       .from('candidates')
       .join('document_word', 'candidates.id', '=', 'document_word.document_id')
@@ -230,5 +233,18 @@ NOT EXISTS (
       .whereIn('word', options.including);
     // .limit(10); // TODO fix this so that if arg is not passed the wherein is not applied
     // TODO make this just return unique documents!
+  }
+  async documentById(id: string) {
+    return (this.knex('document')
+      .select<document>(
+        'id',
+        'sub_corpus_title',
+        'corpus_title',
+        'previous_document',
+        'english',
+        'chinese'
+      )
+      .where({ id })
+      .first() as unknown) as document; // todo make this less bad
   }
 }
