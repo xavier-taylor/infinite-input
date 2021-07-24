@@ -1,0 +1,14 @@
+# The way apollo says you should do client side schema
+# is different from the way graphql codegen says.
+
+# If I want to use whatever apollo features come with client side schema,
+#I need to duplicate this stuff, but use the 'extends' syntax etc
+
+#// https://www.apollographql.com/docs/react/local-state/client-side-schema/
+
+# this file implements the way graphql codegen wants it done
+# https://www.graphql-code-generator.com/docs/integrations/apollo-local-state
+
+type SentenceWord {
+  lastClicked: Int!
+}
