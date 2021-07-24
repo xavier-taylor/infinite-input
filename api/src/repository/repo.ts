@@ -182,6 +182,25 @@ export class PostgresqlRepo {
     type: StudyType,
     studentId: string = '1'
   ): Promise<document[]> {
+    return this.knex
+      .select(
+        'document.chinese',
+        'document.id',
+        'document.english',
+        this.knex.raw('count(document.id)')
+      )
+      .from('document')
+      .join('sentence', 'document.id', '=', 'sentence.document_id')
+      .groupBy('document.chinese', 'document.id', 'document.english')
+      .having(this.knex.raw('count(document.id)'), '>', '1')
+      .limit(10);
+    const rv = this.knex.raw(
+      `SELECT document.chinese,document.id, english, sub_corpus_title, corpus_title, count(document.id) 
+      from document join sentence on document.id = sentence.document_id  
+      group by (document.chinese,document.id, english, sub_corpus_title, corpus_title) having count(document.id)>1 LIMIT 2;
+`
+    );
+
     // based on complete_query.sql, just for testing/mucking around purposes
     const candidates = `SELECT chinese,id, english, sub_corpus_title, corpus_title from document WHERE
 -- doesn't exist a word I don't know
@@ -206,7 +225,7 @@ NOT EXISTS (
       .join('document_word', 'candidates.id', '=', 'document_word.document_id')
       .join('due', 'document_word.word', '=', 'due.word_hanzi')
       .groupBy('id', 'chinese', 'english', 'sub_corpus_title', 'corpus_title')
-      .limit(20);
+      .limit(2000); // TODO make this query real!
   }
   // This is an undata loaded/ unbatched. just for testing.
   async getWords(words: string[]) {
@@ -248,3 +267,24 @@ NOT EXISTS (
       .first() as unknown) as document; // todo make this less bad
   }
 }
+
+/*
+
+KNEX NOTES:
+
+
+this works
+  return this.knex
+      .select(
+        'document.chinese',
+        'document.id',
+        'document.english',
+        this.knex.raw('count(document.id)')
+      )
+      .from('document')
+      .join('sentence', 'document.id', '=', 'sentence.document_id')
+      .groupBy('document.chinese', 'document.id', 'document.english')
+      .having(this.knex.raw('count(document.id)'), '>', '1')
+      .limit(1);
+
+*/

@@ -28,7 +28,8 @@ import {
   SentenceWord,
   StudyType,
 } from '../../schema/generated';
-import { useQuery } from '@apollo/client';
+import { gql, useQuery } from '@apollo/client';
+import { cache } from '../../cache'; // TODO put this cache in a common react context?
 
 // TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff
 
@@ -186,9 +187,43 @@ const Study: React.FC<StudyProps> = ({
 
   const wordsToShow = words
     .filter((w) => w.universalPartOfSpeech !== 'PUNCT')
-    .slice(0, numberToShow);
+    .sort((a, b) => b.lastClicked - a.lastClicked)
+    .slice(0, numberToShow)
+    .sort((b, a) => {
+      const bSIndex = parseInt(b.sentenceId); // TODO once we have an INDEX on sentence (stored on sentenceword too!) which tracks the sentences index(order) inside its document, we can just use that here properly
+      const aSIndex = parseInt(a.sentenceId);
+      if (aSIndex === bSIndex) {
+        return b.index - a.index;
+      } else {
+        return bSIndex - aSIndex;
+      }
+    });
 
-  function handleWordClick(word: SentenceWord) {}
+  function handleWordClick({ sentenceId, index }: SentenceWord) {
+    cache.writeQuery({
+      query: gql`
+        query UpdateLastClicked($sentenceId: String!, $index: Int!) {
+          sentenceWord(sentenceId: $sentenceId, index: $index) {
+            index
+            sentenceId
+            lastClicked
+          }
+        }
+      `,
+      data: {
+        sentenceWord: {
+          __typename: 'SentenceWord',
+          sentenceId,
+          index,
+          lastClicked: new Date().getTime(),
+        },
+      },
+      variables: {
+        sentenceId,
+        index,
+      },
+    });
+  }
   // CONTINUE HERE - work out how to increment the lastClicked property on the sentence word
   // THEN make sure we see the latest ones
 
@@ -209,7 +244,12 @@ const Study: React.FC<StudyProps> = ({
           >
             <span key={document.id} lang="zh">
               {words.map((w) => (
+                // TODO extract this span into some kind of
+                // react component with things like onhover behaviour etc
+                // TODO make it not clickable if it is puncutation!
+                // when doing so extact that common logic from the filter on puncutation (use same constant at least)
                 <span
+                  style={{ cursor: 'pointer' }}
                   onClick={() => handleWordClick(w)}
                   key={`${w.wordHanzi}-${w.index}-${w.sentenceId}`}
                 >
