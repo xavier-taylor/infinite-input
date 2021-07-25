@@ -182,18 +182,18 @@ export class PostgresqlRepo {
     type: StudyType,
     studentId: string = '1'
   ): Promise<document[]> {
-    return this.knex
-      .select(
-        'document.chinese',
-        'document.id',
-        'document.english',
-        this.knex.raw('count(document.id)')
-      )
-      .from('document')
-      .join('sentence', 'document.id', '=', 'sentence.document_id')
-      .groupBy('document.chinese', 'document.id', 'document.english')
-      .having(this.knex.raw('count(document.id)'), '>', '1')
-      .limit(1);
+    // return this.knex
+    //   .select(
+    //     'document.chinese',
+    //     'document.id',
+    //     'document.english',
+    //     this.knex.raw('count(document.id)')
+    //   )
+    //   .from('document')
+    //   .join('sentence', 'document.id', '=', 'sentence.document_id')
+    //   .groupBy('document.chinese', 'document.id', 'document.english')
+    //   .having(this.knex.raw('count(document.id)'), '>', '1')
+    //   .limit(1);
     const rv = this.knex.raw(
       `SELECT document.chinese,document.id, english, sub_corpus_title, corpus_title, count(document.id) 
       from document join sentence on document.id = sentence.document_id  
@@ -225,12 +225,13 @@ NOT EXISTS (
       .join('document_word', 'candidates.id', '=', 'document_word.document_id')
       .join('due', 'document_word.word', '=', 'due.word_hanzi')
       .groupBy('id', 'chinese', 'english', 'sub_corpus_title', 'corpus_title')
-      .limit(2000); // TODO make this query real!
+      .limit(10); // TODO make this query real!
   }
   // This is an undata loaded/ unbatched. just for testing.
   async getWords(words: string[]) {
     return this.knex.select<word[]>('*').from('word').whereIn('hanzi', words);
   }
+  // I am using this for concordance - TODO - make a toggleable version that only returns docs where you know all the words, or even just sortable by whether you know al lthe words
   async getDocuments(options: { including: string[] }): Promise<document[]> {
     // make a 'word to document' function for single word reviews.
     // get the actual list of due words, then work thru results from this query etc
@@ -287,4 +288,5 @@ this works
       .having(this.knex.raw('count(document.id)'), '>', '1')
       .limit(1);
 
+      
 */

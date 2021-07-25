@@ -77,27 +77,37 @@ const typePolicies: TypedTypePolicies = {
     keyFields: ['index', 'sentenceId'],
     fields: {
       forgotLISTEN: {
-        read(_, { readField }) {
-          const index = readField('index') as SentenceWord['index'];
-          const sentenceId = readField(
-            'sentenceId'
-          ) as SentenceWord['sentenceId'];
-          return !!readSentenceWordsVar().find(
-            (w) => w.index === index && w.sentenceId === sentenceId
-          )?.forgot;
+        read(forgotLISTEN = false) {
+          return forgotLISTEN;
         },
       },
       forgotREAD: {
-        read(_, { readField }) {
-          const index = readField('index') as SentenceWord['index'];
-          const sentenceId = readField(
-            'sentenceId'
-          ) as SentenceWord['sentenceId'];
-          return !!listenSentenceWordsVar().find(
-            (w) => w.index === index && w.sentenceId === sentenceId
-          )?.forgot;
+        read(forgotREAD = false) {
+          return forgotREAD;
         },
       },
+      // forgotLISTEN: {
+      //   read(_, { readField }) {
+      //     const index = readField('index') as SentenceWord['index'];
+      //     const sentenceId = readField(
+      //       'sentenceId'
+      //     ) as SentenceWord['sentenceId'];
+      //     return !!readSentenceWordsVar().find(
+      //       (w) => w.index === index && w.sentenceId === sentenceId
+      //     )?.forgot;
+      //   },
+      // },
+      // forgotREAD: {
+      //   read(_, { readField }) {
+      //     const index = readField('index') as SentenceWord['index'];
+      //     const sentenceId = readField(
+      //       'sentenceId'
+      //     ) as SentenceWord['sentenceId'];
+      //     return !!listenSentenceWordsVar().find(
+      //       (w) => w.index === index && w.sentenceId === sentenceId
+      //     )?.forgot;
+      //   },
+      // },
       lastClicked: {
         read(lastClicked = 0) {
           // a default value of zero means it hasn't been clicked on yet

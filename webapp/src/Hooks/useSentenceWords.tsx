@@ -6,6 +6,8 @@ import {
 } from '../cache';
 import { SentenceWord, StudyType } from '../schema/generated';
 
+// TODO - delete this code, I don't think I need it.
+
 // inspired by this pattern
 // https://www.apollographql.com/blog/apollo-client/caching/local-state-management-with-reactive-variables/#use-case-3-locally-decorated-remote-data
 
@@ -64,25 +66,3 @@ export function useSentenceWords(
     operations: { setForgot },
   };
 }
-
-// TODO continue here
-/*
-1. Finish off using reactive variable to track sentence word 'forgot' state. (DONT DELETE OLD CODE IN THE PROCESS)
-2. validate that that approach works.
-
-3. Now, compare with the lastclicked approach (where no reactive variable was necassary)
-    work out whether/how each change to lastclicked i both a) updating the cache and b) resulting in a 
-    re-render of the required react components.
-
-    It seemed to me that a similar approach wasn't working for forgot - the cache was being updated via writeQuery,
-    but it seemed like the react component wasn't re-rendering. This is why I tried the reactive variable approach.
-    but the reactive variable approach is less elegant and has more boilerplate/overhead - it basically
-    results in us creating a second bloody cache.
-
-
-    if can validate that the lastClicked case works robustly, then (GIT COMMIT CLEARLY) then
-    Try and work out if possible to do the 'forgot' case the same way we are doing the lastClicked case - without
-    reactive variables
-
-
-*/

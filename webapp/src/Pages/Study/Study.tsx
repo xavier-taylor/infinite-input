@@ -215,21 +215,38 @@ const Study: React.FC<StudyProps> = ({
     words.push(...s.words);
   }
   // OPTIMIZATION: since I am not really using the grid, perhaps remove it and just have a simple flexbox?
+  const forgot = (mode: StudyType, word: SentenceWord) =>
+    !!(mode === StudyType.Read && word.forgotREAD) ||
+    !!(mode === StudyType.Listen && word.forgotLISTEN);
 
-  const wordsToShow = words
-    .filter((w) => w.universalPartOfSpeech !== 'PUNCT')
-    .sort((a, b) => b.lastClicked - a.lastClicked)
-    .slice(0, numberToShow)
-    .sort((b, a) => {
-      const bSIndex = parseInt(b.sentenceId); // TODO once we have an INDEX on sentence (stored on sentenceword too!) which tracks the sentences index(order) inside its document, we can just use that here properly
-      const aSIndex = parseInt(a.sentenceId);
-      if (aSIndex === bSIndex) {
-        return b.index - a.index;
-      } else {
-        return bSIndex - aSIndex;
-      }
-    });
-
+  // TODO optimize this or at least make it less wasteful.
+  const wordsToShow =
+    studyState === 'check'
+      ? words
+          .filter((w) => w.universalPartOfSpeech !== 'PUNCT')
+          .sort((a, b) => b.lastClicked - a.lastClicked)
+          .slice(0, numberToShow)
+          .sort((b, a) => {
+            const bSIndex = parseInt(b.sentenceId); // TODO once we have an INDEX on sentence (stored on sentenceword too!) which tracks the sentences index(order) inside its document, we can just use that here properly
+            const aSIndex = parseInt(a.sentenceId);
+            if (aSIndex === bSIndex) {
+              return b.index - a.index;
+            } else {
+              return bSIndex - aSIndex;
+            }
+          })
+      : words // we are in 'study' mode, so only show words that are forgot, ie, we clicked on them during study mode.
+          .filter((w) => w.universalPartOfSpeech !== 'PUNCT' && forgot(mode, w))
+          .slice(0, numberToShow)
+          .sort((b, a) => {
+            const bSIndex = parseInt(b.sentenceId); // TODO once we have an INDEX on sentence (stored on sentenceword too!) which tracks the sentences index(order) inside its document, we can just use that here properly
+            const aSIndex = parseInt(a.sentenceId);
+            if (aSIndex === bSIndex) {
+              return b.index - a.index;
+            } else {
+              return bSIndex - aSIndex;
+            }
+          });
   function markForgot(
     { sentenceId, index }: SentenceWord,
     mode: StudyType,
@@ -299,9 +316,6 @@ const Study: React.FC<StudyProps> = ({
       },
     });
   }
-  const forgot = (mode: StudyType, word: SentenceWord) =>
-    !!(mode === StudyType.Read && word.forgotREAD) ||
-    !!(mode === StudyType.Listen && word.forgotLISTEN);
 
   console.log(document.sentences[0].words[0]);
   return (
@@ -379,96 +393,95 @@ const Study: React.FC<StudyProps> = ({
         </Card>
       </Grid>
       <Grid className={classes.rowContainer} item container>
-        {studyState === 'check' &&
-          wordsToShow.map((word) => (
-            <Grid
-              className={classes.definitionContainer}
-              item
-              xs={12}
-              sm={6}
-              md={4}
-              lg={3}
-              xl={2}
+        {wordsToShow.map((word) => (
+          <Grid
+            className={classes.definitionContainer}
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            lg={3}
+            xl={2}
+          >
+            <Card
+              className={clsx(
+                word.index === recentWord.index &&
+                  word.sentenceId === recentWord.sentenceId &&
+                  classes.recentCard,
+                classes.definition
+              )}
             >
-              <Card
-                className={clsx(
-                  word.index === recentWord.index &&
-                    word.sentenceId === recentWord.sentenceId &&
-                    classes.recentCard,
-                  classes.definition
-                )}
-              >
-                {/* TODO make cardheader fixed (ie doesnt move when scrolling thru card contents - might be as simple as setting overflow behaviour on card contents...) */}
-                <CardHeader
-                  classes={{
-                    action: classes.cardHeaderAction,
-                    root: classes.cardHeaderRoot,
-                  }}
-                  title={<span lang="zh">{word.word.hanzi}</span>}
-                  action={
-                    <ButtonGroup>
-                      <IconButton
-                        onClick={() => setConcordanceWord(word.word.hanzi)}
-                      >
-                        <MenuBookIcon color="action"></MenuBookIcon>
-                      </IconButton>
-                      <IconButton>
-                        <RecordVoiceOverIcon color="action" />
-                      </IconButton>
-                      <IconButton
-                        // disabled={!forgot(mode, word)}
-                        onClick={() => markForgot(word, mode, false)}
-                      >
-                        <Test forgot={forgot(mode, word)}></Test>
-                        {/* <ThumbUp
+              {/* TODO make cardheader fixed (ie doesnt move when scrolling thru card contents - might be as simple as setting overflow behaviour on card contents...) */}
+              <CardHeader
+                classes={{
+                  action: classes.cardHeaderAction,
+                  root: classes.cardHeaderRoot,
+                }}
+                title={<span lang="zh">{word.word.hanzi}</span>}
+                action={
+                  <ButtonGroup>
+                    <IconButton
+                      onClick={() => setConcordanceWord(word.word.hanzi)}
+                    >
+                      <MenuBookIcon color="action"></MenuBookIcon>
+                    </IconButton>
+                    <IconButton>
+                      <RecordVoiceOverIcon color="action" />
+                    </IconButton>
+                    <IconButton
+                      // disabled={!forgot(mode, word)}
+                      onClick={() => markForgot(word, mode, false)}
+                    >
+                      <Test forgot={forgot(mode, word)}></Test>
+                      {/* <ThumbUp
                           style={{
                             color: forgot(mode, word)
                               ? theme.palette.action.active
                               : theme.palette.success.main,
                           }}
                         /> */}
-                      </IconButton>
-                      <IconButton
-                        // disabled={forgot(mode, word)}
-                        onClick={() => markForgot(word, mode, true)}
+                    </IconButton>
+                    <IconButton
+                      // disabled={forgot(mode, word)}
+                      onClick={() => markForgot(word, mode, true)}
+                    >
+                      <ThumbDown
+                        style={{
+                          color: forgot(mode, word)
+                            ? theme.palette.error.main
+                            : theme.palette.action.active,
+                        }}
+                      />
+                    </IconButton>
+                  </ButtonGroup>
+                }
+              />
+              <CardContent classes={{ root: classes.cardContentRoot }}>
+                {word.word.ccceDefinitions.map((def) => {
+                  return (
+                    <>
+                      <Typography
+                        key={def.id}
+                        color="textSecondary"
+                        variant="body1"
                       >
-                        <ThumbDown
-                          style={{
-                            color: forgot(mode, word)
-                              ? theme.palette.error.main
-                              : theme.palette.action.active,
-                          }}
-                        />
-                      </IconButton>
-                    </ButtonGroup>
-                  }
-                />
-                <CardContent classes={{ root: classes.cardContentRoot }}>
-                  {word.word.ccceDefinitions.map((def) => {
-                    return (
-                      <>
-                        <Typography
-                          key={def.id}
-                          color="textSecondary"
-                          variant="body1"
-                        >
-                          {def.pinyin}
+                        {def.pinyin}
+                      </Typography>
+                      {def.definitions.map((d, i) => (
+                        <Typography key={`${def.id}-${i}`} variant="body2">
+                          {d}
                         </Typography>
-                        {def.definitions.map((d, i) => (
-                          <Typography key={`${def.id}-${i}`} variant="body2">
-                            {d}
-                          </Typography>
-                        ))}
-                      </>
-                    );
-                  })}
-                  {/* {word.word.ccceDefinitions[0]?.definitions.map((d) => (
+                      ))}
+                    </>
+                  );
+                })}
+                {/* {word.word.ccceDefinitions[0]?.definitions.map((d) => (
                   <Typography variant="body2">{d}</Typography>
                 ))} */}
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
       </Grid>
 
       <Grid className={classes.rowContainer} item>
