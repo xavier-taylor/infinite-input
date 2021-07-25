@@ -193,7 +193,7 @@ export class PostgresqlRepo {
       .join('sentence', 'document.id', '=', 'sentence.document_id')
       .groupBy('document.chinese', 'document.id', 'document.english')
       .having(this.knex.raw('count(document.id)'), '>', '1')
-      .limit(10);
+      .limit(1);
     const rv = this.knex.raw(
       `SELECT document.chinese,document.id, english, sub_corpus_title, corpus_title, count(document.id) 
       from document join sentence on document.id = sentence.document_id  

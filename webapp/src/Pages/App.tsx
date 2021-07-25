@@ -55,6 +55,7 @@ const App: React.FC = () => {
           <MenuDrawer drawer={drawer}></MenuDrawer>
           <main className={classes.content}>
             <div className={classes.appBarSpacer} />
+            {/* TODO OPTIMIZATION make the back menu in browser meanfinful */}
             <Switch>
               <Route path="/read">
                 <StudyContainer

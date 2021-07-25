@@ -9,6 +9,9 @@
 # this file implements the way graphql codegen wants it done
 # https://www.graphql-code-generator.com/docs/integrations/apollo-local-state
 
+#TODO think of something better than the forgotREAD forgotLISTEN solution
 type SentenceWord {
   lastClicked: Int!
+  forgotREAD: Boolean
+  forgotLISTEN: Boolean
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import MenuBookIcon from '@material-ui/icons/MenuBook';
 import RecordVoiceOverIcon from '@material-ui/icons/RecordVoiceOver';
+import clsx from 'clsx';
 import {
   makeStyles,
   createStyles,
@@ -19,7 +20,7 @@ import {
   CardContent,
   IconButton,
 } from '@material-ui/core';
-import { ThumbDown } from '@material-ui/icons';
+import { ThumbDown, ThumbUp } from '@material-ui/icons';
 import Concordance from '../../Components/Concordance';
 import {
   Document,
@@ -30,6 +31,20 @@ import {
 } from '../../schema/generated';
 import { gql, useQuery } from '@apollo/client';
 import { cache } from '../../cache'; // TODO put this cache in a common react context?
+
+// just an experiment, if works extract this and maybe more
+const Test: React.FC<{ forgot: boolean }> = ({ forgot }) => {
+  const theme = useTheme();
+  return (
+    <ThumbUp
+      style={{
+        color: forgot
+          ? theme.palette.action.active
+          : theme.palette.success.main,
+      }}
+    />
+  );
+};
 
 // TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff
 
@@ -48,6 +63,18 @@ const useStyles = makeStyles((theme: Theme) =>
     cardHeaderRoot: {
       padding: theme.spacing(1),
       paddingBottom: '0px',
+    },
+    '@keyframes example': {
+      '0%': { backgroundColor: theme.palette.background.default },
+      // from: { backgroundColor: 'yellow' },
+      '50%': { backgroundColor: theme.palette.info.light },
+      '100%': { backgroundColor: theme.palette.background.default },
+    },
+    recentCard: {
+      // background: theme.palette.grey[300], // TODO make this effect only happen if there is more than one definition card rendered
+      // https://github.com/mui-org/material-ui/issues/13793
+      animationName: '$example',
+      animationDuration: '2s',
     },
     cardHeaderAction: {
       padding: theme.spacing(0.5),
@@ -125,6 +152,7 @@ const Study: React.FC<StudyProps> = ({
   documentId,
   nextAvailable,
   prevAvailable,
+  mode,
 }) => {
   // OPTIMIZATION if I just make this query grab top level sentence words, and leave fetching
   // the word definitions to this definition cards, I can use the front end cache. OPTIMIZATION
@@ -143,6 +171,9 @@ const Study: React.FC<StudyProps> = ({
   const [concordanceWord, setConcordanceWord] = useState<string | undefined>(
     undefined
   );
+  const [recentWord, setRecentWord] = useState<
+    Partial<Pick<SentenceWord, 'sentenceId' | 'index'>>
+  >({});
 
   //   // // This maps keeps track of things we care about happening for a given sentence word. has to be 2d since data is 2d
   //   // // initially use this for showing definitions, later could use it for things like marking a word as unknown
@@ -199,7 +230,51 @@ const Study: React.FC<StudyProps> = ({
       }
     });
 
-  function handleWordClick({ sentenceId, index }: SentenceWord) {
+  function markForgot(
+    { sentenceId, index }: SentenceWord,
+    mode: StudyType,
+    forgot: boolean
+  ) {
+    // TODO think perhaps of a neater solution than the computed 'forgotMode'
+    cache.writeQuery({
+      query: gql`
+    query Updated($sentenceId: String!, $index: Int!) {
+      sentenceWord(sentenceId: $sentenceId, index: $index ) {
+        index
+        sentenceId
+        forgot${mode}
+      }
+    }
+  `,
+      data: {
+        sentenceWord: {
+          __typename: 'SentenceWord',
+          sentenceId,
+          index,
+          [`forgot${mode}`]: forgot,
+        },
+      },
+      variables: {
+        sentenceId,
+        index,
+      },
+    });
+  }
+
+  function handleWordClick(
+    sentenceWord: SentenceWord,
+    mode: StudyType,
+    studyState: studyStates
+  ) {
+    const { sentenceId, index } = sentenceWord;
+    if (studyState === 'study') {
+      markForgot(sentenceWord, mode, true);
+    }
+
+    setRecentWord({ sentenceId, index }); // TODO rename this variable
+    // TODO think of way to make this neater, maybe using fragment
+    // ie, dont do both this and the above writeQuery, just one
+
     cache.writeQuery({
       query: gql`
         query UpdateLastClicked($sentenceId: String!, $index: Int!) {
@@ -224,9 +299,11 @@ const Study: React.FC<StudyProps> = ({
       },
     });
   }
-  // CONTINUE HERE - work out how to increment the lastClicked property on the sentence word
-  // THEN make sure we see the latest ones
+  const forgot = (mode: StudyType, word: SentenceWord) =>
+    !!(mode === StudyType.Read && word.forgotREAD) ||
+    !!(mode === StudyType.Listen && word.forgotLISTEN);
 
+  console.log(document.sentences[0].words[0]);
   return (
     <Grid
       container
@@ -250,7 +327,7 @@ const Study: React.FC<StudyProps> = ({
                 // when doing so extact that common logic from the filter on puncutation (use same constant at least)
                 <span
                   style={{ cursor: 'pointer' }}
-                  onClick={() => handleWordClick(w)}
+                  onClick={() => handleWordClick(w, mode, studyState)}
                   key={`${w.wordHanzi}-${w.index}-${w.sentenceId}`}
                 >
                   {w.wordHanzi}
@@ -313,7 +390,14 @@ const Study: React.FC<StudyProps> = ({
               lg={3}
               xl={2}
             >
-              <Card className={classes.definition}>
+              <Card
+                className={clsx(
+                  word.index === recentWord.index &&
+                    word.sentenceId === recentWord.sentenceId &&
+                    classes.recentCard,
+                  classes.definition
+                )}
+              >
                 {/* TODO make cardheader fixed (ie doesnt move when scrolling thru card contents - might be as simple as setting overflow behaviour on card contents...) */}
                 <CardHeader
                   classes={{
@@ -331,8 +415,30 @@ const Study: React.FC<StudyProps> = ({
                       <IconButton>
                         <RecordVoiceOverIcon color="action" />
                       </IconButton>
-                      <IconButton>
-                        <ThumbDown color="error" />
+                      <IconButton
+                        // disabled={!forgot(mode, word)}
+                        onClick={() => markForgot(word, mode, false)}
+                      >
+                        <Test forgot={forgot(mode, word)}></Test>
+                        {/* <ThumbUp
+                          style={{
+                            color: forgot(mode, word)
+                              ? theme.palette.action.active
+                              : theme.palette.success.main,
+                          }}
+                        /> */}
+                      </IconButton>
+                      <IconButton
+                        // disabled={forgot(mode, word)}
+                        onClick={() => markForgot(word, mode, true)}
+                      >
+                        <ThumbDown
+                          style={{
+                            color: forgot(mode, word)
+                              ? theme.palette.error.main
+                              : theme.palette.action.active,
+                          }}
+                        />
                       </IconButton>
                     </ButtonGroup>
                   }

@@ -31,6 +31,8 @@ fragment EntireDocument on Document {
       sentenceId
       index
       lastClicked @client
+      forgotLISTEN @client
+      forgotREAD @client
       wordHanzi
       lemma
       partOfSpeech

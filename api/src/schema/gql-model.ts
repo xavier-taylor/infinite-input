@@ -85,6 +85,8 @@ export type Sentence = {
 export type SentenceWord = {
   __typename?: 'SentenceWord';
   due: Scalars['Boolean'];
+  forgotLISTEN?: Maybe<Scalars['Boolean']>;
+  forgotREAD?: Maybe<Scalars['Boolean']>;
   index: Scalars['Int'];
   lastClicked: Scalars['Int'];
   lemma: Scalars['String'];
@@ -265,6 +267,8 @@ export type SentenceResolvers<ContextType = any, ParentType extends ResolversPar
 
 export type SentenceWordResolvers<ContextType = any, ParentType extends ResolversParentTypes['SentenceWord'] = ResolversParentTypes['SentenceWord']> = {
   due?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  forgotLISTEN?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  forgotREAD?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   index?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   lastClicked?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   lemma?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
