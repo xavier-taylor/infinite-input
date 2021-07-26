@@ -47,18 +47,40 @@ CREATE TABLE mandarin.student
     PRIMARY KEY (id)
 );
 
+
+/*
+SRS algorithm.
+
+States: [unknown, learning, consolidationg]
+or should unkown be 'locked' and 'unlocked'??
+Think about it with a fresh mind
+
+When unknown:
+A card can be selec
+
+WHEN learning:
+
+WHEN consolidating
+
+
+
+*/
+
 CREATE TABLE mandarin.student_word_listen
 (
     student_id bigint REFERENCES mandarin.student (id),
     word_hanzi text REFERENCES mandarin.word (hanzi),
     f1 bigint NOT NULL,
     f2 bigint NOT NULL,
-    due date NOT NULL,          -- TODO probably need index on this, or perhaps a student_id + this row index...
-    previous date NOT NULL,       -- TODO determine whether not null makes sense here TODO decide if we even need this!
+    due date NOT NULL,         
+    previous date NOT NULL,  
+    understood boolean[] CONSTRAINT ten_elements CHECK (cardinality(understood) < 11) NOT NULL,
     understood_count bigint NOT NULL,
-    understood_distinct_documents_count bigint NOT NULL,
+    understood_distinct_documents_count bigint NOT NULL, -- increment this only when a new student_document_listen is created for this word
     PRIMARY KEY (student_id, word_hanzi)
 );
+COMMENT ON COLUMN mandarin.student_word_listen.understood
+    IS 'A record of the last 10 times you listened to this word. understood[9] is most recent, understood[0] is oldest';
 
 CREATE TABLE mandarin.student_word_read
 (
@@ -68,10 +90,13 @@ CREATE TABLE mandarin.student_word_read
     f2 bigint NOT NULL,
     due date NOT NULL,
     previous date NOT NULL,
+    understood boolean[] CONSTRAINT ten_elements CHECK (cardinality(understood) < 11) NOT NULL,
     understood_count bigint NOT NULL,
-    understood_distinct_documents_count bigint NOT NULL,
+    understood_distinct_documents_count bigint NOT NULL, -- increment this only when a new student_document_listen is created for this word
     PRIMARY KEY (student_id, word_hanzi)
 );
+COMMENT ON COLUMN mandarin.student_word_listen.understood
+    IS 'A record of the last 10 times you listened to this word. understood[9] is most recent, understood[0] is oldest';
 
 CREATE TABLE mandarin.corpus
 (
@@ -118,6 +143,7 @@ CREATE TABLE mandarin.sentence
     -- TODO adjust types, regenerate types etc throughout project as required.
     -- add constraint that document_id and index = composite unique, but keep the id field, so can use in apollo cache etc 
     document_id bigint NOT NULL REFERENCES mandarin.document (id),
+    document_index int NOT NULL, -- the index of the sentence in its document, starting at 0. ie, 'ABC. DEF.' The sentence 'ABC' has document_index 0
     chinese text NOT NULL,
     sentiment text NOT NULL, -- http://a1-www.is.tokushima-u.ac.jp/member/ren/Ren-CECps1.0/Ren-CECps1.0.html
     PRIMARY KEY (id)
@@ -137,8 +163,9 @@ CREATE TABLE mandarin.sentence_word
 ( -- note we map 1 token to 1 word to 1 sentence_word because in the chinese model 1 token = 1 word
  -- the combination of head and deprel makes the sentence.dependencies data redundant, so we will not store it. 
  -- however, i am not sure if the ner field makes the entire NER representation (the Span) redundant, so will store it in named_entity
-    id int,   --consider renaming this to index                 --standa.word.id 1 based index of word in sentence
+    stanza_id int,                 --standa.word.id 1 based index of word in sentence
     sentence_id bigint REFERENCES mandarin.sentence (id),
+    document_id bigint NOT NULL REFERENCES mandarin.document (id),
     word_hanzi text NOT NULL REFERENCES mandarin.word (hanzi),  -- stanza.word.text
     lemma text NOT NULL REFERENCES mandarin.word (hanzi),                -- stanza.word.lemma
     part_of_speech text NOT NULL,                               -- stanza.word.xpos
@@ -150,10 +177,11 @@ CREATE TABLE mandarin.sentence_word
     end_char int NOT NULL,                                      -- standa.token.end_char indexes into document
     ner text NOT NULL,                                          -- stanza.token.ner, apparently in in BIOES format (with 'O' denoting none)
     named_entity_id bigint NULL REFERENCES mandarin.named_entity (id),  -- stanza.span.words/tokens
-    PRIMARY KEY (id, sentence_id)
+    PRIMARY KEY (stanza_id, sentence_id)
 );
 COMMENT ON COLUMN mandarin.sentence_word.named_entity_id 
     IS 'The named entity, if any, that this word is part of. 1 named_entity has 1+ sentence_words, one sentence_word has 1 or 0 NE.';
+
 
 
 CREATE TABLE mandarin.student_document_read
@@ -161,6 +189,7 @@ CREATE TABLE mandarin.student_document_read
     student_id bigint REFERENCES mandarin.student (id),
     document_id bigint REFERENCES mandarin.document (id),
     read_count bigint NOT NULL,
+    last_read date, -- UTC
     PRIMARY KEY (student_id, document_id)
 );
 
@@ -169,9 +198,21 @@ CREATE TABLE mandarin.student_document_listen
     student_id bigint REFERENCES mandarin.student (id),
     document_id bigint REFERENCES mandarin.document (id),
     listen_count bigint NOT NULL,
+    last_listened date, -- UTC
     PRIMARY KEY (student_id, document_id)
 );
 
+CREATE TABLE mandarin.student_document
+(
+    student_id bigint REFERENCES mandarin.student (id),
+    document_id bigint REFERENCES mandarin.document (id),
+    marked_as_bad boolean NOT NULL, -- if A student marks a document as bad, we don't show them this document ever again TODO
+    -- bad could mean they didn't like it(rude? etc) or they thought the language/translation etc was poor quality
+    PRIMARY KEY (student_id, document_id)
+);
+
+
+-- not planning to use these two  short term. these tables would grow pretty big and I am not sure what the value would be
 CREATE TABLE mandarin.read_log
 (
     date_time date,

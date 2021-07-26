@@ -151,7 +151,7 @@ for subcorpus in corpus.sub_corpuses:
                 # -- -- FOR sentence in document
                 for sentence in doc.sentences:
                 # -- -- -- insert sentence
-                    # add sentence index TODO (ie a field called index that has value 0 for first sentence in a document)
+                    # add sentence index TODO (ie a field called document_index that has value 0 for first sentence in a document)
                     cur.execute('''
                         INSERT INTO mandarin.sentence (document_id, chinese, sentiment) 
                         VALUES (%s, %s, %s)
@@ -183,7 +183,7 @@ for subcorpus in corpus.sub_corpuses:
                             (word.lemma, 7, 7))
                         cur.execute('''
                         INSERT INTO mandarin.sentence_word (
-                            id, 
+                            stanza_id, 
                             sentence_id, 
                             word_hanzi,
                             lemma,
@@ -194,11 +194,13 @@ for subcorpus in corpus.sub_corpuses:
                             feats,
                             start_char,
                             end_char,
-                            ner
+                            ner,
+                            document_id
                         ) 
                         VALUES (
                             %s, 
                             %s, 
+                            %s,
                             %s,
                             %s,
                             %s,
@@ -223,7 +225,8 @@ for subcorpus in corpus.sub_corpuses:
                             Json(feats),
                             token.start_char,
                             token.end_char,
-                            token.ner
+                            token.ner,
+                            document_id
                         ))
                 # -- -- -- FOR ent in sentence
                 # -- -- -- -- insert named_entity
