@@ -7,8 +7,8 @@ CREATE SCHEMA mandarin;
 CREATE TABLE mandarin.word
 (
     hanzi text,
-    hsk_word_2010 integer NOT NULL CHECK (hsk_word_2010 BETWEEN 1 AND 7),
-    hsk_char_2010 integer NOT NULL CHECK (hsk_char_2010 BETWEEN 1 AND 7),
+    hsk_word_2010 integer CHECK (hsk_word_2010 BETWEEN 1 AND 7),
+    hsk_char_2010 integer CHECK (hsk_char_2010 BETWEEN 1 AND 7),
     PRIMARY KEY (hanzi)
 );
 COMMENT ON TABLE mandarin.word
@@ -48,28 +48,11 @@ CREATE TABLE mandarin.student
 );
 
 
-/*
-SRS algorithm.
-
-States: [unknown, learning, consolidationg]
-or should unkown be 'locked' and 'unlocked'??
-Think about it with a fresh mind
-
-When unknown:
-A card can be selec
-
-WHEN learning:
-
-WHEN consolidating
-
-
-
-*/
-
 CREATE TABLE mandarin.student_word_listen
 (
     student_id bigint REFERENCES mandarin.student (id),
     word_hanzi text REFERENCES mandarin.word (hanzi),
+    learning_index int NOT NULL, -- This indexes the array of 'learning' steps, in minutes, ie [1,10] etc - this array is hardcoded in the server for now
     f1 bigint NOT NULL,
     f2 bigint NOT NULL,
     due date NOT NULL,         
@@ -86,6 +69,7 @@ CREATE TABLE mandarin.student_word_read
 (
     student_id bigint REFERENCES mandarin.student (id),
     word_hanzi text REFERENCES mandarin.word (hanzi),
+    learning_index int NOT NULL,
     f1 bigint NOT NULL,
     f2 bigint NOT NULL,
     due date NOT NULL,
@@ -123,8 +107,6 @@ CREATE TABLE mandarin.document
     previous_document bigint NULL REFERENCES mandarin.document (id),
     english text NULL,
     chinese text NOT NULL,
-    -- TODO change this ones name to words lol 
-    words_upos_not_punct text[] NOT NULL, -- distinct words TODO consider deleting this once have investigated quick query
     FOREIGN KEY (corpus_title, sub_corpus_title) REFERENCES mandarin.sub_corpus (corpus_title, title),
     PRIMARY KEY (id)
 );
@@ -132,16 +114,7 @@ CREATE TABLE mandarin.document
 
 CREATE TABLE mandarin.sentence
 (
-    id bigserial, -- serial creates a sequence, and since I created sentences in order
-    -- this 'id' can be used to sort the sentences in the same order as they appear
-    -- in their document.
-    -- however, TODO add 'index int' field, where index = 0 means this was the first sentence
-    -- in the document, index = 2 means this was teh second sentence in the document etc.
-    -- TODO adjust script to populate this field when importing corpus
-    -- TODO adjust existing data via some clever update query to have this set based on
-    -- the order implicit in the id field - ideally in pure sql, but worst can scenario can do it in a script
-    -- TODO adjust types, regenerate types etc throughout project as required.
-    -- add constraint that document_id and index = composite unique, but keep the id field, so can use in apollo cache etc 
+    id bigserial,
     document_id bigint NOT NULL REFERENCES mandarin.document (id),
     document_index int NOT NULL, -- the index of the sentence in its document, starting at 0. ie, 'ABC. DEF.' The sentence 'ABC' has document_index 0
     chinese text NOT NULL,
@@ -220,7 +193,7 @@ CREATE TABLE mandarin.read_log
     understood boolean NOT NULL,
     sentence_word_id int,
     sentence_id bigint,
-    FOREIGN KEY (sentence_word_id, sentence_id) REFERENCES mandarin.sentence_word (id, sentence_id),
+    FOREIGN KEY (sentence_word_id, sentence_id) REFERENCES mandarin.sentence_word (stanza_id, sentence_id),
     PRIMARY KEY (date_time, student_id, sentence_word_id, sentence_id)
 );
 
@@ -231,7 +204,7 @@ CREATE TABLE mandarin.listen_log
     understood boolean NOT NULL,
     sentence_word_id int,
     sentence_id bigint,
-    FOREIGN KEY (sentence_word_id, sentence_id) REFERENCES mandarin.sentence_word (id, sentence_id),
+    FOREIGN KEY (sentence_word_id, sentence_id) REFERENCES mandarin.sentence_word (stanza_id, sentence_id),
     PRIMARY KEY (date_time, student_id, sentence_word_id, sentence_id)
 );
 

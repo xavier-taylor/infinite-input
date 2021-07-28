@@ -35,6 +35,9 @@ psql xavier -d infinite_input -f mandarin.sql
 -d indicates the database, -f indicates the file, and xavier is the role
 This command runs that .sql file
 
+# deleting stuff
+psql xavier -d infinite_input -f delete.sql 
+
 # disabling triggers etc 
 set session_replication_role to replica;
 then afterwards

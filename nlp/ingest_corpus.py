@@ -1,4 +1,4 @@
-#! /usr/bin/python3.8
+#! /usr/bin/python3.9
 import psycopg2
 import stanza
 from typing import List
@@ -6,6 +6,10 @@ from datetime import datetime
 from psycopg2.extras import Json
 
 '''
+>> import stanza
+>>> stanza.download('zh') - you need to do this to get the chinese models first
+for traditional chinese - zh-hant, ran that too, id for indonesian, ran that too
+
 Notes: - can do nlp at rate of 21 sentences per sec
 - But with the below database ingestion and file i/o, seem to be able to do.... 15.64 when inserted 1000 sentences.
 '''
@@ -65,7 +69,7 @@ um_ed_summary = 'The texts in this domain are acquired from online  teaching  ma
 # A B done, C done
 #sub_corpora_a=[SubCorpus(title='Education', path='Education/Bi-Education.txt', summary=um_ed_summary)])
 #sub_corpora_b = [SubCorpus(title='Laws', path='Laws/Bi-Laws.txt', summary='TBD'), SubCorpus(title='Microblog', path='Microblog/Bi-Microblog.txt', summary='TBD'), SubCorpus(title='News', path='News/Bi-News.txt', summary='TBD'), SubCorpus(title='Spoken', path='Spoken/Bi-Spoken.txt', summary='TBD') ]
-sub_corpora_c = [SubCorpus(title='Science', path='Science/Bi-Science.txt', summary='TBD'), SubCorpus(title='Subtitles', path='Subtitles/Bi-Subtitles.txt', summary='TBD'), SubCorpus(title='Thesis', path='Thesis/Bi-Thesis.txt', summary='TBD'), SubCorpus(title='Testing', path='Testing/Testing-Data.txt', summary='Test data for the um corpus') ]
+# sub_corpora_c = [SubCorpus(title='Science', path='Science/Bi-Science.txt', summary='TBD'), SubCorpus(title='Subtitles', path='Subtitles/Bi-Subtitles.txt', summary='TBD'), SubCorpus(title='Thesis', path='Thesis/Bi-Thesis.txt', summary='TBD'), SubCorpus(title='Testing', path='Testing/Testing-Data.txt', summary='Test data for the um corpus') ]
 
 corpus = Corpus(
     title='UM-Corpus', 
@@ -74,7 +78,8 @@ corpus = Corpus(
     website='http://nlp2ct.cis.umac.mo/um-corpus/',
     summary=um_summary,
     #sub_corpuses=[SubCorpus(title='Education', path='Education/Bi-Education.txt', summary=um_ed_summary)])
-    sub_corpuses=sub_corpora_c)
+    # sub_corpuses=sub_corpora_c)
+    sub_corpuses=[SubCorpus(title='Microblog', path='Microblog/Bi-Microblog.txt', summary='TBD')])
 
 zh_nlp = stanza.Pipeline('zh')
 # records = cur.fetchall()
@@ -85,7 +90,7 @@ conn = psycopg2.connect("dbname=infinite_input user=xavier password=localdb-4301
 conn.autocommit = True
 cur = conn.cursor()
 
-if (False):
+if (True):
     cur.execute('''
         INSERT INTO mandarin.corpus (title, licence, website, summary) 
         VALUES (%(title)s, %(licence)s, %(website)s, %(summary)s);''',
@@ -117,17 +122,10 @@ for subcorpus in corpus.sub_corpuses:
         chinese = ''
         before = datetime.now()
         document_id = None # the first document has a null reference for its previous_document ref
-        # TODO the english and chinese for at least some sentences have unstripped newlines at their end, ie 溜达
-        # so need to strip those before ingestion
 
-
-        # TODO should probably delete or exclude sentences which just have a single word ie
-        # select * from mandarin.document join mandarin.sentence on document.id = sentence.document_id join mandarin.sentence_word on sentence_word.sentence_id = sentence.id
-        #where document.chinese = '溜达
-        #'; 
-        # which is clearly a bloody dictionary definition? Or maybe this is just more generally a case of 'um corpus is bad'.
         for line in f:
-
+            if(line_index==2):
+                break
             if (line_index%2 == 0):
                 english = line
                 line_index = line_index + 1
@@ -139,24 +137,23 @@ for subcorpus in corpus.sub_corpuses:
                 doc = zh_nlp(chinese)
 
                 # -- -- insert document
-                words = list(map((lambda x: x.text),filter((lambda x: x.upos !='PUNCT'),doc.iter_words())))
 
                 cur.execute('''
-                    INSERT INTO mandarin.document (sub_corpus_title, corpus_title, previous_document, english, chinese, words_upos_not_punct) 
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    INSERT INTO mandarin.document (sub_corpus_title, corpus_title, previous_document, english, chinese) 
+                    VALUES (%s, %s, %s, %s, %s)
                     RETURNING id;''',
-                    (subcorpus.title, corpus.title, document_id, english, chinese, words)
+                    (subcorpus.title, corpus.title, document_id, english, chinese.rstrip() )
                     )
                 document_id = cur.fetchone()[0]
                 # -- -- FOR sentence in document
-                for sentence in doc.sentences:
+                for idx, sentence in enumerate(doc.sentences):
                 # -- -- -- insert sentence
                     # add sentence index TODO (ie a field called document_index that has value 0 for first sentence in a document)
                     cur.execute('''
-                        INSERT INTO mandarin.sentence (document_id, chinese, sentiment) 
-                        VALUES (%s, %s, %s)
+                        INSERT INTO mandarin.sentence (document_id, chinese, sentiment, document_index) 
+                        VALUES (%s, %s, %s, %s)
                         RETURNING id;''',
-                        (document_id, sentence.text, sentence.sentiment)
+                        (document_id, sentence.text, sentence.sentiment, idx)
                         )
                     sentence_id = cur.fetchone()[0]
                     assert(len(sentence.words) == len(sentence.tokens))
@@ -164,23 +161,21 @@ for subcorpus in corpus.sub_corpuses:
                 # -- -- -- -- upsert lemma
                 # -- -- -- -- upsert word sycopg2.extras.execute_batch(cur, sql, argslist, page_size=100)
                 # -- -- -- -- insert sentence_word https://www.psycopg.org/docs/extras.html#fast-exec
-                    ## TODO need to write script to create 'hsk level' like the javascript I have
-                    # TODO for now this is POTENTIALLY ERRONEOUSLY  declaring all as hsk 7!!
                     for i in range(len(sentence.words)):
                         word = sentence.words[i]
                         token = sentence.tokens[i]
                         feats = extract_feats(word)
                         cur.execute('''
-                        INSERT INTO mandarin.word (hanzi, hsk_word_2010, hsk_char_2010) 
-                        VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;
+                        INSERT INTO mandarin.word (hanzi) 
+                        VALUES (%s ) ON CONFLICT DO NOTHING;
                         ''',
-                        (word.text, 7, 7))
+                        (word.text, ))
                         if(word.text != word.lemma):
                             cur.execute('''
-                            INSERT INTO mandarin.word (hanzi, hsk_word_2010, hsk_char_2010) 
-                            VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;
+                            INSERT INTO mandarin.word (hanzi ) 
+                            VALUES (%s ) ON CONFLICT DO NOTHING;
                             ''',
-                            (word.lemma, 7, 7))
+                            (word.lemma, ))
                         cur.execute('''
                         INSERT INTO mandarin.sentence_word (
                             stanza_id, 
@@ -244,7 +239,7 @@ for subcorpus in corpus.sub_corpuses:
                             UPDATE mandarin.sentence_word
                             SET named_entity_id = %s
                             WHERE 
-                                id = %s AND
+                                stanza_id = %s AND
                                 sentence_id = %s
                             ;
                             ''',
@@ -271,82 +266,19 @@ for subcorpus in corpus.sub_corpuses:
             
 
 '''
-First ingestion run of um corpus education, with: set session_replication_role to replica;
-sentences: 450000.0
-6:14:39.901219
-seconds 22479
-374.65
-39
-sentences per second  20.01868410516482
+TODO continue here
+status: I have this file 'runnable' again (don't forget to run delete script and set Corpus boolean before running again).
+The problem is, I don't have my pytorch and or cuda etc set up right - I get various errors, ie:
+My next task is to resolve these errors
 
+/home/xavier/.local/lib/python3.9/site-packages/torch/cuda/__init__.py:52: UserWarning: CUDA initialization: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 803: system has unsupported display driver / cuda driver combination (Triggered internally at  /pytorch/c10/cuda/CUDAFunctions.cpp:115.)
+  return torch._C._cuda_getDeviceCount() > 0
 
-second run:
-starting to process subcorpus: Laws
-440000
-sentences: 220000.0
-5:14:20.435927
-seconds 18860
-314.3333333333333
-20
-sentences per second  11.664899257688228
-starting to process subcorpus: Microblog
-10000
-sentences: 5000.0
-0:04:58.521549
-seconds 298
-4.966666666666667
-58
-sentences per second  16.778523489932887
-starting to process subcorpus: News
-900000
-sentences: 450000.0
-8:55:38.378672
-seconds 32138
-535.6333333333333
-38
-sentences per second  14.00211587528782
-starting to process subcorpus: Spoken
-440000
-sentences: 220000.0
-2:43:13.488250
-seconds 9793
-163.21666666666667
-13
-sentences per second  22.465026039007455
+/home/xavier/.local/lib/python3.9/site-packages/torch/nn/functional.py:652: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  /pytorch/c10/core/TensorImpl.h:1156.)
+  return torch.max_pool1d(input, kernel_size, stride, padding, dilation, ceil_mode)
 
-
-third lot:
-starting to process subcorpus: Science
-540000
-sentences: 270000.0
-4:10:53.951784
-seconds 15053
-250.88333333333333
-53
-sentences per second  17.93662392878496
-starting to process subcorpus: Subtitles
-600000
-sentences: 300000.0
-3:10:27.442756
-seconds 11427
-190.45
-27
-sentences per second  26.253609871357312
-starting to process subcorpus: Thesis
-600000
-sentences: 300000.0
-6:00:16.124225
-seconds 21616
-360.26666666666665
-16
-sentences per second  13.87860843819393
-starting to process subcorpus: Testing
-9998
-sentences: 4999.0
-0:04:50.749203
-seconds 290
-4.833333333333333
-50
-sentences per second  17.23793103448276
+1. fix these errors/fix the installation of this python stuff
+2. re ingest the um corpus
+3. regenerate my sql typescript types, then update gql stuff including generating types etc etc
 
 '''
