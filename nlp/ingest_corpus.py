@@ -66,9 +66,7 @@ Reference
 um_ed_summary = 'The texts in this domain are acquired from online  teaching  materials,  such  as  language  teaching resources,  dictionaries,  etc.,  which  can  be  served  as language education'
 
 # I just so happened to ingest the 8 corpora (+ 1 test set) in these chunks, no significance in their order etc
-# A B done, C done
-#sub_corpora_a=[SubCorpus(title='Education', path='Education/Bi-Education.txt', summary=um_ed_summary)])
-#sub_corpora_b = [SubCorpus(title='Laws', path='Laws/Bi-Laws.txt', summary='TBD'), SubCorpus(title='Microblog', path='Microblog/Bi-Microblog.txt', summary='TBD'), SubCorpus(title='News', path='News/Bi-News.txt', summary='TBD'), SubCorpus(title='Spoken', path='Spoken/Bi-Spoken.txt', summary='TBD') ]
+sub_corpora_b = [SubCorpus(title='Education', path='Education/Bi-Education.txt', summary=um_ed_summary),SubCorpus(title='Laws', path='Laws/Bi-Laws.txt', summary='TBD'), SubCorpus(title='Microblog', path='Microblog/Bi-Microblog.txt', summary='TBD'), SubCorpus(title='News', path='News/Bi-News.txt', summary='TBD'), SubCorpus(title='Spoken', path='Spoken/Bi-Spoken.txt', summary='TBD') ]
 # sub_corpora_c = [SubCorpus(title='Science', path='Science/Bi-Science.txt', summary='TBD'), SubCorpus(title='Subtitles', path='Subtitles/Bi-Subtitles.txt', summary='TBD'), SubCorpus(title='Thesis', path='Thesis/Bi-Thesis.txt', summary='TBD'), SubCorpus(title='Testing', path='Testing/Testing-Data.txt', summary='Test data for the um corpus') ]
 
 corpus = Corpus(
@@ -77,9 +75,7 @@ corpus = Corpus(
     licence='https://creativecommons.org/licenses/by-nc-nd/4.0/',
     website='http://nlp2ct.cis.umac.mo/um-corpus/',
     summary=um_summary,
-    #sub_corpuses=[SubCorpus(title='Education', path='Education/Bi-Education.txt', summary=um_ed_summary)])
-    # sub_corpuses=sub_corpora_c)
-    sub_corpuses=[SubCorpus(title='Microblog', path='Microblog/Bi-Microblog.txt', summary='TBD')])
+    sub_corpuses=sub_corpora_b)
 
 zh_nlp = stanza.Pipeline('zh')
 # records = cur.fetchall()
@@ -124,8 +120,6 @@ for subcorpus in corpus.sub_corpuses:
         document_id = None # the first document has a null reference for its previous_document ref
 
         for line in f:
-            if(line_index==2):
-                break
             if (line_index%2 == 0):
                 english = line
                 line_index = line_index + 1
@@ -276,6 +270,26 @@ My next task is to resolve these errors
 
 /home/xavier/.local/lib/python3.9/site-packages/torch/nn/functional.py:652: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  /pytorch/c10/core/TensorImpl.h:1156.)
   return torch.max_pool1d(input, kernel_size, stride, padding, dilation, ceil_mode)
+
+For 'cuda' I start working thru this doc:
+https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html
+which points me to https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=20.04&target_type=deb_network
+which told me to do this:
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
+sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
+sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /"
+sudo apt-get update
+sudo apt-get -y install cuda
+
+This got rid of the cuda error~!
+
+
+as for the pytorch warning, I can ignore it:
+https://github.com/stanfordnlp/stanza/issues/728
+https://github.com/pytorch/pytorch/issues/54846
+
+In future should update to a new pytorch and wont get the warning anymore
 
 1. fix these errors/fix the installation of this python stuff
 2. re ingest the um corpus

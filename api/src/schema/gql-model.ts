@@ -87,15 +87,28 @@ export type SentenceWord = {
   due: Scalars['Boolean'];
   forgotLISTEN?: Maybe<Scalars['Boolean']>;
   forgotREAD?: Maybe<Scalars['Boolean']>;
-  index: Scalars['Int'];
   lastClicked: Scalars['Int'];
   lemma: Scalars['String'];
   namedEntity?: Maybe<NamedEntity>;
   partOfSpeech: Scalars['String'];
   sentenceId: Scalars['String'];
+  stanzaId: Scalars['Int'];
   universalPartOfSpeech: Scalars['String'];
   word: Word;
   wordHanzi: Scalars['String'];
+};
+
+export type StudyState = {
+  __typename?: 'StudyState';
+  locked: Scalars['Boolean'];
+  learningIndex: Scalars['Int'];
+  f1: Scalars['Int'];
+  f2: Scalars['Int'];
+  due: Scalars['String'];
+  previous: Scalars['String'];
+  understood: Array<Scalars['Boolean']>;
+  understoodCount: Scalars['Int'];
+  underStoodDistinct: Scalars['Int'];
 };
 
 export enum StudyType {
@@ -111,6 +124,8 @@ export type Word = {
   hskWord2010: Scalars['Int'];
   hskChar2010: Scalars['Int'];
   ccceDefinitions: Array<CcceDefinition>;
+  readStudy?: Maybe<StudyState>;
+  listenStudy?: Maybe<StudyState>;
 };
 
 
@@ -201,6 +216,7 @@ export type ResolversTypes = {
   Sentence: ResolverTypeWrapper<sentence>;
   SentenceWord: ResolverTypeWrapper<sentence_word>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  StudyState: ResolverTypeWrapper<StudyState>;
   StudyType: StudyType;
   Upload: ResolverTypeWrapper<Scalars['Upload']>;
   Word: ResolverTypeWrapper<word>;
@@ -217,6 +233,7 @@ export type ResolversParentTypes = {
   Sentence: sentence;
   SentenceWord: sentence_word;
   Boolean: Scalars['Boolean'];
+  StudyState: StudyState;
   Upload: Scalars['Upload'];
   Word: word;
 };
@@ -269,15 +286,28 @@ export type SentenceWordResolvers<ContextType = any, ParentType extends Resolver
   due?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   forgotLISTEN?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   forgotREAD?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  index?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   lastClicked?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   lemma?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namedEntity?: Resolver<Maybe<ResolversTypes['NamedEntity']>, ParentType, ContextType>;
   partOfSpeech?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   sentenceId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  stanzaId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   universalPartOfSpeech?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   word?: Resolver<ResolversTypes['Word'], ParentType, ContextType>;
   wordHanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type StudyStateResolvers<ContextType = any, ParentType extends ResolversParentTypes['StudyState'] = ResolversParentTypes['StudyState']> = {
+  locked?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  learningIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  f1?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  f2?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  due?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  previous?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  understood?: Resolver<Array<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  understoodCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  underStoodDistinct?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -290,6 +320,8 @@ export type WordResolvers<ContextType = any, ParentType extends ResolversParentT
   hskWord2010?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   hskChar2010?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   ccceDefinitions?: Resolver<Array<ResolversTypes['CCCEDefinition']>, ParentType, ContextType>;
+  readStudy?: Resolver<Maybe<ResolversTypes['StudyState']>, ParentType, ContextType>;
+  listenStudy?: Resolver<Maybe<ResolversTypes['StudyState']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -300,6 +332,7 @@ export type Resolvers<ContextType = any> = {
   Query?: QueryResolvers<ContextType>;
   Sentence?: SentenceResolvers<ContextType>;
   SentenceWord?: SentenceWordResolvers<ContextType>;
+  StudyState?: StudyStateResolvers<ContextType>;
   Upload?: GraphQLScalarType;
   Word?: WordResolvers<ContextType>;
 };

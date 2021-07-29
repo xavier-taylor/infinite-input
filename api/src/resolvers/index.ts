@@ -11,13 +11,15 @@ export const resolvers: Resolvers<IContextType> = {
   },
   Word: {
     hanzi: ({ hanzi }) => hanzi,
-    hskChar2010: ({ hsk_char_2010 }) => hsk_char_2010,
-    hskWord2010: ({ hsk_word_2010 }) => hsk_word_2010,
+    hskChar2010: ({ hsk_char_2010 }) => hsk_char_2010 ?? 7,
+    hskWord2010: ({ hsk_word_2010 }) => hsk_word_2010 ?? 7,
     ccceDefinitions: ({ hanzi }, _args, { repo }) => repo.getCCCE(hanzi),
+    // readStudy: TODO make resolvers for these. Note that these resolvers
+    // listenStudy: get parametized by the hanzi via args, and by student_id via context!
   },
   SentenceWord: {
     sentenceId: ({ sentence_id }) => sentence_id,
-    index: ({ id }) => id,
+    stanzaId: ({ stanza_id }) => stanza_id,
     wordHanzi: ({ word_hanzi }) => word_hanzi,
     lemma: ({ lemma }) => lemma,
     partOfSpeech: ({ part_of_speech }) => part_of_speech,

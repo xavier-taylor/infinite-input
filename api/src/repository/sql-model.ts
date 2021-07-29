@@ -26,24 +26,6 @@ export interface document {
   previous_document: string | null;
   english: string | null;
   chinese: string;
-  words_upos_not_punct: any;
-}
-export interface document_augmented {
-  document_id: string | null;
-  document_chinese: string | null;
-  document_english: string | null;
-  unique_words_no_punct: any | null;
-  unique_words_no_num_no_punct: any | null;
-}
-export interface document_with_words {
-  document_id: string | null;
-  document_chinese: string | null;
-  document_english: string | null;
-  words: any | null;
-}
-export interface document_word {
-  document_id: string | null;
-  word: string | null;
 }
 export interface listen_log {
   date_time: Date;
@@ -70,12 +52,14 @@ export interface read_log {
 export interface sentence {
   id?: string;
   document_id: string;
+  document_index: number;
   chinese: string;
   sentiment: string;
 }
 export interface sentence_word {
-  id: number;
+  stanza_id: number;
   sentence_id: string;
+  document_id: string;
   word_hanzi: string;
   lemma: string;
   part_of_speech: string;
@@ -93,35 +77,48 @@ export interface student {
   first_name: string;
   last_name: string;
 }
+export interface student_document {
+  student_id: string;
+  document_id: string;
+  marked_as_bad: boolean;
+}
 export interface student_document_listen {
   student_id: string;
   document_id: string;
   listen_count: string;
+  last_listened: Date | null;
 }
 export interface student_document_read {
   student_id: string;
   document_id: string;
   read_count: string;
+  last_read: Date | null;
 }
 export interface student_word_listen {
   student_id: string;
   word_hanzi: string;
+  learning_index: number;
   f1: string;
   f2: string;
   due: Date;
   previous: Date;
+  understood: any;
   understood_count: string;
   understood_distinct_documents_count: string;
+  locked: boolean;
 }
 export interface student_word_read {
   student_id: string;
   word_hanzi: string;
+  learning_index: number;
   f1: string;
   f2: string;
   due: Date;
   previous: Date;
+  understood: any;
   understood_count: string;
   understood_distinct_documents_count: string;
+  locked: boolean;
 }
 export interface sub_corpus {
   title: string;
@@ -130,6 +127,6 @@ export interface sub_corpus {
 }
 export interface word {
   hanzi: string;
-  hsk_word_2010: number;
-  hsk_char_2010: number;
+  hsk_word_2010: number | null;
+  hsk_char_2010: number | null;
 }

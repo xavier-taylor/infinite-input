@@ -4,6 +4,8 @@ DROP SCHEMA IF EXISTS mandarin CASCADE;
 
 CREATE SCHEMA mandarin;
 
+-- TODO - need to include unihan data
+-- which will allow me to map things like 'is simplified variant/is traditional variant'
 CREATE TABLE mandarin.word
 (
     hanzi text,
@@ -47,9 +49,14 @@ CREATE TABLE mandarin.student
     PRIMARY KEY (id)
 );
 
-
+-- locked could have gone on the mandarin.word itself. This approachs allows more finegrained
+-- locking and unlocking, however. To start with, I will just have words unlocked as pairs (listen and read)
+-- but in future UI could allow you to lock just the reads, for example.
+-- This approch is also better because the flexibility might allow me to
+-- block the unlocking of say, student_word_listen for traditional variants
 CREATE TABLE mandarin.student_word_listen
 (
+    locked boolean not null;
     student_id bigint REFERENCES mandarin.student (id),
     word_hanzi text REFERENCES mandarin.word (hanzi),
     learning_index int NOT NULL, -- This indexes the array of 'learning' steps, in minutes, ie [1,10] etc - this array is hardcoded in the server for now
@@ -67,6 +74,7 @@ COMMENT ON COLUMN mandarin.student_word_listen.understood
 
 CREATE TABLE mandarin.student_word_read
 (
+    locked boolean not null;
     student_id bigint REFERENCES mandarin.student (id),
     word_hanzi text REFERENCES mandarin.word (hanzi),
     learning_index int NOT NULL,

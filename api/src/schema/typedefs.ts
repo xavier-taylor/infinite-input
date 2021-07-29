@@ -18,16 +18,31 @@ export const typeDefs = gql`
     definitions: [String!]!
   }
 
+  # this represents student_word_listen and student_word_read
+  type StudyState {
+    locked: Boolean!
+    learningIndex: Int!
+    f1: Int!
+    f2: Int!
+    due: String! # TODO is there a date type I can easily use that wont break my tooling?
+    previous: String!
+    understood: [Boolean!]!
+    understoodCount: Int!
+    underStoodDistinct: Int!
+  }
+
   type Word {
     hanzi: String!
     hskWord2010: Int!
     hskChar2010: Int!
     ccceDefinitions: [CCCEDefinition!]! # possible that some words lack definition - in that case, we just get an empty array here.
+    readStudy: StudyState # can be null because we only create this once we edit it
+    listenStudy: StudyState # unlike other fields, these last 2 fields are user specific.
   }
 
   type SentenceWord {
     sentenceId: String!
-    index: Int! # this corresponds to what is currently 'id' on sentence_word, which is the index of the word in this sentence
+    stanzaId: Int! # this is the (1 based) index of the word in this sentence
     wordHanzi: String!
     lemma: String!
     partOfSpeech: String!

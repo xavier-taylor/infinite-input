@@ -4,7 +4,6 @@ import { Document, SentenceWord, StudyType, Word } from '../schema/gql-model';
 import {
   cc_cedict,
   document,
-  document_word,
   sentence,
   sentence_word,
   word,
