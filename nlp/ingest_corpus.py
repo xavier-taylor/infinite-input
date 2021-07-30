@@ -67,7 +67,9 @@ um_ed_summary = 'The texts in this domain are acquired from online  teaching  ma
 
 # I just so happened to ingest the 8 corpora (+ 1 test set) in these chunks, no significance in their order etc
 sub_corpora_b = [SubCorpus(title='Education', path='Education/Bi-Education.txt', summary=um_ed_summary),SubCorpus(title='Laws', path='Laws/Bi-Laws.txt', summary='TBD'), SubCorpus(title='Microblog', path='Microblog/Bi-Microblog.txt', summary='TBD'), SubCorpus(title='News', path='News/Bi-News.txt', summary='TBD'), SubCorpus(title='Spoken', path='Spoken/Bi-Spoken.txt', summary='TBD') ]
-# sub_corpora_c = [SubCorpus(title='Science', path='Science/Bi-Science.txt', summary='TBD'), SubCorpus(title='Subtitles', path='Subtitles/Bi-Subtitles.txt', summary='TBD'), SubCorpus(title='Thesis', path='Thesis/Bi-Thesis.txt', summary='TBD'), SubCorpus(title='Testing', path='Testing/Testing-Data.txt', summary='Test data for the um corpus') ]
+# sub b is done
+# sub_corpora_c = [ SubCorpus(title='Subtitles', path='Subtitles/Bi-Subtitles.txt', summary='TBD'), SubCorpus(title='Thesis', path='Thesis/Bi-Thesis.txt', summary='TBD'), SubCorpus(title='Testing', path='Testing/Testing-Data.txt', summary='Test data for the um corpus') ]
+# sub_corpora_d = [SubCorpus(title='Science', path='Science/Bi-Science.txt', summary='TBD')  ]
 
 corpus = Corpus(
     title='UM-Corpus', 
