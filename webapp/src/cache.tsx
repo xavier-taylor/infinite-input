@@ -29,7 +29,10 @@ export const haveFetchedDocsToListenVar = makeVar<boolean>(false);
 */
 
 // https://www.apollographql.com/blog/apollo-client/caching/local-state-management-with-reactive-variables/#use-case-3-locally-decorated-remote-data
-export type SentenceWordLocal = Pick<SentenceWord, 'index' | 'sentenceId'> & {
+export type SentenceWordLocal = Pick<
+  SentenceWord,
+  'stanzaId' | 'sentenceId'
+> & {
   forgot: boolean | undefined;
 };
 export const readSentenceWordsVar = makeVar<SentenceWordLocal[]>([]);
@@ -74,7 +77,7 @@ const typePolicies: TypedTypePolicies = {
     keyFields: ['hanzi'],
   },
   SentenceWord: {
-    keyFields: ['index', 'sentenceId'],
+    keyFields: ['stanzaId', 'sentenceId'],
     fields: {
       forgotLISTEN: {
         read(forgotLISTEN = false) {

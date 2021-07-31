@@ -172,7 +172,7 @@ const Study: React.FC<StudyProps> = ({
     undefined
   );
   const [recentWord, setRecentWord] = useState<
-    Partial<Pick<SentenceWord, 'sentenceId' | 'index'>>
+    Partial<Pick<SentenceWord, 'sentenceId' | 'stanzaId'>>
   >({});
 
   //   // // This maps keeps track of things we care about happening for a given sentence word. has to be 2d since data is 2d
@@ -230,7 +230,7 @@ const Study: React.FC<StudyProps> = ({
             const bSIndex = parseInt(b.sentenceId); // TODO once we have an INDEX on sentence (stored on sentenceword too!) which tracks the sentences index(order) inside its document, we can just use that here properly
             const aSIndex = parseInt(a.sentenceId);
             if (aSIndex === bSIndex) {
-              return b.index - a.index;
+              return b.stanzaId - a.stanzaId;
             } else {
               return bSIndex - aSIndex;
             }
@@ -242,13 +242,13 @@ const Study: React.FC<StudyProps> = ({
             const bSIndex = parseInt(b.sentenceId); // TODO once we have an INDEX on sentence (stored on sentenceword too!) which tracks the sentences index(order) inside its document, we can just use that here properly
             const aSIndex = parseInt(a.sentenceId);
             if (aSIndex === bSIndex) {
-              return b.index - a.index;
+              return b.stanzaId - a.stanzaId;
             } else {
               return bSIndex - aSIndex;
             }
           });
   function markForgot(
-    { sentenceId, index }: SentenceWord,
+    { sentenceId, stanzaId }: SentenceWord,
     mode: StudyType,
     forgot: boolean
   ) {
@@ -267,13 +267,13 @@ const Study: React.FC<StudyProps> = ({
         sentenceWord: {
           __typename: 'SentenceWord',
           sentenceId,
-          index,
+          stanzaId,
           [`forgot${mode}`]: forgot,
         },
       },
       variables: {
         sentenceId,
-        index,
+        stanzaId,
       },
     });
   }
@@ -283,20 +283,20 @@ const Study: React.FC<StudyProps> = ({
     mode: StudyType,
     studyState: studyStates
   ) {
-    const { sentenceId, index } = sentenceWord;
+    const { sentenceId, stanzaId } = sentenceWord;
     if (studyState === 'study') {
       markForgot(sentenceWord, mode, true);
     }
 
-    setRecentWord({ sentenceId, index }); // TODO rename this variable
+    setRecentWord({ sentenceId, stanzaId }); // TODO rename this variable
     // TODO think of way to make this neater, maybe using fragment
     // ie, dont do both this and the above writeQuery, just one
 
     cache.writeQuery({
       query: gql`
-        query UpdateLastClicked($sentenceId: String!, $index: Int!) {
-          sentenceWord(sentenceId: $sentenceId, index: $index) {
-            index
+        query UpdateLastClicked($sentenceId: String!, $stanzaId: Int!) {
+          sentenceWord(sentenceId: $sentenceId, stanzaId: $stanzaId) {
+            stanzaId
             sentenceId
             lastClicked
           }
@@ -306,13 +306,13 @@ const Study: React.FC<StudyProps> = ({
         sentenceWord: {
           __typename: 'SentenceWord',
           sentenceId,
-          index,
+          stanzaId,
           lastClicked: new Date().getTime(),
         },
       },
       variables: {
         sentenceId,
-        index,
+        stanzaId,
       },
     });
   }
@@ -342,7 +342,7 @@ const Study: React.FC<StudyProps> = ({
                 <span
                   style={{ cursor: 'pointer' }}
                   onClick={() => handleWordClick(w, mode, studyState)}
-                  key={`${w.wordHanzi}-${w.index}-${w.sentenceId}`}
+                  key={`${w.wordHanzi}-${w.stanzaId}-${w.sentenceId}`}
                 >
                   {w.wordHanzi}
                 </span>
@@ -405,7 +405,7 @@ const Study: React.FC<StudyProps> = ({
           >
             <Card
               className={clsx(
-                word.index === recentWord.index &&
+                word.stanzaId === recentWord.stanzaId &&
                   word.sentenceId === recentWord.sentenceId &&
                   classes.recentCard,
                 classes.definition

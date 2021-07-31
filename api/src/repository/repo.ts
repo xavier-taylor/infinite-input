@@ -1,4 +1,3 @@
-import { tickNum } from 'event-loop-ticks'; // for debugging only
 import { Pool } from 'pg';
 import { Document, SentenceWord, StudyType, Word } from '../schema/gql-model';
 import {
@@ -157,7 +156,6 @@ export class PostgresqlRepo {
   // prior to data loader we were doing seperate calls for each, including
   // for the same word over and over
   async getCCCE(hanzi: string) {
-    console.log('tick: ', tickNum(), hanzi); // for testing only TODO
     return this.ccceLoader.load(hanzi);
   }
 
@@ -193,22 +191,26 @@ export class PostgresqlRepo {
     //   .groupBy('document.chinese', 'document.id', 'document.english')
     //   .having(this.knex.raw('count(document.id)'), '>', '1')
     //   .limit(1);
-    const rv = this.knex.raw(
-      `SELECT document.chinese,document.id, english, sub_corpus_title, corpus_title, count(document.id) 
-      from document join sentence on document.id = sentence.document_id  
-      group by (document.chinese,document.id, english, sub_corpus_title, corpus_title) having count(document.id)>1 LIMIT 2;
-`
-    );
 
     // based on complete_query.sql, just for testing/mucking around purposes
-    const candidates = `SELECT chinese,id, english, sub_corpus_title, corpus_title from document WHERE
+    const candidates = `
+SELECT 
+	chinese,id, english, sub_corpus_title, corpus_title
+FROM
+	document 
 -- doesn't exist a word I don't know
-NOT EXISTS (
-	Select 1 FROM document_word
-	left join :student_word: ON :student_word:.word_hanzi = document_word.word AND :student_word:.student_id = :studentId
-	WHERE :student_word:.word_hanzi is null
-	and document_word.document_id = document.id
-	) `;
+WHERE NOT EXISTS (
+	SELECT 
+		1
+	FROM
+		sentence_word
+	LEFT JOIN
+		student_word_read
+	ON
+		student_word_read.student_id = 1 AND student_word_read.word_hanzi = sentence_word.word_hanzi
+	WHERE
+		student_word_read.word_hanzi IS null AND sentence_word.document_id = document.id AND sentence_word.universal_part_of_speech NOT IN ('PUNCT', 'NUM')
+)`;
     const cVars = {
       student_word:
         type === StudyType.Read ? 'student_word_read' : 'student_word_listen',
@@ -216,13 +218,14 @@ NOT EXISTS (
     };
     const due = `SELECT word_hanzi FROM :student_word: WHERE student_id = :studentId AND due <= CURRENT_DATE`;
     const dVars = { ...cVars }; // its the same, for now
+    // TODO implement propery sorting/aggregation etc ie use of count() and distinct()
     return this.knex
       .with('candidates', this.knex.raw(candidates, cVars))
       .with('due', this.knex.raw(due, dVars))
       .select('id', 'sub_corpus_title', 'corpus_title', 'english', 'chinese')
       .from('candidates')
-      .join('document_word', 'candidates.id', '=', 'document_word.document_id')
-      .join('due', 'document_word.word', '=', 'due.word_hanzi')
+      .join('sentence_word', 'candidates.id', '=', 'sentence_word.document_id')
+      .join('due', 'sentence_word.word_hanzi', '=', 'due.word_hanzi')
       .groupBy('id', 'chinese', 'english', 'sub_corpus_title', 'corpus_title')
       .limit(10); // TODO make this query real!
   }
@@ -239,7 +242,7 @@ NOT EXISTS (
     // return this.knex.r
 
     return this.knex('document')
-      .join('document_word', 'document.id', '=', 'document_word.document_id')
+      .join('sentence_word', 'document.id', '=', 'sentence_word.document_id')
       .limit(10)
       .select(
         'id',

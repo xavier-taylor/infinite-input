@@ -23,37 +23,37 @@ export function useSentenceWords(
   const setForgot = (
     mode: StudyType,
     forgot: boolean,
-    index: SentenceWord['index'],
+    stanzaId: SentenceWord['stanzaId'],
     sentenceId: SentenceWord['sentenceId']
   ) => {
     let newOrUpdated;
     if (mode === StudyType.Read) {
       const existing = readSWV().find(
-        (w) => w.index === index && w.sentenceId === sentenceId
+        (w) => w.stanzaId === stanzaId && w.sentenceId === sentenceId
       );
       if (existing) {
         newOrUpdated = { ...existing, forgot };
       } else {
-        newOrUpdated = { index, sentenceId, forgot };
+        newOrUpdated = { stanzaId, sentenceId, forgot };
       }
       readSWV([
         ...readSWV().filter(
-          (w) => !(w.index === index && w.sentenceId === sentenceId)
+          (w) => !(w.stanzaId === stanzaId && w.sentenceId === sentenceId)
         ),
         newOrUpdated,
       ]);
     } else if (mode === StudyType.Listen) {
       const existing = listenSWV().find(
-        (w) => w.index === index && w.sentenceId === sentenceId
+        (w) => w.stanzaId === stanzaId && w.sentenceId === sentenceId
       );
       if (existing) {
         newOrUpdated = { ...existing, forgot };
       } else {
-        newOrUpdated = { index, sentenceId, forgot };
+        newOrUpdated = { stanzaId, sentenceId, forgot };
       }
       listenSWV([
         ...listenSWV().filter(
-          (w) => !(w.index === index && w.sentenceId === sentenceId)
+          (w) => !(w.stanzaId === stanzaId && w.sentenceId === sentenceId)
         ),
         newOrUpdated,
       ]);
