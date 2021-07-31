@@ -22,7 +22,7 @@ WHERE NOT EXISTS (
 due as (SELECT word_hanzi FROM student_word_read WHERE student_id = 1 AND due <= CURRENT_DATE)
 -- exists a word that is due today
 select 
-	id, chinese, english, count(sentence_word.word_hanzi), array_agg(sentence_word.word_hanzi)as due, cast(count(sentence_word.word_hanzi) as float)/cast((length(chinese)-1) as float) as fraction_due 
+	id, chinese, english, count(sentence_word.word_hanzi), array_agg(sentence_word.word_hanzi)as due, cast(count(sentence_word.word_hanzi) as float)/cast((length(chinese)) as float) as fraction_due 
 from 
 	candidates 
 JOIN 

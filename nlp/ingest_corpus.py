@@ -5,6 +5,9 @@ from typing import List
 from datetime import datetime
 from psycopg2.extras import Json
 
+
+# TODO - refactor so can also ingest tatoeba file. use https://pypi.org/project/chinese-converter/ to convert to simp
+
 '''
 >> import stanza
 >>> stanza.download('zh') - you need to do this to get the chinese models first
@@ -66,9 +69,9 @@ Reference
 um_ed_summary = 'The texts in this domain are acquired from online  teaching  materials,  such  as  language  teaching resources,  dictionaries,  etc.,  which  can  be  served  as language education'
 
 # I just so happened to ingest the 8 corpora (+ 1 test set) in these chunks, no significance in their order etc
-sub_corpora_b = [SubCorpus(title='Education', path='Education/Bi-Education.txt', summary=um_ed_summary),SubCorpus(title='Laws', path='Laws/Bi-Laws.txt', summary='TBD'), SubCorpus(title='Microblog', path='Microblog/Bi-Microblog.txt', summary='TBD'), SubCorpus(title='News', path='News/Bi-News.txt', summary='TBD'), SubCorpus(title='Spoken', path='Spoken/Bi-Spoken.txt', summary='TBD') ]
+# sub_corpora_b = [SubCorpus(title='Education', path='Education/Bi-Education.txt', summary=um_ed_summary),SubCorpus(title='Laws', path='Laws/Bi-Laws.txt', summary='TBD'), SubCorpus(title='Microblog', path='Microblog/Bi-Microblog.txt', summary='TBD'), SubCorpus(title='News', path='News/Bi-News.txt', summary='TBD'), SubCorpus(title='Spoken', path='Spoken/Bi-Spoken.txt', summary='TBD') ]
 # sub b is done
-# sub_corpora_c = [ SubCorpus(title='Subtitles', path='Subtitles/Bi-Subtitles.txt', summary='TBD'), SubCorpus(title='Thesis', path='Thesis/Bi-Thesis.txt', summary='TBD'), SubCorpus(title='Testing', path='Testing/Testing-Data.txt', summary='Test data for the um corpus') ]
+sub_corpora_c = [ SubCorpus(title='Subtitles', path='Subtitles/Bi-Subtitles.txt', summary='TBD'), SubCorpus(title='Thesis', path='Thesis/Bi-Thesis.txt', summary='TBD'), SubCorpus(title='Testing', path='Testing/Testing-Data.txt', summary='Test data for the um corpus') ]
 # sub_corpora_d = [SubCorpus(title='Science', path='Science/Bi-Science.txt', summary='TBD')  ]
 
 corpus = Corpus(
@@ -77,7 +80,7 @@ corpus = Corpus(
     licence='https://creativecommons.org/licenses/by-nc-nd/4.0/',
     website='http://nlp2ct.cis.umac.mo/um-corpus/',
     summary=um_summary,
-    sub_corpuses=sub_corpora_b)
+    sub_corpuses=sub_corpora_c)
 
 zh_nlp = stanza.Pipeline('zh')
 # records = cur.fetchall()
@@ -88,7 +91,7 @@ conn = psycopg2.connect("dbname=infinite_input user=xavier password=localdb-4301
 conn.autocommit = True
 cur = conn.cursor()
 
-if (True):
+if (False):
     cur.execute('''
         INSERT INTO mandarin.corpus (title, licence, website, summary) 
         VALUES (%(title)s, %(licence)s, %(website)s, %(summary)s);''',
