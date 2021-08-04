@@ -235,12 +235,6 @@ WHERE NOT EXISTS (
   }
   // I am using this for concordance - TODO - make a toggleable version that only returns docs where you know all the words, or even just sortable by whether you know al lthe words
   async getDocuments(options: { including: string[] }): Promise<document[]> {
-    // make a 'word to document' function for single word reviews.
-    // get the actual list of due words, then work thru results from this query etc
-
-    // const raw = `select id, sub_corpus_title, corpus_title, previous_document, english, chinese from document join document_word on document.id = document_id limit 5;`
-    // return this.knex.r
-
     return this.knex('document')
       .join('sentence_word', 'document.id', '=', 'sentence_word.document_id')
       .limit(10)
@@ -252,10 +246,11 @@ WHERE NOT EXISTS (
         'english',
         'chinese'
       )
-      .whereIn('word', options.including);
+      .whereIn('word_hanzi', options.including);
     // .limit(10); // TODO fix this so that if arg is not passed the wherein is not applied
     // TODO make this just return unique documents!
   }
+
   async documentById(id: string) {
     return (this.knex('document')
       .select<document>(

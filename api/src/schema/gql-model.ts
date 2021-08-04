@@ -1,4 +1,4 @@
-import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
+import { GraphQLResolveInfo } from 'graphql';
 import { document, sentence, sentence_word, word, cc_cedict } from '../repository/sql-model';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -12,10 +12,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** The `Upload` scalar type represents a file upload. */
-  Upload: any;
 };
-
 
 export type CcceDefinition = {
   __typename?: 'CCCEDefinition';
@@ -25,11 +22,6 @@ export type CcceDefinition = {
   pinyin: Scalars['String'];
   definitions: Array<Scalars['String']>;
 };
-
-export enum CacheControlScope {
-  Public = 'PUBLIC',
-  Private = 'PRIVATE'
-}
 
 export type Document = {
   __typename?: 'Document';
@@ -116,7 +108,6 @@ export enum StudyType {
   Listen = 'LISTEN',
   ListenHuman = 'LISTEN_HUMAN'
 }
-
 
 export type Word = {
   __typename?: 'Word';
@@ -208,7 +199,6 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = {
   CCCEDefinition: ResolverTypeWrapper<cc_cedict>;
   String: ResolverTypeWrapper<Scalars['String']>;
-  CacheControlScope: CacheControlScope;
   Document: ResolverTypeWrapper<document>;
   NamedEntity: ResolverTypeWrapper<NamedEntity>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
@@ -218,7 +208,6 @@ export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   StudyState: ResolverTypeWrapper<StudyState>;
   StudyType: StudyType;
-  Upload: ResolverTypeWrapper<Scalars['Upload']>;
   Word: ResolverTypeWrapper<word>;
 };
 
@@ -234,14 +223,8 @@ export type ResolversParentTypes = {
   SentenceWord: sentence_word;
   Boolean: Scalars['Boolean'];
   StudyState: StudyState;
-  Upload: Scalars['Upload'];
   Word: word;
 };
-
-export type CacheControlDirectiveArgs = {   maxAge?: Maybe<Scalars['Int']>;
-  scope?: Maybe<CacheControlScope>; };
-
-export type CacheControlDirectiveResolver<Result, Parent, ContextType = any, Args = CacheControlDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export type CcceDefinitionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CCCEDefinition'] = ResolversParentTypes['CCCEDefinition']> = {
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -311,10 +294,6 @@ export type StudyStateResolvers<ContextType = any, ParentType extends ResolversP
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export interface UploadScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Upload'], any> {
-  name: 'Upload';
-}
-
 export type WordResolvers<ContextType = any, ParentType extends ResolversParentTypes['Word'] = ResolversParentTypes['Word']> = {
   hanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   hskWord2010?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -333,7 +312,6 @@ export type Resolvers<ContextType = any> = {
   Sentence?: SentenceResolvers<ContextType>;
   SentenceWord?: SentenceWordResolvers<ContextType>;
   StudyState?: StudyStateResolvers<ContextType>;
-  Upload?: GraphQLScalarType;
   Word?: WordResolvers<ContextType>;
 };
 
@@ -343,13 +321,3 @@ export type Resolvers<ContextType = any> = {
  * Use "Resolvers" root object instead. If you wish to get "IResolvers", add "typesPrefix: I" to your config.
  */
 export type IResolvers<ContextType = any> = Resolvers<ContextType>;
-export type DirectiveResolvers<ContextType = any> = {
-  cacheControl?: CacheControlDirectiveResolver<any, any, ContextType>;
-};
-
-
-/**
- * @deprecated
- * Use "DirectiveResolvers" root object instead. If you wish to get "IDirectiveResolvers", add "typesPrefix: I" to your config.
- */
-export type IDirectiveResolvers<ContextType = any> = DirectiveResolvers<ContextType>;

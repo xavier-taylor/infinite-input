@@ -37,5 +37,10 @@ order by
 
 -- took 11.5 secs before index creation
 -- took 6.5-7 secs after btree index creation
+-- with hash index also seemed to take 6.5 seconds
 
 --
+
+
+-- TODO - try version of query that is just a join that starts from
+-- ie from student_word_read join sentence word join document (something like that)

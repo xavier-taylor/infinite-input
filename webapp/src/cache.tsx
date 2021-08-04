@@ -1,5 +1,10 @@
 import { InMemoryCache, InMemoryCacheConfig, makeVar } from '@apollo/client';
-import { Document, SentenceWord, TypedTypePolicies } from './schema/generated';
+import {
+  Document,
+  DocumentByIdQueryVariables,
+  SentenceWord,
+  TypedTypePolicies,
+} from './schema/generated';
 
 // OPTIMIZATION - consider storying these properties in the cache somehow?
 export type DocumentIdList = Array<Document['id']>;
@@ -41,6 +46,19 @@ export const listenSentenceWordsVar = makeVar<SentenceWordLocal[]>([]);
 const typePolicies: TypedTypePolicies = {
   Query: {
     fields: {
+      document: {
+        read(_, { args, toReference }) {
+          // This tells us to try the query Document (which is a by id query) first against our cache.
+          // note that if there is a cache miss, it still queries the server (I tested this)
+          // https://stackoverflow.com/questions/65842596/apollo-client-using-cached-results-from-object-list-in-response-to-query-for-s?rq=1
+          // I cast it because this query will always have args of this shape
+          const vars = args as DocumentByIdQueryVariables;
+          return toReference({
+            __typename: 'Document',
+            id: vars.id,
+          });
+        },
+      },
       haveFetchedDocsToRead: {
         read() {
           return haveFetchedDocsToReadVar();

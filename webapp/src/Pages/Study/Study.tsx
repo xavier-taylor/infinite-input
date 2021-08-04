@@ -154,8 +154,7 @@ const Study: React.FC<StudyProps> = ({
   prevAvailable,
   mode,
 }) => {
-  // OPTIMIZATION if I just make this query grab top level sentence words, and leave fetching
-  // the word definitions to this definition cards, I can use the front end cache. OPTIMIZATION
+  // CONTINUE HERE TODO = why isn't this using the cached documents? are they in the cache the way I think they are?
   const { data, loading, error } = useQuery(DocumentByIdDocument, {
     variables: { id: documentId },
   });
@@ -214,6 +213,16 @@ const Study: React.FC<StudyProps> = ({
   for (let s of document.sentences) {
     words.push(...s.words);
   }
+  // apparently these are not guaranteed to be sorted by the server, could move this sorting there? TODO
+  words.sort((b, a) => {
+    const bSIndex = parseInt(b.sentenceId);
+    const aSIndex = parseInt(a.sentenceId);
+    if (aSIndex === bSIndex) {
+      return b.stanzaId - a.stanzaId;
+    } else {
+      return bSIndex - aSIndex;
+    }
+  });
   // OPTIMIZATION: since I am not really using the grid, perhaps remove it and just have a simple flexbox?
   const forgot = (mode: StudyType, word: SentenceWord) =>
     !!(mode === StudyType.Read && word.forgotREAD) ||
@@ -227,7 +236,7 @@ const Study: React.FC<StudyProps> = ({
           .sort((a, b) => b.lastClicked - a.lastClicked)
           .slice(0, numberToShow)
           .sort((b, a) => {
-            const bSIndex = parseInt(b.sentenceId); // TODO once we have an INDEX on sentence (stored on sentenceword too!) which tracks the sentences index(order) inside its document, we can just use that here properly
+            const bSIndex = parseInt(b.sentenceId);
             const aSIndex = parseInt(a.sentenceId);
             if (aSIndex === bSIndex) {
               return b.stanzaId - a.stanzaId;
@@ -247,6 +256,7 @@ const Study: React.FC<StudyProps> = ({
               return bSIndex - aSIndex;
             }
           });
+
   function markForgot(
     { sentenceId, stanzaId }: SentenceWord,
     mode: StudyType,

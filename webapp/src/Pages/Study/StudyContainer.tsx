@@ -21,12 +21,11 @@ interface StudyContainerProps {
   drawerOpen: boolean;
   mode: StudyType; // note this is a graphql enum!
 }
+
 const StudyContainer: React.FC<StudyContainerProps> = ({
   drawerOpen,
   mode,
 }) => {
-  // I think this state logic is painful,  and I would definitely like to introduce a redux store to keep track of it
-  ///  or if redux store isn't the answer, something more sane and manageeabke
   let haveFetchedDocsVar: ReactiveVar<boolean>;
   let toStudyVar: ReactiveVar<DocumentIdList>;
   let studiedVar: ReactiveVar<DocumentIdList>;
@@ -86,6 +85,7 @@ const StudyContainer: React.FC<StudyContainerProps> = ({
   } else if (haveFetchedDocs) {
     if (ids.length > 0 && haveFetchedDocs) {
       const nextDocumentToStudy = ids[0];
+
       return (
         <Study
           mode={mode}
