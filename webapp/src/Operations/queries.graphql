@@ -14,9 +14,14 @@ query Concordance($word: String!) {
     }
   }
 }
-query DocumentsDue($studyType: StudyType!) {
-  documentsDue(studyType: $studyType) {
-    ...EntireDocument
+query Due($studyType: StudyType!) {
+  due(studyType: $studyType) {
+    documents {
+      ...EntireDocument
+    }
+    orphans {
+      hanzi
+    }
   }
 }
 

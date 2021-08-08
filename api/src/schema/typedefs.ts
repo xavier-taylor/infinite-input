@@ -91,7 +91,7 @@ export const typeDefs = gql`
     words(words: [String!]!): [Word!]! # the param words is the hanzi strins
     #word: Word
     #document: Document
-    documentsDue(studyType: StudyType!): [Document!]!
+    due(studyType: StudyType!): Due!
     document(id: String!): Document!
     concordanceDocs(word: String!): [Document!]!
   }

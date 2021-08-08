@@ -139,19 +139,15 @@ interface StudyProps {
   documentId: string;
   mode: StudyType;
   next: () => void;
-  previous: () => void;
   nextAvailable: boolean;
-  prevAvailable: boolean;
 }
 // TODO strip newlines from sentences in database! - ie update ingestion script?
 
 const Study: React.FC<StudyProps> = ({
   next,
-  previous,
   drawerOpen,
   documentId,
   nextAvailable,
-  prevAvailable,
   mode,
 }) => {
   // CONTINUE HERE TODO = why isn't this using the cached documents? are they in the cache the way I think they are?
@@ -192,10 +188,6 @@ const Study: React.FC<StudyProps> = ({
 
   // No - all this stuff should be kept in the apollo cache as local state - extra cool - when we click 'prev', the old study state is still there!
 
-  const leftButtonText: Record<studyStates, string> = {
-    study: 'Undo',
-    check: 'Hide',
-  };
   const rightButtonText: Record<studyStates, string> = {
     study: 'Show',
     check: 'Next',
@@ -370,18 +362,15 @@ const Study: React.FC<StudyProps> = ({
           <CardActions classes={{ root: classes.cardActionRoot }}>
             <ButtonGroup classes={{ grouped: classes.buttonGroupGrouped }}>
               <Button
-                disabled={!prevAvailable && studyState === 'study'}
+                disabled={studyState === 'study'}
                 onClick={() => {
-                  if (studyState === 'study') {
-                    previous();
-                  }
                   setStudyState(studyState === 'check' ? 'study' : 'check');
                 }}
                 variant="outlined"
                 color="default"
                 size="medium"
               >
-                {leftButtonText[studyState]}
+                Hide
               </Button>
               <Button
                 disabled={!nextAvailable && studyState === 'check'}

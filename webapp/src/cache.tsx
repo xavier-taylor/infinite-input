@@ -68,6 +68,19 @@ const typePolicies: TypedTypePolicies = {
   },
   Word: {
     keyFields: ['hanzi'],
+    fields: {
+      // forgot is just used when doing word level review
+      forgotLISTEN: {
+        read(forgotLISTEN = false) {
+          return forgotLISTEN;
+        },
+      },
+      forgotREAD: {
+        read(forgotREAD = false) {
+          return forgotREAD;
+        },
+      },
+    },
   },
   SentenceWord: {
     keyFields: ['stanzaId', 'sentenceId'],

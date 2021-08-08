@@ -30,6 +30,12 @@ export type Document = {
   chinese: Scalars['String'];
 };
 
+export type Due = {
+  __typename?: 'Due';
+  documents: Array<Document>;
+  orphans: Array<Word>;
+};
+
 export type NamedEntity = {
   __typename?: 'NamedEntity';
   chinese: Scalars['String'];
@@ -41,7 +47,7 @@ export type NamedEntity = {
 export type Query = {
   __typename?: 'Query';
   words: Array<Word>;
-  documentsDue: Array<Document>;
+  due: Due;
   document: Document;
   concordanceDocs: Array<Document>;
 };
@@ -52,7 +58,7 @@ export type QueryWordsArgs = {
 };
 
 
-export type QueryDocumentsDueArgs = {
+export type QueryDueArgs = {
   studyType: StudyType;
 };
 
@@ -104,8 +110,7 @@ export type StudyState = {
 
 export enum StudyType {
   Read = 'READ',
-  Listen = 'LISTEN',
-  ListenHuman = 'LISTEN_HUMAN'
+  Listen = 'LISTEN'
 }
 
 export type Word = {
@@ -138,17 +143,23 @@ export type ConcordanceQuery = (
   )> }
 );
 
-export type DocumentsDueQueryVariables = Exact<{
+export type DueQueryVariables = Exact<{
   studyType: StudyType;
 }>;
 
 
-export type DocumentsDueQuery = (
+export type DueQuery = (
   { __typename?: 'Query' }
-  & { documentsDue: Array<(
-    { __typename?: 'Document' }
-    & EntireDocumentFragment
-  )> }
+  & { due: (
+    { __typename?: 'Due' }
+    & { documents: Array<(
+      { __typename?: 'Document' }
+      & EntireDocumentFragment
+    )>, orphans: Array<(
+      { __typename?: 'Word' }
+      & Pick<Word, 'hanzi'>
+    )> }
+  ) }
 );
 
 export type EntireDocumentFragment = (
@@ -190,7 +201,7 @@ export type DocumentByIdQuery = (
 
 export const EntireDocumentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"EntireDocument"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Document"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"english"}},{"kind":"Field","name":{"kind":"Name","value":"chinese"}},{"kind":"Field","name":{"kind":"Name","value":"sentences"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"chinese"}},{"kind":"Field","name":{"kind":"Name","value":"words"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sentenceId"}},{"kind":"Field","name":{"kind":"Name","value":"stanzaId"}},{"kind":"Field","name":{"kind":"Name","value":"lastClicked"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"client"}}]},{"kind":"Field","name":{"kind":"Name","value":"forgotLISTEN"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"client"}}]},{"kind":"Field","name":{"kind":"Name","value":"forgotREAD"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"client"}}]},{"kind":"Field","name":{"kind":"Name","value":"wordHanzi"}},{"kind":"Field","name":{"kind":"Name","value":"lemma"}},{"kind":"Field","name":{"kind":"Name","value":"partOfSpeech"}},{"kind":"Field","name":{"kind":"Name","value":"universalPartOfSpeech"}},{"kind":"Field","name":{"kind":"Name","value":"due"}},{"kind":"Field","name":{"kind":"Name","value":"namedEntity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"chinese"}},{"kind":"Field","name":{"kind":"Name","value":"entityType"}},{"kind":"Field","name":{"kind":"Name","value":"start"}},{"kind":"Field","name":{"kind":"Name","value":"end"}}]}},{"kind":"Field","name":{"kind":"Name","value":"word"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hanzi"}},{"kind":"Field","name":{"kind":"Name","value":"hskWord2010"}},{"kind":"Field","name":{"kind":"Name","value":"hskChar2010"}},{"kind":"Field","name":{"kind":"Name","value":"ccceDefinitions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"simplified"}},{"kind":"Field","name":{"kind":"Name","value":"traditional"}},{"kind":"Field","name":{"kind":"Name","value":"pinyin"}},{"kind":"Field","name":{"kind":"Name","value":"definitions"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<EntireDocumentFragment, unknown>;
 export const ConcordanceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Concordance"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"word"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"concordanceDocs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"word"},"value":{"kind":"Variable","name":{"kind":"Name","value":"word"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"english"}},{"kind":"Field","name":{"kind":"Name","value":"sentences"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"words"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"lastClicked"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"client"}}]},{"kind":"Field","name":{"kind":"Name","value":"sentenceId"}},{"kind":"Field","name":{"kind":"Name","value":"stanzaId"}},{"kind":"Field","name":{"kind":"Name","value":"wordHanzi"}},{"kind":"Field","name":{"kind":"Name","value":"partOfSpeech"}},{"kind":"Field","name":{"kind":"Name","value":"universalPartOfSpeech"}}]}}]}}]}}]}}]} as unknown as DocumentNode<ConcordanceQuery, ConcordanceQueryVariables>;
-export const DocumentsDueDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DocumentsDue"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"studyType"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"StudyType"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"documentsDue"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"studyType"},"value":{"kind":"Variable","name":{"kind":"Name","value":"studyType"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"EntireDocument"}}]}}]}},...EntireDocumentFragmentDoc.definitions]} as unknown as DocumentNode<DocumentsDueQuery, DocumentsDueQueryVariables>;
+export const DueDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Due"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"studyType"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"StudyType"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"due"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"studyType"},"value":{"kind":"Variable","name":{"kind":"Name","value":"studyType"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"documents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"EntireDocument"}}]}},{"kind":"Field","name":{"kind":"Name","value":"orphans"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hanzi"}}]}}]}}]}},...EntireDocumentFragmentDoc.definitions]} as unknown as DocumentNode<DueQuery, DueQueryVariables>;
 export const DocumentByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DocumentById"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"document"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"EntireDocument"}}]}}]}},...EntireDocumentFragmentDoc.definitions]} as unknown as DocumentNode<DocumentByIdQuery, DocumentByIdQueryVariables>;
 export type CCCEDefinitionKeySpecifier = ('id' | 'simplified' | 'traditional' | 'pinyin' | 'definitions' | CCCEDefinitionKeySpecifier)[];
 export type CCCEDefinitionFieldPolicy = {
@@ -207,6 +218,11 @@ export type DocumentFieldPolicy = {
 	english?: FieldPolicy<any> | FieldReadFunction<any>,
 	chinese?: FieldPolicy<any> | FieldReadFunction<any>
 };
+export type DueKeySpecifier = ('documents' | 'orphans' | DueKeySpecifier)[];
+export type DueFieldPolicy = {
+	documents?: FieldPolicy<any> | FieldReadFunction<any>,
+	orphans?: FieldPolicy<any> | FieldReadFunction<any>
+};
 export type NamedEntityKeySpecifier = ('chinese' | 'entityType' | 'start' | 'end' | NamedEntityKeySpecifier)[];
 export type NamedEntityFieldPolicy = {
 	chinese?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -214,10 +230,10 @@ export type NamedEntityFieldPolicy = {
 	start?: FieldPolicy<any> | FieldReadFunction<any>,
 	end?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('words' | 'documentsDue' | 'document' | 'concordanceDocs' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('words' | 'due' | 'document' | 'concordanceDocs' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	words?: FieldPolicy<any> | FieldReadFunction<any>,
-	documentsDue?: FieldPolicy<any> | FieldReadFunction<any>,
+	due?: FieldPolicy<any> | FieldReadFunction<any>,
 	document?: FieldPolicy<any> | FieldReadFunction<any>,
 	concordanceDocs?: FieldPolicy<any> | FieldReadFunction<any>
 };
@@ -271,6 +287,10 @@ export type TypedTypePolicies = TypePolicies & {
 	Document?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | DocumentKeySpecifier | (() => undefined | DocumentKeySpecifier),
 		fields?: DocumentFieldPolicy,
+	},
+	Due?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | DueKeySpecifier | (() => undefined | DueKeySpecifier),
+		fields?: DueFieldPolicy,
 	},
 	NamedEntity?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | NamedEntityKeySpecifier | (() => undefined | NamedEntityKeySpecifier),

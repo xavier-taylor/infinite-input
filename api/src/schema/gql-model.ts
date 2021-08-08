@@ -4,6 +4,7 @@ export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
@@ -31,6 +32,12 @@ export type Document = {
   chinese: Scalars['String'];
 };
 
+export type Due = {
+  __typename?: 'Due';
+  documents: Array<Document>;
+  orphans: Array<Word>;
+};
+
 export type NamedEntity = {
   __typename?: 'NamedEntity';
   chinese: Scalars['String'];
@@ -42,7 +49,7 @@ export type NamedEntity = {
 export type Query = {
   __typename?: 'Query';
   words: Array<Word>;
-  documentsDue: Array<Document>;
+  due: Due;
   document: Document;
   concordanceDocs: Array<Document>;
 };
@@ -53,7 +60,7 @@ export type QueryWordsArgs = {
 };
 
 
-export type QueryDocumentsDueArgs = {
+export type QueryDueArgs = {
   studyType: StudyType;
 };
 
@@ -105,8 +112,7 @@ export type StudyState = {
 
 export enum StudyType {
   Read = 'READ',
-  Listen = 'LISTEN',
-  ListenHuman = 'LISTEN_HUMAN'
+  Listen = 'LISTEN'
 }
 
 export type Word = {
@@ -200,6 +206,7 @@ export type ResolversTypes = {
   CCCEDefinition: ResolverTypeWrapper<cc_cedict>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Document: ResolverTypeWrapper<document>;
+  Due: ResolverTypeWrapper<Omit<Due, 'documents' | 'orphans'> & { documents: Array<ResolversTypes['Document']>, orphans: Array<ResolversTypes['Word']> }>;
   NamedEntity: ResolverTypeWrapper<NamedEntity>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Query: ResolverTypeWrapper<{}>;
@@ -216,6 +223,7 @@ export type ResolversParentTypes = {
   CCCEDefinition: cc_cedict;
   String: Scalars['String'];
   Document: document;
+  Due: Omit<Due, 'documents' | 'orphans'> & { documents: Array<ResolversParentTypes['Document']>, orphans: Array<ResolversParentTypes['Word']> };
   NamedEntity: NamedEntity;
   Int: Scalars['Int'];
   Query: {};
@@ -243,6 +251,12 @@ export type DocumentResolvers<ContextType = any, ParentType extends ResolversPar
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type DueResolvers<ContextType = any, ParentType extends ResolversParentTypes['Due'] = ResolversParentTypes['Due']> = {
+  documents?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType>;
+  orphans?: Resolver<Array<ResolversTypes['Word']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type NamedEntityResolvers<ContextType = any, ParentType extends ResolversParentTypes['NamedEntity'] = ResolversParentTypes['NamedEntity']> = {
   chinese?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   entityType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -253,7 +267,7 @@ export type NamedEntityResolvers<ContextType = any, ParentType extends Resolvers
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   words?: Resolver<Array<ResolversTypes['Word']>, ParentType, ContextType, RequireFields<QueryWordsArgs, 'words'>>;
-  documentsDue?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryDocumentsDueArgs, 'studyType'>>;
+  due?: Resolver<ResolversTypes['Due'], ParentType, ContextType, RequireFields<QueryDueArgs, 'studyType'>>;
   document?: Resolver<ResolversTypes['Document'], ParentType, ContextType, RequireFields<QueryDocumentArgs, 'id'>>;
   concordanceDocs?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryConcordanceDocsArgs, 'word'>>;
 };
@@ -307,6 +321,7 @@ export type WordResolvers<ContextType = any, ParentType extends ResolversParentT
 export type Resolvers<ContextType = any> = {
   CCCEDefinition?: CcceDefinitionResolvers<ContextType>;
   Document?: DocumentResolvers<ContextType>;
+  Due?: DueResolvers<ContextType>;
   NamedEntity?: NamedEntityResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Sentence?: SentenceResolvers<ContextType>;
