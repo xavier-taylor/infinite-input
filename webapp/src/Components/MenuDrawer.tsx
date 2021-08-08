@@ -1,16 +1,23 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Drawer,
   IconButton,
   Divider,
   List,
   ListSubheader,
+  ListItemAvatar,
+  Tooltip,
+  Typography,
+  Avatar,
+  CircularProgress,
+  Badge,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import Collapse from '@material-ui/core/Collapse';
 import ListItemText from '@material-ui/core/ListItemText';
 import HearingIcon from '@material-ui/icons/Hearing';
 import MenuBookIcon from '@material-ui/icons/MenuBook';
@@ -21,27 +28,16 @@ import BrushIcon from '@material-ui/icons/Brush';
 import { DrawerState } from '../Pages/App';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useHistory } from 'react-router-dom';
+import {
+  FiberNew,
+  FilterList,
+  Notes,
+  ShortText,
+  Subject,
+} from '@material-ui/icons';
 
 // because I couldn't understand the baloney here: https://material-ui.com/guides/typescript/#usage-of-component-prop
 // I didn't end up using the react Router Link (for example, as a component prop to the ListItems), instead I use the useHistory hook hehehe
-
-const mainMenu = [
-  {
-    name: 'Read',
-    icon: <MenuBookIcon />,
-    path: '/read',
-  },
-  {
-    name: 'Listen',
-    icon: <HearingIcon />,
-    path: '/listen',
-  },
-  {
-    name: 'Browse',
-    icon: <SearchIcon />,
-    path: '/browse',
-  },
-];
 
 const drawerWidth = 240; // TODO make this dynamic/responsive
 
@@ -74,6 +70,16 @@ const useStyles = makeStyles((theme) => ({
       width: theme.spacing(9),
     },
   },
+  nested: {
+    paddingLeft: theme.spacing(4),
+  },
+  avatar: {
+    width: theme.spacing(3),
+    height: theme.spacing(3),
+  },
+  badgeRoot: {
+    color: theme.palette.primary.main,
+  },
 }));
 
 interface DrawerProps {
@@ -90,8 +96,24 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
       setDrawer(false);
     }
   }, [gt600px, setDrawer]);
+  const [openRead, setOpenRead] = useState(true);
+  const [openListen, setOpenListen] = useState(false);
+  const tooltipProps = {
+    disableFocusListener: drawerOpen,
+    disableTouchListener: drawerOpen,
+    disableHoverListener: drawerOpen,
+  };
+
+  // TODO extract the 4 study list items
+  const newWordCount = 10;
+  const newWordLoading = false;
+  const listenOrphansLoading = false;
+  const listenOrphansCount = 24;
+  const listenSentenceLoading = false;
+  const listenSentenceCount = 301;
 
   //https://material.io/design/layout/responsive-layout-grid.html#ui-regions for def of perm vs tmp
+
   return (
     <Drawer
       variant={gt600px ? 'permanent' : 'temporary'}
@@ -111,12 +133,130 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
       <Divider />
       <div>
         <List>
-          {mainMenu.map((m, i) => (
-            <ListItem onClick={() => history.push(m.path)} key={i} button>
-              <ListItemIcon>{m.icon}</ListItemIcon>
-              <ListItemText primary={m.name} />
-            </ListItem>
-          ))}
+          <ListItem onClick={() => history.push('/word/new')} button>
+            {/* TODO add loading or count here */}
+            <ListItemIcon>
+              <Badge color="secondary" badgeContent={newWordCount}>
+                <FiberNew color="primary"></FiberNew>
+              </Badge>
+            </ListItemIcon>
+            <ListItemText primary={'New Words'} />
+          </ListItem>
+          <ListItem
+            onClick={() => {
+              setOpenRead((prevOpen) => !prevOpen);
+            }}
+            button
+          >
+            <ListItemIcon>
+              <MenuBookIcon />
+            </ListItemIcon>
+            <ListItemText primary={'Read'} />
+          </ListItem>
+          <Collapse in={openRead}>
+            <Tooltip title="Words" {...tooltipProps}>
+              <ListItem
+                className={classes.nested}
+                onClick={() => history.push('/read/word')}
+                button
+              >
+                {/* TODO add loading or count here */}
+                <ListItemAvatar>
+                  <Badge
+                    badgeContent={
+                      <CircularProgress size="1rem"></CircularProgress>
+                    }
+                  >
+                    <Avatar className={classes.avatar} variant="rounded">
+                      词
+                    </Avatar>
+                  </Badge>
+                </ListItemAvatar>
+                <ListItemText primary={'Words'} />
+              </ListItem>
+            </Tooltip>
+            <Tooltip title="Sentences" {...tooltipProps}>
+              <ListItem
+                className={classes.nested}
+                onClick={() => history.push('/read/sentence')}
+                button
+              >
+                <ListItemAvatar>
+                  <Badge
+                    badgeContent={
+                      <CircularProgress size="1rem"></CircularProgress>
+                    }
+                  >
+                    <Avatar className={classes.avatar} variant="rounded">
+                      句
+                    </Avatar>
+                  </Badge>
+                </ListItemAvatar>
+                <ListItemText primary={'Sentences'} />
+              </ListItem>
+            </Tooltip>
+          </Collapse>
+          <ListItem onClick={() => setOpenListen(!openListen)} button>
+            <ListItemIcon>
+              <Badge
+                max={999}
+                invisible={openListen}
+                badgeContent={listenOrphansCount + listenSentenceCount}
+              >
+                <HearingIcon />
+              </Badge>
+            </ListItemIcon>
+            <ListItemText primary={'Listen'} />
+          </ListItem>
+          <Collapse in={openListen}>
+            <Tooltip title="Words" {...tooltipProps}>
+              <ListItem
+                className={classes.nested}
+                onClick={() => history.push('/listen/word')}
+                button
+              >
+                {/* TODO add loading or count here */}
+                <ListItemAvatar>
+                  <Badge
+                    classes={{ root: classes.badgeRoot }}
+                    max={999}
+                    badgeContent={listenOrphansCount}
+                  >
+                    <Avatar className={classes.avatar} variant="rounded">
+                      词
+                    </Avatar>
+                  </Badge>
+                </ListItemAvatar>
+                <ListItemText primary={'Words'} />
+              </ListItem>
+            </Tooltip>
+            <Tooltip title="Sentences" {...tooltipProps}>
+              <ListItem
+                className={classes.nested}
+                onClick={() => history.push('/listen/sentence')}
+                button
+              >
+                <ListItemAvatar>
+                  <Badge
+                    max={999}
+                    color="secondary"
+                    badgeContent={listenSentenceCount}
+                  >
+                    <Avatar className={classes.avatar} variant="rounded">
+                      句
+                    </Avatar>
+                  </Badge>
+                </ListItemAvatar>
+                <ListItemText primary={'Sentences'} />
+              </ListItem>
+            </Tooltip>
+          </Collapse>
+          <ListItem onClick={() => history.push('/browse')} button>
+            <ListItemIcon>
+              <SearchIcon />
+            </ListItemIcon>
+            <ListItemText primary={'Browse'} />
+          </ListItem>
         </List>
       </div>
       <Divider />

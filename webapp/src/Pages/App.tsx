@@ -5,7 +5,7 @@ import Header from '../Components/Header';
 import MenuDrawer from '../Components/MenuDrawer';
 import StudyContainer from './Study/StudyContainer';
 import { ThemeProvider } from '@material-ui/styles';
-import { createMuiTheme } from '@material-ui/core';
+import { createMuiTheme } from '@material-ui/core/styles';
 
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { StudyType } from '../schema/generated';
@@ -55,21 +55,30 @@ const App: React.FC = () => {
           <MenuDrawer drawer={drawer}></MenuDrawer>
           <main className={classes.content}>
             <div className={classes.appBarSpacer} />
-            {/* TODO OPTIMIZATION make the back menu in browser meanfinful */}
             <Switch>
-              <Route path="/read">
+              <Route exact path="/">
+                <div>some kind of home page</div>
+              </Route>
+              <Route path="/word/new">
+                <div>learn new words</div>
+              </Route>
+              <Route path="/read/sentence">
                 <StudyContainer
                   mode={StudyType.Read}
                   drawerOpen={drawerOpen}
                 ></StudyContainer>
               </Route>
-              <Route path="/listen">
-                <div>Listen page goes here</div>
+              <Route path="/read/word">
+                <div>read orphan words</div>
+              </Route>
+              <Route path="/listen/sentence">
+                <div>Listen document page goes here</div>
+              </Route>
+              <Route path="/listen/word">
+                <div>listen orphan words</div>
               </Route>
               <Route path="/browse">
-                <div>
-                  I don't recall exactly what browse page was meant to be
-                </div>
+                <div>browse and control words (ie whether locked )</div>
               </Route>
               <Route path="/settings/appearance">
                 <div>Appearance settings</div>

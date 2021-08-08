@@ -50,6 +50,12 @@ export const typeDefs = gql`
     namedEntity: NamedEntity
     word: Word!
     due: Boolean! # whether this is a word we are reviewing, ie a word that was due today (or soon)
+    # TODO put something here like 'understood' boolean?
+    # how to handle read vs listened?
+    # how to handle document with same word more than once?
+    # how to handle same word in several documents in one session - understand some, forget in others?
+    # should I have a seperate type for the mutation/update?
+    # that type would more correspond to student_word_read????
   }
 
   type Sentence {
@@ -65,10 +71,20 @@ export const typeDefs = gql`
     chinese: String!
   }
 
+  # A container type for due documents and
+  # orphan words (ie, the words that were due today
+  # for which we didn't have documetns for)
+  # not sure yet if this needs to return
+  # its own study type or if that is just known by the caller
+  # TODO return this from documentsDue
+  type Due {
+    documents: [Document!]!
+    orphans: [Word!]!
+  }
+
   enum StudyType {
     READ
     LISTEN
-    LISTEN_HUMAN
   }
 
   type Query {

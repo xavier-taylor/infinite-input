@@ -1,1 +1,9 @@
 // this will include the visual effect of being a 'stack' of cards
+
+// should render up to 2 cards behind it. probably don't want them to be full cards (too heavy duty),
+// just simple versions of cards with minimal actual content (maybe a top left hand corner char?)
+
+&.card-2{ 
+      z-index: 9; transform: rotateZ(-7deg);
+      transition-delay: 0.05s;
+    }
