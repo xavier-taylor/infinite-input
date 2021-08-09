@@ -15,3 +15,8 @@ type SentenceWord {
   forgotREAD: Boolean
   forgotLISTEN: Boolean
 }
+
+type Word {
+  forgotREAD: Boolean
+  forgotLISTEN: Boolean
+}

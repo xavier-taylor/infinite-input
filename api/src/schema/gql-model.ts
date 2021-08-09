@@ -117,12 +117,14 @@ export enum StudyType {
 
 export type Word = {
   __typename?: 'Word';
-  hanzi: Scalars['String'];
-  hskWord2010: Scalars['Int'];
-  hskChar2010: Scalars['Int'];
   ccceDefinitions: Array<CcceDefinition>;
-  readStudy?: Maybe<StudyState>;
+  forgotLISTEN?: Maybe<Scalars['Boolean']>;
+  forgotREAD?: Maybe<Scalars['Boolean']>;
+  hanzi: Scalars['String'];
+  hskChar2010: Scalars['Int'];
+  hskWord2010: Scalars['Int'];
   listenStudy?: Maybe<StudyState>;
+  readStudy?: Maybe<StudyState>;
 };
 
 
@@ -309,12 +311,14 @@ export type StudyStateResolvers<ContextType = any, ParentType extends ResolversP
 };
 
 export type WordResolvers<ContextType = any, ParentType extends ResolversParentTypes['Word'] = ResolversParentTypes['Word']> = {
-  hanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  hskWord2010?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  hskChar2010?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   ccceDefinitions?: Resolver<Array<ResolversTypes['CCCEDefinition']>, ParentType, ContextType>;
-  readStudy?: Resolver<Maybe<ResolversTypes['StudyState']>, ParentType, ContextType>;
+  forgotLISTEN?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  forgotREAD?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  hanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  hskChar2010?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  hskWord2010?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   listenStudy?: Resolver<Maybe<ResolversTypes['StudyState']>, ParentType, ContextType>;
+  readStudy?: Resolver<Maybe<ResolversTypes['StudyState']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

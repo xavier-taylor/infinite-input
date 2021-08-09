@@ -115,12 +115,14 @@ export enum StudyType {
 
 export type Word = {
   __typename?: 'Word';
-  hanzi: Scalars['String'];
-  hskWord2010: Scalars['Int'];
-  hskChar2010: Scalars['Int'];
   ccceDefinitions: Array<CcceDefinition>;
-  readStudy?: Maybe<StudyState>;
+  forgotLISTEN?: Maybe<Scalars['Boolean']>;
+  forgotREAD?: Maybe<Scalars['Boolean']>;
+  hanzi: Scalars['String'];
+  hskChar2010: Scalars['Int'];
+  hskWord2010: Scalars['Int'];
   listenStudy?: Maybe<StudyState>;
+  readStudy?: Maybe<StudyState>;
 };
 
 export type ConcordanceQueryVariables = Exact<{
@@ -270,14 +272,16 @@ export type StudyStateFieldPolicy = {
 	understoodCount?: FieldPolicy<any> | FieldReadFunction<any>,
 	underStoodDistinct?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type WordKeySpecifier = ('hanzi' | 'hskWord2010' | 'hskChar2010' | 'ccceDefinitions' | 'readStudy' | 'listenStudy' | WordKeySpecifier)[];
+export type WordKeySpecifier = ('ccceDefinitions' | 'forgotLISTEN' | 'forgotREAD' | 'hanzi' | 'hskChar2010' | 'hskWord2010' | 'listenStudy' | 'readStudy' | WordKeySpecifier)[];
 export type WordFieldPolicy = {
-	hanzi?: FieldPolicy<any> | FieldReadFunction<any>,
-	hskWord2010?: FieldPolicy<any> | FieldReadFunction<any>,
-	hskChar2010?: FieldPolicy<any> | FieldReadFunction<any>,
 	ccceDefinitions?: FieldPolicy<any> | FieldReadFunction<any>,
-	readStudy?: FieldPolicy<any> | FieldReadFunction<any>,
-	listenStudy?: FieldPolicy<any> | FieldReadFunction<any>
+	forgotLISTEN?: FieldPolicy<any> | FieldReadFunction<any>,
+	forgotREAD?: FieldPolicy<any> | FieldReadFunction<any>,
+	hanzi?: FieldPolicy<any> | FieldReadFunction<any>,
+	hskChar2010?: FieldPolicy<any> | FieldReadFunction<any>,
+	hskWord2010?: FieldPolicy<any> | FieldReadFunction<any>,
+	listenStudy?: FieldPolicy<any> | FieldReadFunction<any>,
+	readStudy?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type TypedTypePolicies = TypePolicies & {
 	CCCEDefinition?: Omit<TypePolicy, "fields" | "keyFields"> & {

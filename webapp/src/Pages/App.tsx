@@ -3,14 +3,31 @@ import { CssBaseline } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Header from '../Components/Header';
 import MenuDrawer from '../Components/MenuDrawer';
-import StudyContainer from './Study/StudyContainer';
+import Study from './Study/Study';
 import { ThemeProvider } from '@material-ui/styles';
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createTheme } from '@material-ui/core/styles';
 
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import { StudyType } from '../schema/generated';
+import { DueDocument, DueQuery, StudyType } from '../schema/generated';
+import {
+  QueryResult,
+  ReactiveVar,
+  useQuery,
+  useReactiveVar,
+} from '@apollo/client';
+import {
+  docsToListenVar,
+  docsToReadVar,
+  DocumentIdList,
+  haveFetchedListeningDueVar,
+  haveFetchedReadingDueVar,
+  WordHanziList,
+  wordsToListenVar,
+  wordsToReadVar,
+} from '../cache';
+import { StudyContainer } from './Study/StudyContainer';
 
-const baseTheme = createMuiTheme({
+const baseTheme = createTheme({
   overrides: {
     MuiCssBaseline: {
       '@global': {
@@ -40,19 +57,67 @@ export interface DrawerState {
   setDrawer: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+function setDue(
+  haveFetchedDueVar: ReactiveVar<boolean>,
+  docsToStudyVar: ReactiveVar<DocumentIdList>,
+  wordsToStudyVar: ReactiveVar<WordHanziList>,
+  data: DueQuery
+) {
+  haveFetchedDueVar(true);
+  docsToStudyVar(data.due.documents.map((d) => d.id));
+  wordsToStudyVar(data.due.orphans.map((w) => w.hanzi));
+}
+
 const App: React.FC = () => {
   const classes = useStyles();
   // TODO media query whether drawer starts open?
-  const [drawerOpen, setDrawer] = useState(true);
   // TODO put this in a global context or even in apollo rather than passing it around?
+  const [drawerOpen, setDrawer] = useState(true);
   const drawer = { drawerOpen, setDrawer };
+
+  // Fetch new words TODO
+
+  // TODO error handling for these two queries
+  // Fetch due reading
+  const haveFetchedReading = useReactiveVar(haveFetchedReadingDueVar);
+  const readingRV = useQuery(DueDocument, {
+    variables: { studyType: StudyType.Read },
+    skip: haveFetchedReading,
+  });
+  if (readingRV.data && !haveFetchedReading) {
+    setDue(
+      haveFetchedReadingDueVar,
+      docsToReadVar,
+      wordsToReadVar,
+      readingRV.data
+    );
+  }
+  // Fetch due listening
+  const haveFetchedListening = useReactiveVar(haveFetchedListeningDueVar);
+  const listeningRV = useQuery(DueDocument, {
+    variables: { studyType: StudyType.Listen },
+    skip: haveFetchedListening || !haveFetchedReading,
+  });
+  if (listeningRV.data && !haveFetchedListening) {
+    setDue(
+      haveFetchedListeningDueVar,
+      docsToListenVar,
+      wordsToListenVar,
+      listeningRV.data
+    );
+  }
+
   return (
     <ThemeProvider theme={baseTheme}>
       <Router>
         <div className={classes.root}>
           <CssBaseline />
-          <Header drawer={drawer}></Header>
-          <MenuDrawer drawer={drawer}></MenuDrawer>
+          <Header drawer={drawer} />
+          <MenuDrawer
+            drawer={drawer}
+            loadingReading={!haveFetchedReading || readingRV.loading}
+            loadingListening={!haveFetchedListening || listeningRV.loading}
+          />
           <main className={classes.content}>
             <div className={classes.appBarSpacer} />
             <Switch>
@@ -63,10 +128,7 @@ const App: React.FC = () => {
                 <div>learn new words</div>
               </Route>
               <Route path="/read/sentence">
-                <StudyContainer
-                  mode={StudyType.Read}
-                  drawerOpen={drawerOpen}
-                ></StudyContainer>
+                <StudyContainer mode={StudyType.Read} drawerOpen={drawerOpen} />
               </Route>
               <Route path="/read/word">
                 <div>read orphan words</div>

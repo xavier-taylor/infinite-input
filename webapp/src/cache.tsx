@@ -3,21 +3,24 @@ import {
   Document,
   DocumentByIdQueryVariables,
   TypedTypePolicies,
+  Word,
 } from './schema/generated';
 
-// OPTIMIZATION - consider storying these properties in the cache somehow?
 export type DocumentIdList = Array<Document['id']>;
+export type WordHanziList = Array<Word['hanzi']>;
 // we read these 'to read' docs starting at index 0
 export const docsToReadVar = makeVar<DocumentIdList>([]);
 // these 'already read' docs have the most recently read arr[length-1]
 export const readDocsVar = makeVar<DocumentIdList>([]);
-export const haveFetchedDocsToReadVar = makeVar<boolean>(false);
+export const wordsToReadVar = makeVar<WordHanziList>([]);
+export const readWordsVar = makeVar<WordHanziList>([]);
+export const haveFetchedReadingDueVar = makeVar<boolean>(false);
 
 export const docsToListenVar = makeVar<DocumentIdList>([]);
 export const listenedDocsVar = makeVar<DocumentIdList>([]);
-export const haveFetchedDocsToListenVar = makeVar<boolean>(false);
-
-// TODO - wordsToRead and wordsToListen, for orphan words.
+export const wordsToListenVar = makeVar<WordHanziList>([]);
+export const listenedWordsVar = makeVar<WordHanziList>([]);
+export const haveFetchedListeningDueVar = makeVar<boolean>(false);
 
 const typePolicies: TypedTypePolicies = {
   Query: {
@@ -34,9 +37,10 @@ const typePolicies: TypedTypePolicies = {
           });
         },
       },
-      haveFetchedDocsToRead: {
+      // Not currently using this reactive variables via the cache, but may do so...
+      haveFetchedReadingDue: {
         read() {
-          return haveFetchedDocsToReadVar();
+          return haveFetchedReadingDueVar();
         },
       },
       docsToRead: {
@@ -49,9 +53,19 @@ const typePolicies: TypedTypePolicies = {
           return readDocsVar();
         },
       },
-      haveFetchedDocsToListen: {
+      wordsToRead: {
         read() {
-          return haveFetchedDocsToListenVar();
+          return wordsToReadVar();
+        },
+      },
+      readWords: {
+        read() {
+          return readWordsVar();
+        },
+      },
+      haveFetchedListeningDue: {
+        read() {
+          return haveFetchedListeningDueVar();
         },
       },
       docsToListen: {
@@ -62,6 +76,16 @@ const typePolicies: TypedTypePolicies = {
       listenedDocs: {
         read() {
           return listenedDocsVar();
+        },
+      },
+      wordsToListen: {
+        read() {
+          return wordsToListenVar();
+        },
+      },
+      listenedWords: {
+        read() {
+          return listenedWordsVar();
         },
       },
     },

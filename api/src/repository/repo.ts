@@ -227,7 +227,7 @@ WHERE NOT EXISTS (
       .join('sentence_word', 'candidates.id', '=', 'sentence_word.document_id')
       .join('due', 'sentence_word.word_hanzi', '=', 'due.word_hanzi')
       .groupBy('id', 'chinese', 'english', 'sub_corpus_title', 'corpus_title')
-      .limit(10); // TODO make this query real!
+      .limit(3); // TODO make this query real!
   }
   // This is an undata loaded/ unbatched. just for testing.
   async getWords(words: string[]) {

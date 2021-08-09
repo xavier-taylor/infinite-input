@@ -25,26 +25,11 @@ import Concordance from '../../Components/Concordance';
 import {
   Document,
   DocumentByIdDocument,
-  Sentence,
   SentenceWord,
   StudyType,
 } from '../../schema/generated';
 import { gql, useQuery } from '@apollo/client';
-import { cache } from '../../cache'; // TODO put this cache in a common react context?
-
-// just an experiment, if works extract this and maybe more
-const Test: React.FC<{ forgot: boolean }> = ({ forgot }) => {
-  const theme = useTheme();
-  return (
-    <ThumbUp
-      style={{
-        color: forgot
-          ? theme.palette.action.active
-          : theme.palette.success.main,
-      }}
-    />
-  );
-};
+import { cache } from '../../cache';
 
 // TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff
 
@@ -135,25 +120,24 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface StudyProps {
   drawerOpen: boolean; // TODO determine if we need this prop!
-  // document: Document;
-  documentId: string;
   mode: StudyType;
-  next: () => void;
-  nextAvailable: boolean;
+  documentId: Document['id'];
+  isLast: boolean;
+  next: () => void; // a function that tells parent we are ready for next document
 }
 // TODO strip newlines from sentences in database! - ie update ingestion script?
 
 const Study: React.FC<StudyProps> = ({
-  next,
   drawerOpen,
-  documentId,
-  nextAvailable,
   mode,
+  documentId,
+  isLast,
+  next,
 }) => {
-  // CONTINUE HERE TODO = why isn't this using the cached documents? are they in the cache the way I think they are?
   const { data, loading, error } = useQuery(DocumentByIdDocument, {
     variables: { id: documentId },
   });
+
   const classes = useStyles();
   const theme = useTheme();
   const xs = useMediaQuery(theme.breakpoints.down('xs'));
@@ -170,42 +154,21 @@ const Study: React.FC<StudyProps> = ({
     Partial<Pick<SentenceWord, 'sentenceId' | 'stanzaId'>>
   >({});
 
-  //   // // This maps keeps track of things we care about happening for a given sentence word. has to be 2d since data is 2d
-  //   // // initially use this for showing definitions, later could use it for things like marking a word as unknown
-  //   // interface SentenceWordData {
-  //   //   lastClicked: Date;
-  //   // }
-  //   // type SentenceWordMap = Record<SentenceWord['sentenceId'], Record<SentenceWord['index'], SentenceWordData>>;
-  //   // // TODO work out what happens with this state when a new document renders (and understand react better)
-  //   // // I want this to be 'fresh' for each new document...
-  //   // const [sentenceWordData, updateSWI] = useState<SentenceWordMap>({});
-  // const selectWord = (i: number) =>
-  //   updateSWI((prev) => {
-  //     const next = prev.filter((n) => n !== i);
-  //     next.push(i);
-  //     return next;
-  //   });
-
-  // No - all this stuff should be kept in the apollo cache as local state - extra cool - when we click 'prev', the old study state is still there!
-
   const rightButtonText: Record<studyStates, string> = {
     study: 'Show',
     check: 'Next',
   };
   //const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   if (loading) return <div></div>;
-  // TODO don't want to render loading here. skeleton or indicator. // fix this as part of pulling out the components from this page
   else if (error) return <div>error</div>;
   else if (!data) return <div>no data?</div>;
 
   const { document } = data;
 
   const words: SentenceWord[] = [];
-  // OPTIMIZATION have the api return a flat array of sentence words
   for (let s of document.sentences) {
     words.push(...s.words);
   }
-  // apparently these are not guaranteed to be sorted by the server, could move this sorting there? TODO
   words.sort((b, a) => {
     const bSIndex = parseInt(b.sentenceId);
     const aSIndex = parseInt(a.sentenceId);
@@ -290,9 +253,7 @@ const Study: React.FC<StudyProps> = ({
       markForgot(sentenceWord, mode, true);
     }
 
-    setRecentWord({ sentenceId, stanzaId }); // TODO rename this variable
-    // TODO think of way to make this neater, maybe using fragment
-    // ie, dont do both this and the above writeQuery, just one
+    setRecentWord({ sentenceId, stanzaId });
 
     cache.writeQuery({
       query: gql`
@@ -319,12 +280,11 @@ const Study: React.FC<StudyProps> = ({
     });
   }
 
-  console.log(document.sentences[0].words[0]);
   return (
     <Grid
       container
       direction="column"
-      justify="flex-start"
+      justifyContent="flex-start"
       alignItems="stretch"
       className={classes.gridContainer}
     >
@@ -373,7 +333,7 @@ const Study: React.FC<StudyProps> = ({
                 Hide
               </Button>
               <Button
-                disabled={!nextAvailable && studyState === 'check'}
+                // disabled={isLast} // && studyState === 'check'}
                 onClick={() => {
                   if (studyState === 'check') {
                     setConcordanceWord(undefined);
@@ -401,6 +361,7 @@ const Study: React.FC<StudyProps> = ({
             md={4}
             lg={3}
             xl={2}
+            key={`${word.wordHanzi}-${word.stanzaId}-${word.sentenceId}`}
           >
             <Card
               className={clsx(
@@ -431,19 +392,15 @@ const Study: React.FC<StudyProps> = ({
                       // disabled={!forgot(mode, word)}
                       onClick={() => markForgot(word, mode, false)}
                     >
-                      <Test forgot={forgot(mode, word)}></Test>
-                      {/* <ThumbUp
-                          style={{
-                            color: forgot(mode, word)
-                              ? theme.palette.action.active
-                              : theme.palette.success.main,
-                          }}
-                        /> */}
+                      <ThumbUp
+                        style={{
+                          color: forgot(mode, word)
+                            ? theme.palette.action.active
+                            : theme.palette.success.main,
+                        }}
+                      />
                     </IconButton>
-                    <IconButton
-                      // disabled={forgot(mode, word)}
-                      onClick={() => markForgot(word, mode, true)}
-                    >
+                    <IconButton onClick={() => markForgot(word, mode, true)}>
                       <ThumbDown
                         style={{
                           color: forgot(mode, word)

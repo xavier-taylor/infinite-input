@@ -63,10 +63,13 @@ const useStyles = makeStyles((theme) => ({
 
 interface DrawerProps {
   drawer: DrawerState;
+  loadingReading: boolean;
+  loadingListening: boolean;
 }
 
 const MenuDrawer: React.FC<DrawerProps> = (props) => {
   const { drawerOpen, setDrawer } = props.drawer;
+  const { loadingListening, loadingReading } = props;
   const history = useHistory();
   const classes = useStyles();
   const gt600px = useMediaQuery((theme: any) => theme.breakpoints.up('sm')); // TODO typescript
@@ -113,7 +116,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
             avatarContent="读"
             useBadge={!openRead}
             badgeContent={FAKE_READ_DOCUMENTS + FAKE_READ_WORDS}
-            loadingBadgeContent={false}
+            loadingBadgeContent={loadingReading}
           />
           <Collapse in={openRead}>
             <MenuListItem
@@ -122,7 +125,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
               tooltip={!drawerOpen}
               text="Words"
               badgeContent={FAKE_READ_WORDS}
-              loadingBadgeContent={false}
+              loadingBadgeContent={loadingReading}
               nest
               onClick={() => history.push('/read/word')}
             />
@@ -132,7 +135,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
               tooltip={!drawerOpen}
               text="Sentences"
               badgeContent={FAKE_READ_DOCUMENTS}
-              loadingBadgeContent={false}
+              loadingBadgeContent={loadingReading}
               nest
               onClick={() => history.push('/read/sentence')}
             />
@@ -145,7 +148,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
             avatarContent="听"
             useBadge={!openListen}
             badgeContent={undefined}
-            loadingBadgeContent={true}
+            loadingBadgeContent={loadingListening}
           />
           <Collapse in={openListen}>
             <MenuListItem
@@ -154,7 +157,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
               tooltip={!drawerOpen}
               text="Words"
               badgeContent={undefined}
-              loadingBadgeContent={true}
+              loadingBadgeContent={loadingListening}
               nest
               onClick={() => history.push('/listen/word')}
             />
@@ -164,7 +167,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
               tooltip={!drawerOpen}
               text="Sentences"
               badgeContent={undefined}
-              loadingBadgeContent={true}
+              loadingBadgeContent={loadingListening}
               nest
               onClick={() => history.push('/listen/sentence')}
             />
