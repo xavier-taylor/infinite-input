@@ -32,10 +32,31 @@ export type Document = {
   chinese: Scalars['String'];
 };
 
+export type DocumentStudyPayload = {
+  documentId: Scalars['String'];
+  forgottenWordsHanzi: Array<Scalars['String']>;
+};
+
+export type DocumentStudyResponse = {
+  __typename?: 'DocumentStudyResponse';
+  success?: Maybe<Scalars['Boolean']>;
+};
+
 export type Due = {
   __typename?: 'Due';
   documents: Array<Document>;
   orphans: Array<Word>;
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  documentStudy: DocumentStudyResponse;
+};
+
+
+export type MutationDocumentStudyArgs = {
+  studyType: StudyType;
+  payload: DocumentStudyPayload;
 };
 
 export type NamedEntity = {
@@ -208,13 +229,16 @@ export type ResolversTypes = {
   CCCEDefinition: ResolverTypeWrapper<cc_cedict>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Document: ResolverTypeWrapper<document>;
+  DocumentStudyPayload: DocumentStudyPayload;
+  DocumentStudyResponse: ResolverTypeWrapper<DocumentStudyResponse>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   Due: ResolverTypeWrapper<Omit<Due, 'documents' | 'orphans'> & { documents: Array<ResolversTypes['Document']>, orphans: Array<ResolversTypes['Word']> }>;
+  Mutation: ResolverTypeWrapper<{}>;
   NamedEntity: ResolverTypeWrapper<NamedEntity>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Query: ResolverTypeWrapper<{}>;
   Sentence: ResolverTypeWrapper<sentence>;
   SentenceWord: ResolverTypeWrapper<sentence_word>;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   StudyState: ResolverTypeWrapper<StudyState>;
   StudyType: StudyType;
   Word: ResolverTypeWrapper<word>;
@@ -225,13 +249,16 @@ export type ResolversParentTypes = {
   CCCEDefinition: cc_cedict;
   String: Scalars['String'];
   Document: document;
+  DocumentStudyPayload: DocumentStudyPayload;
+  DocumentStudyResponse: DocumentStudyResponse;
+  Boolean: Scalars['Boolean'];
   Due: Omit<Due, 'documents' | 'orphans'> & { documents: Array<ResolversParentTypes['Document']>, orphans: Array<ResolversParentTypes['Word']> };
+  Mutation: {};
   NamedEntity: NamedEntity;
   Int: Scalars['Int'];
   Query: {};
   Sentence: sentence;
   SentenceWord: sentence_word;
-  Boolean: Scalars['Boolean'];
   StudyState: StudyState;
   Word: word;
 };
@@ -253,10 +280,19 @@ export type DocumentResolvers<ContextType = any, ParentType extends ResolversPar
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type DocumentStudyResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentStudyResponse'] = ResolversParentTypes['DocumentStudyResponse']> = {
+  success?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type DueResolvers<ContextType = any, ParentType extends ResolversParentTypes['Due'] = ResolversParentTypes['Due']> = {
   documents?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType>;
   orphans?: Resolver<Array<ResolversTypes['Word']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  documentStudy?: Resolver<ResolversTypes['DocumentStudyResponse'], ParentType, ContextType, RequireFields<MutationDocumentStudyArgs, 'studyType' | 'payload'>>;
 };
 
 export type NamedEntityResolvers<ContextType = any, ParentType extends ResolversParentTypes['NamedEntity'] = ResolversParentTypes['NamedEntity']> = {
@@ -325,7 +361,9 @@ export type WordResolvers<ContextType = any, ParentType extends ResolversParentT
 export type Resolvers<ContextType = any> = {
   CCCEDefinition?: CcceDefinitionResolvers<ContextType>;
   Document?: DocumentResolvers<ContextType>;
+  DocumentStudyResponse?: DocumentStudyResponseResolvers<ContextType>;
   Due?: DueResolvers<ContextType>;
+  Mutation?: MutationResolvers<ContextType>;
   NamedEntity?: NamedEntityResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Sentence?: SentenceResolvers<ContextType>;

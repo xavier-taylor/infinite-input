@@ -5,9 +5,10 @@ import {
   ListItemText,
   CircularProgress,
   Avatar,
+  Typography,
 } from '@material-ui/core';
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import { OptionalTooltip } from './OptionalTooltip';
 
@@ -30,6 +31,7 @@ interface CommonProps {
   text: string;
   nest?: boolean;
   tooltip?: boolean;
+  avatarColor: string;
 }
 interface WithoutBadge {
   useBadge: false | undefined;
@@ -46,14 +48,15 @@ export const MenuListItem: React.FC<Props> = ({
   onClick,
   avatarContent,
   text,
+  avatarColor,
   nest = false,
   tooltip = false,
   ...optional
 }) => {
   const classes = useStyles();
-
   const avatar = (
     <Avatar
+      style={{ backgroundColor: avatarColor }}
       className={classes.avatar}
       variant="rounded"
       children={avatarContent}
@@ -84,7 +87,10 @@ export const MenuListItem: React.FC<Props> = ({
         button
       >
         <ListItemAvatar>{badgeAndAvatar}</ListItemAvatar>
-        <ListItemText primary={text} />
+        <ListItemText
+          primaryTypographyProps={{ variant: nest ? 'body2' : 'body1' }}
+          primary={text}
+        />
       </ListItem>
     </OptionalTooltip>
   );

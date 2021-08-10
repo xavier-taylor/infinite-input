@@ -30,10 +30,31 @@ export type Document = {
   chinese: Scalars['String'];
 };
 
+export type DocumentStudyPayload = {
+  documentId: Scalars['String'];
+  forgottenWordsHanzi: Array<Scalars['String']>;
+};
+
+export type DocumentStudyResponse = {
+  __typename?: 'DocumentStudyResponse';
+  success?: Maybe<Scalars['Boolean']>;
+};
+
 export type Due = {
   __typename?: 'Due';
   documents: Array<Document>;
   orphans: Array<Word>;
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  documentStudy: DocumentStudyResponse;
+};
+
+
+export type MutationDocumentStudyArgs = {
+  studyType: StudyType;
+  payload: DocumentStudyPayload;
 };
 
 export type NamedEntity = {
@@ -220,10 +241,18 @@ export type DocumentFieldPolicy = {
 	english?: FieldPolicy<any> | FieldReadFunction<any>,
 	chinese?: FieldPolicy<any> | FieldReadFunction<any>
 };
+export type DocumentStudyResponseKeySpecifier = ('success' | DocumentStudyResponseKeySpecifier)[];
+export type DocumentStudyResponseFieldPolicy = {
+	success?: FieldPolicy<any> | FieldReadFunction<any>
+};
 export type DueKeySpecifier = ('documents' | 'orphans' | DueKeySpecifier)[];
 export type DueFieldPolicy = {
 	documents?: FieldPolicy<any> | FieldReadFunction<any>,
 	orphans?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type MutationKeySpecifier = ('documentStudy' | MutationKeySpecifier)[];
+export type MutationFieldPolicy = {
+	documentStudy?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type NamedEntityKeySpecifier = ('chinese' | 'entityType' | 'start' | 'end' | NamedEntityKeySpecifier)[];
 export type NamedEntityFieldPolicy = {
@@ -292,9 +321,17 @@ export type TypedTypePolicies = TypePolicies & {
 		keyFields?: false | DocumentKeySpecifier | (() => undefined | DocumentKeySpecifier),
 		fields?: DocumentFieldPolicy,
 	},
+	DocumentStudyResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | DocumentStudyResponseKeySpecifier | (() => undefined | DocumentStudyResponseKeySpecifier),
+		fields?: DocumentStudyResponseFieldPolicy,
+	},
 	Due?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | DueKeySpecifier | (() => undefined | DueKeySpecifier),
 		fields?: DueFieldPolicy,
+	},
+	Mutation?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | MutationKeySpecifier | (() => undefined | MutationKeySpecifier),
+		fields?: MutationFieldPolicy,
 	},
 	NamedEntity?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | NamedEntityKeySpecifier | (() => undefined | NamedEntityKeySpecifier),

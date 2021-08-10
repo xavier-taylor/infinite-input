@@ -95,4 +95,21 @@ export const typeDefs = gql`
     document(id: String!): Document!
     concordanceDocs(word: String!): [Document!]!
   }
+
+  # TODO enrich this as required for cache updating or error handling
+  type DocumentStudyResponse {
+    success: Boolean
+  }
+
+  input DocumentStudyPayload {
+    documentId: String!
+    forgottenWordsHanzi: [String!]!
+  }
+
+  type Mutation {
+    documentStudy(
+      studyType: StudyType!
+      payload: DocumentStudyPayload!
+    ): DocumentStudyResponse!
+  }
 `;

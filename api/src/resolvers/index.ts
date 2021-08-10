@@ -43,6 +43,17 @@ export const resolvers: Resolvers<IContextType> = {
     sentences: ({ id }, args, { repo }, _info) =>
       repo.getSentences(id as string),
   },
+  Mutation: {
+    // TODO CONTINUE HERE -
+    // get this mutation called when we finish studying a document.
+    // then implement actual logic in this mutation!
+    documentStudy: (_, { payload, studyType }) => {
+      console.log('in the mutation resolver for documentStudy');
+      console.log(payload);
+      console.log(studyType);
+      return { success: true };
+    },
+  },
   Query: {
     // just to demonstrate if the dataloader on the definition is working
     // TODO consider deleting this words query unless there is a conceivable use for it?

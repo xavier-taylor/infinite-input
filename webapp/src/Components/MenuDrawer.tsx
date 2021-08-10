@@ -5,6 +5,7 @@ import {
   Divider,
   List,
   ListSubheader,
+  useTheme,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
@@ -80,7 +81,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
   }, [gt600px, setDrawer]);
   const [openRead, setOpenRead] = useState(true);
   const [openListen, setOpenListen] = useState(false);
-
+  const theme = useTheme();
   return (
     <Drawer
       variant={gt600px ? 'permanent' : 'temporary'}
@@ -101,6 +102,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
       <div>
         <List>
           <MenuListItem
+            avatarColor={theme.palette.success.main}
             onClick={() => history.push('/word/new')}
             useBadge
             badgeContent={FAKE_NEW_WORDS}
@@ -109,6 +111,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
             text="New Words"
           />
           <MenuListItem
+            avatarColor={theme.palette.info.main}
             onClick={() => {
               setOpenRead((prevOpen) => !prevOpen);
             }}
@@ -120,6 +123,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
           />
           <Collapse in={openRead}>
             <MenuListItem
+              avatarColor={theme.palette.info.light}
               avatarContent="词"
               useBadge
               tooltip={!drawerOpen}
@@ -130,6 +134,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
               onClick={() => history.push('/read/word')}
             />
             <MenuListItem
+              avatarColor={theme.palette.info.light}
               avatarContent="句"
               useBadge
               tooltip={!drawerOpen}
@@ -141,6 +146,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
             />
           </Collapse>
           <MenuListItem
+            avatarColor={theme.palette.secondary.main}
             onClick={() => {
               setOpenListen((prevOpen) => !prevOpen);
             }}
@@ -152,6 +158,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
           />
           <Collapse in={openListen}>
             <MenuListItem
+              avatarColor={theme.palette.secondary.light}
               avatarContent="词"
               useBadge
               tooltip={!drawerOpen}
@@ -162,6 +169,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
               onClick={() => history.push('/listen/word')}
             />
             <MenuListItem
+              avatarColor={theme.palette.secondary.light}
               avatarContent="句"
               useBadge
               tooltip={!drawerOpen}

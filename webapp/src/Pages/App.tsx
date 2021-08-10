@@ -1,20 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CssBaseline } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Header from '../Components/Header';
 import MenuDrawer from '../Components/MenuDrawer';
-import Study from './Study/Study';
 import { ThemeProvider } from '@material-ui/styles';
 import { createTheme } from '@material-ui/core/styles';
 
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { DueDocument, DueQuery, StudyType } from '../schema/generated';
-import {
-  QueryResult,
-  ReactiveVar,
-  useQuery,
-  useReactiveVar,
-} from '@apollo/client';
+import { ReactiveVar, useQuery, useReactiveVar } from '@apollo/client';
 import {
   docsToListenVar,
   docsToReadVar,
@@ -63,6 +57,7 @@ function setDue(
   wordsToStudyVar: ReactiveVar<WordHanziList>,
   data: DueQuery
 ) {
+  console.log('setDue was called!');
   haveFetchedDueVar(true);
   docsToStudyVar(data.due.documents.map((d) => d.id));
   wordsToStudyVar(data.due.orphans.map((w) => w.hanzi));
@@ -84,28 +79,43 @@ const App: React.FC = () => {
     variables: { studyType: StudyType.Read },
     skip: haveFetchedReading,
   });
-  if (readingRV.data && !haveFetchedReading) {
-    setDue(
-      haveFetchedReadingDueVar,
-      docsToReadVar,
-      wordsToReadVar,
-      readingRV.data
-    );
-  }
+
+  // Putting this inside useEffect to silence this error:
+  /*
+Warning: Cannot update a component (`StudyContainer`) while rendering a different component (`App`). To locate the bad setState() call inside `App`, follow the stack trace as described in https://reactjs.org/link/setstate-in-render
+    at App (http://localhost:3000/static/js/main.chunk.js:1991:19)
+    at ApolloProvider (http://localhost:3000/static/js/vendors~main.chunk.js:6339:19)
+  */
+  useEffect(() => {
+    console.log('in useEffect for reading');
+    if (readingRV.data && !haveFetchedReading) {
+      console.log('will call setDue for reading');
+      setDue(
+        haveFetchedReadingDueVar,
+        docsToReadVar,
+        wordsToReadVar,
+        readingRV.data
+      );
+    }
+  }, [readingRV.data, haveFetchedReading]);
   // Fetch due listening
   const haveFetchedListening = useReactiveVar(haveFetchedListeningDueVar);
   const listeningRV = useQuery(DueDocument, {
     variables: { studyType: StudyType.Listen },
     skip: haveFetchedListening || !haveFetchedReading,
   });
-  if (listeningRV.data && !haveFetchedListening) {
-    setDue(
-      haveFetchedListeningDueVar,
-      docsToListenVar,
-      wordsToListenVar,
-      listeningRV.data
-    );
-  }
+  useEffect(() => {
+    console.log('in useEffect for listening');
+    if (listeningRV.data && !haveFetchedListening) {
+      console.log('will call setDue for listening');
+      setDue(
+        haveFetchedListeningDueVar,
+        docsToListenVar,
+        wordsToListenVar,
+        listeningRV.data
+      );
+    }
+  }, [listeningRV.data, haveFetchedListening]);
 
   return (
     <ThemeProvider theme={baseTheme}>
