@@ -20,8 +20,6 @@ export const typeDefs = gql`
 
   # this represents student_word_listen and student_word_read
   type StudyState {
-    locked: Boolean!
-    learningIndex: Int!
     f1: Int!
     f2: Int!
     due: String! # TODO is there a date type I can easily use that wont break my tooling?

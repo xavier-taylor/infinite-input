@@ -40,6 +40,34 @@ export const haveFetchedListeningDueVar = makeVar<boolean>(false);
  * Then think about how to implement it.
  * Where possible, minimize use of reactive variables and front end stuff
  *
+ * Initially, we can't unlock a word just for reading or listening, must do it for both
+ *
+ * // We will force you to listen to trad variants as well (not just read them) if you
+ * want to unlock the trad variant - justification 'taiwanese pronunciation is different'
+ * . So there is no need to unlock simp listen and read and trad read.
+ *
+ * In what order should the backend serve up new cards, if you have lots of newcards unlocked?
+ * Ideally we can support anki style user configurable sorting, although tbh that might be quite hard.
+ *
+ * The general idea is that the user unlocks words from the browse view (electing to optionaly also unlock trad/simp variants)
+ *
+ * The most obviously useful solution is that we serve newCards up in order of how long ago they were unlocked.
+ * So store unlockedDate on student_word_listen and student_word_read.
+ * I think I can safely leave improving that till the future.
+ * For now,
+ *
+ * Ok so newWords endpoint returns a list of words, with no in build knowledge about trad/simp variants
+ * you store those words' (wordHanzi id) in a reactive variable toLearn[]
+ * then have: 2/3 -> 1/3 meaning[] (can you remember the meaning when shown char and pronunciation/audio)
+ * then into: 2/3 -> 1/3 pronunciation[] can you remember the pronunciation when shown char and meaning
+ * then into: 2/3 -> 1/3 recognition[] can you pick the character (against some random others) when given audio/pronuncation and meaning
+ * then into 1/3 -> 2/3 reading[] can you read the character (remember its meaning and prondunciation)
+ * Could do more, but that is maybe enough for now. After you successfully read it
+ * send a mutation that sets that student_word_listen and student_word_read
+ * into 'due tomorrow' so to speak.
+ * For now, we will keep it simple and not store
+ *
+ *
  *
  */
 

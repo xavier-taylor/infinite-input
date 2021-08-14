@@ -125,8 +125,6 @@ export type SentenceWord = {
 
 export type StudyState = {
   __typename?: 'StudyState';
-  locked: Scalars['Boolean'];
-  learningIndex: Scalars['Int'];
   f1: Scalars['Int'];
   f2: Scalars['Int'];
   due: Scalars['String'];
@@ -351,10 +349,8 @@ export type SentenceWordFieldPolicy = {
 	word?: FieldPolicy<any> | FieldReadFunction<any>,
 	wordHanzi?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type StudyStateKeySpecifier = ('locked' | 'learningIndex' | 'f1' | 'f2' | 'due' | 'previous' | 'understood' | 'understoodCount' | 'underStoodDistinct' | StudyStateKeySpecifier)[];
+export type StudyStateKeySpecifier = ('f1' | 'f2' | 'due' | 'previous' | 'understood' | 'understoodCount' | 'underStoodDistinct' | StudyStateKeySpecifier)[];
 export type StudyStateFieldPolicy = {
-	locked?: FieldPolicy<any> | FieldReadFunction<any>,
-	learningIndex?: FieldPolicy<any> | FieldReadFunction<any>,
 	f1?: FieldPolicy<any> | FieldReadFunction<any>,
 	f2?: FieldPolicy<any> | FieldReadFunction<any>,
 	due?: FieldPolicy<any> | FieldReadFunction<any>,

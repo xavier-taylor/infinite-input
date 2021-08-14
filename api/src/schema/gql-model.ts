@@ -127,8 +127,6 @@ export type SentenceWord = {
 
 export type StudyState = {
   __typename?: 'StudyState';
-  locked: Scalars['Boolean'];
-  learningIndex: Scalars['Int'];
   f1: Scalars['Int'];
   f2: Scalars['Int'];
   due: Scalars['String'];
@@ -342,8 +340,6 @@ export type SentenceWordResolvers<ContextType = any, ParentType extends Resolver
 };
 
 export type StudyStateResolvers<ContextType = any, ParentType extends ResolversParentTypes['StudyState'] = ResolversParentTypes['StudyState']> = {
-  locked?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  learningIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   f1?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   f2?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   due?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

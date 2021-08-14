@@ -94,10 +94,16 @@ export interface student_document_read {
   read_count: string;
   last_read: Date | null;
 }
+export interface student_word {
+  student_id: string;
+  word_hanzi: string;
+  locked: boolean;
+  date_last_unlocked: Date | null;
+  learning: learning_state;
+}
 export interface student_word_listen {
   student_id: string;
   word_hanzi: string;
-  learning_index: number;
   f1: string;
   f2: string;
   due: Date;
@@ -105,12 +111,10 @@ export interface student_word_listen {
   understood: any;
   understood_count: string;
   understood_distinct_documents_count: string;
-  locked: boolean;
 }
 export interface student_word_read {
   student_id: string;
   word_hanzi: string;
-  learning_index: number;
   f1: string;
   f2: string;
   due: Date;
@@ -118,7 +122,6 @@ export interface student_word_read {
   understood: any;
   understood_count: string;
   understood_distinct_documents_count: string;
-  locked: boolean;
 }
 export interface sub_corpus {
   title: string;
@@ -129,4 +132,12 @@ export interface word {
   hanzi: string;
   hsk_word_2010: number | null;
   hsk_char_2010: number | null;
+}
+export enum learning_state {
+  not_yet_learned = 'not_yet_learned',
+  meaning = 'meaning',
+  pronunciation = 'pronunciation',
+  recognition = 'recognition',
+  reading = 'reading',
+  learned = 'learned',
 }

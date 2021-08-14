@@ -49,6 +49,27 @@ CREATE TABLE mandarin.student
     PRIMARY KEY (id)
 );
 
+/*
+ * then have: 2/3 -> 1/3 meaning[] (can you remember the meaning when shown char and pronunciation/audio)
+ * then into: 2/3 -> 1/3 pronunciation[] can you remember the pronunciation when shown char and meaning
+ * then into: 2/3 -> 1/3 recognition[] can you pick the character (against some random others) when given audio/pronuncation and meaning
+ * then into 1/3 -> 2/3 reading[] can you read the character (remember its meaning and pronunciation)
+*/
+CREATE TYPE mandarin.learning_state AS ENUM ('not_yet_learned', 'meaning', 'pronunciation', 'recognition', 'reading', 'learned');
+
+
+CREATE TABLE mandarin.student_word 
+(
+    student_id bigint REFERENCES mandarin.student (id),
+    word_hanzi text REFERENCES mandarin.word (hanzi),
+    locked boolean not null,
+    date_last_unlocked date,
+    learning mandarin.learning_state not null,
+    CONSTRAINT if_unlocked_then_date_last_unlocked_is_not_null 
+        CHECK ( ( locked) OR (date_last_unlocked IS NOT NULL) ) ,
+    PRIMARY KEY (student_id, word_hanzi)
+);
+
 -- locked could have gone on the mandarin.word itself. This approachs allows more finegrained
 -- locking and unlocking, however. To start with, I will just have words unlocked as pairs (listen and read)
 -- but in future UI could allow you to lock just the reads, for example.
@@ -56,10 +77,8 @@ CREATE TABLE mandarin.student
 -- block the unlocking of say, student_word_listen for traditional variants
 CREATE TABLE mandarin.student_word_listen
 (
-    locked boolean not null;
     student_id bigint REFERENCES mandarin.student (id),
     word_hanzi text REFERENCES mandarin.word (hanzi),
-    learning_index int NOT NULL, -- This indexes the array of 'learning' steps, in minutes, ie [1,10] etc - this array is hardcoded in the server for now
     f1 bigint NOT NULL,
     f2 bigint NOT NULL,
     due date NOT NULL,         
@@ -67,6 +86,7 @@ CREATE TABLE mandarin.student_word_listen
     understood boolean[] CONSTRAINT ten_elements CHECK (cardinality(understood) < 11) NOT NULL,
     understood_count bigint NOT NULL,
     understood_distinct_documents_count bigint NOT NULL, -- increment this only when a new student_document_listen is created for this word
+    FOREIGN KEY (student_id, word_hanzi) REFERENCES mandarin.student_word (student_id, word_hanzi),
     PRIMARY KEY (student_id, word_hanzi)
 );
 COMMENT ON COLUMN mandarin.student_word_listen.understood
@@ -74,10 +94,8 @@ COMMENT ON COLUMN mandarin.student_word_listen.understood
 
 CREATE TABLE mandarin.student_word_read
 (
-    locked boolean not null;
     student_id bigint REFERENCES mandarin.student (id),
     word_hanzi text REFERENCES mandarin.word (hanzi),
-    learning_index int NOT NULL,
     f1 bigint NOT NULL,
     f2 bigint NOT NULL,
     due date NOT NULL,
@@ -85,6 +103,7 @@ CREATE TABLE mandarin.student_word_read
     understood boolean[] CONSTRAINT ten_elements CHECK (cardinality(understood) < 11) NOT NULL,
     understood_count bigint NOT NULL,
     understood_distinct_documents_count bigint NOT NULL, -- increment this only when a new student_document_listen is created for this word
+    FOREIGN KEY (student_id, word_hanzi) REFERENCES mandarin.student_word (student_id, word_hanzi),
     PRIMARY KEY (student_id, word_hanzi)
 );
 COMMENT ON COLUMN mandarin.student_word_listen.understood
