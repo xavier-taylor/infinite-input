@@ -1,5 +1,5 @@
 import { IContextType } from '../server';
-import { Resolvers } from '../schema/gql-model';
+import { Resolvers, StudyType } from '../schema/gql-model';
 
 export const resolvers: Resolvers<IContextType> = {
   CCCEDefinition: {
@@ -70,13 +70,23 @@ export const resolvers: Resolvers<IContextType> = {
     // TODO - the query from the front end does *not* pass in the user id!
     // that would be abusable. instead, here at the backend we have some kind of auth thingo whichi gives
     // use the user id
-    due: async (_parent, { studyType }, { repo }, _info) => ({
+    due: async (_parent, { studyType }, { repo }, _info) => {
       // TODO actually get a set of documents to cover as many
       // due words as possible, then return the rest of the due words as
       // orphans
-      documents: await repo.getDueDocuments(studyType),
-      orphans: await repo.getWords(['我', '她']),
-    }),
+      const orphans =
+        studyType === StudyType.Read
+          ? await repo.getWords(['我', '她'])
+          : await repo.getWords(['熟悉', '热心', '看起来']);
+      const documents =
+        studyType === StudyType.Read
+          ? await repo.getDueDocuments(studyType)
+          : (await repo.getDueDocuments(studyType)).slice(1);
+      return {
+        documents,
+        orphans,
+      };
+    },
     document: (_parent, { id }, { repo }, _info) => repo.documentById(id),
     concordanceDocs: (_parent, { word }, { repo }, _info) =>
       repo.getDocuments({ including: [word] }),

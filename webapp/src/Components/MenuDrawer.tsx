@@ -22,13 +22,12 @@ import { DrawerState } from '../Pages/App';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useHistory } from 'react-router-dom';
 import { MenuListItem } from './MenuListItem';
+import { useDocuments } from '../Hooks/documents';
+import { StudyType } from '../schema/generated';
+import { useWords } from '../Hooks/words';
 
 // Fake data waiting on real integration
 const FAKE_NEW_WORDS = 10;
-const FAKE_READ_WORDS = 15;
-const FAKE_READ_DOCUMENTS = 124;
-const FAKE_LISTEN_WORDS = 3;
-const FAKE_LISTEN_DOCUMENTS = 209;
 
 const drawerWidth = 240; // TODO make this dynamic/responsive
 
@@ -74,6 +73,13 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
   const history = useHistory();
   const classes = useStyles();
   const gt600px = useMediaQuery((theme: any) => theme.breakpoints.up('sm')); // TODO typescript
+
+  const toReadDocsCount = useDocuments(StudyType.Read).countRemaining;
+  const toReadWordsCount = useWords(StudyType.Read).countRemaining;
+
+  const toListenDocsCount = useDocuments(StudyType.Listen).countRemaining;
+  const toListenWordsCount = useWords(StudyType.Listen).countRemaining;
+
   useEffect(() => {
     if (!gt600px) {
       setDrawer(false);
@@ -118,7 +124,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
             text="Read"
             avatarContent="读"
             useBadge={!openRead}
-            badgeContent={FAKE_READ_DOCUMENTS + FAKE_READ_WORDS}
+            badgeContent={toReadDocsCount + toReadWordsCount}
             loadingBadgeContent={loadingReading}
           />
           <Collapse in={openRead}>
@@ -128,7 +134,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
               useBadge
               tooltip={!drawerOpen}
               text="Words"
-              badgeContent={FAKE_READ_WORDS}
+              badgeContent={toReadWordsCount}
               loadingBadgeContent={loadingReading}
               nest
               onClick={() => history.push('/read/word')}
@@ -139,7 +145,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
               useBadge
               tooltip={!drawerOpen}
               text="Sentences"
-              badgeContent={FAKE_READ_DOCUMENTS}
+              badgeContent={toReadDocsCount}
               loadingBadgeContent={loadingReading}
               nest
               onClick={() => history.push('/read/sentence')}
@@ -153,7 +159,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
             text="Listen"
             avatarContent="听"
             useBadge={!openListen}
-            badgeContent={undefined}
+            badgeContent={toListenDocsCount + toListenWordsCount}
             loadingBadgeContent={loadingListening}
           />
           <Collapse in={openListen}>
@@ -163,7 +169,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
               useBadge
               tooltip={!drawerOpen}
               text="Words"
-              badgeContent={undefined}
+              badgeContent={toListenWordsCount}
               loadingBadgeContent={loadingListening}
               nest
               onClick={() => history.push('/listen/word')}
@@ -174,7 +180,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
               useBadge
               tooltip={!drawerOpen}
               text="Sentences"
-              badgeContent={undefined}
+              badgeContent={toListenDocsCount}
               loadingBadgeContent={loadingListening}
               nest
               onClick={() => history.push('/listen/sentence')}

@@ -8,6 +8,14 @@ import {
 
 export type DocumentIdList = Array<Document['id']>;
 export type WordHanziList = Array<Word['hanzi']>;
+
+/**
+ * The following reactive variables track:
+ *  1. documents for review
+ *  2. orphan words
+ *  3. words we go wrong during a document review
+ * See Hooks/words.tsx
+ */
 // we read these 'to read' docs starting at index 0
 export const docsToReadVar = makeVar<DocumentIdList>([]);
 // these 'already read' docs have the most recently read arr[length-1]
@@ -21,6 +29,19 @@ export const listenedDocsVar = makeVar<DocumentIdList>([]);
 export const wordsToListenVar = makeVar<WordHanziList>([]);
 export const listenedWordsVar = makeVar<WordHanziList>([]);
 export const haveFetchedListeningDueVar = makeVar<boolean>(false);
+
+/**
+ * The following reactive variables track New words
+ *
+ */
+
+/**
+ * Think through the new word flow (at high level)
+ * Then think about how to implement it.
+ * Where possible, minimize use of reactive variables and front end stuff
+ *
+ *
+ */
 
 const typePolicies: TypedTypePolicies = {
   Query: {

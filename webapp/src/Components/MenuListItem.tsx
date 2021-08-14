@@ -68,6 +68,7 @@ export const MenuListItem: React.FC<Props> = ({
     badgeAndAvatar = (
       <Badge
         max={999}
+        showZero
         classes={{ badge: classes.badge }}
         badgeContent={
           loadingBadgeContent ? <CircularProgress size="1rem" /> : badgeContent

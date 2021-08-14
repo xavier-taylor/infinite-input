@@ -1,4 +1,4 @@
-import { ReactiveVar } from '@apollo/client';
+import { ReactiveVar, useReactiveVar } from '@apollo/client';
 import {
   haveFetchedListeningDueVar,
   haveFetchedReadingDueVar,
@@ -9,6 +9,10 @@ import {
   wordsToReadVar,
 } from '../cache';
 import { StudyType } from '../schema/generated';
+
+// These hooks and their associated reactive variables
+// are for reviewing both orphan words, and individual words
+// that we forgot during a sentence review.
 
 export const useWords = (mode: StudyType) => {
   let haveFetchedDueVar: ReactiveVar<boolean>;
@@ -35,5 +39,6 @@ export const useWords = (mode: StudyType) => {
 
   return {
     next: nextWord,
+    countRemaining: useReactiveVar(wordsToStudyVar).length,
   };
 };

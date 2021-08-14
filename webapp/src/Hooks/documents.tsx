@@ -10,6 +10,8 @@ import {
 } from '../cache';
 import { StudyType } from '../schema/generated';
 
+// This module is to handle logic around the documents reactive variables
+
 export const useDocuments = (mode: StudyType) => {
   let haveFetchedDueVar: ReactiveVar<boolean>;
   let docsToStudyVar: ReactiveVar<DocumentIdList>;
@@ -41,5 +43,6 @@ export const useDocuments = (mode: StudyType) => {
     current: useReactiveVar(docsToStudyVar)[0],
     loading: !useReactiveVar(haveFetchedDueVar),
     finished: haveFetchedDueVar() && docsToStudyVar().length === 0,
+    countRemaining: useReactiveVar(docsToStudyVar).length,
   };
 };
