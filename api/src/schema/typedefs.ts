@@ -98,7 +98,7 @@ export const typeDefs = gql`
 
   # TODO enrich this as required for cache updating or error handling
   type DocumentStudyResponse {
-    success: Boolean
+    success: Boolean!
   }
 
   input DocumentStudyPayload {

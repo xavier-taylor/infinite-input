@@ -39,7 +39,7 @@ export type DocumentStudyPayload = {
 
 export type DocumentStudyResponse = {
   __typename?: 'DocumentStudyResponse';
-  success?: Maybe<Scalars['Boolean']>;
+  success: Scalars['Boolean'];
 };
 
 export type Due = {
@@ -69,20 +69,16 @@ export type NamedEntity = {
 
 export type Query = {
   __typename?: 'Query';
-  words: Array<Word>;
-  due: Due;
-  document: Document;
   concordanceDocs: Array<Document>;
+  document: Document;
+  due: Due;
+  sentenceWord?: Maybe<SentenceWord>;
+  words: Array<Word>;
 };
 
 
-export type QueryWordsArgs = {
-  words: Array<Scalars['String']>;
-};
-
-
-export type QueryDueArgs = {
-  studyType: StudyType;
+export type QueryConcordanceDocsArgs = {
+  word: Scalars['String'];
 };
 
 
@@ -91,8 +87,19 @@ export type QueryDocumentArgs = {
 };
 
 
-export type QueryConcordanceDocsArgs = {
-  word: Scalars['String'];
+export type QueryDueArgs = {
+  studyType: StudyType;
+};
+
+
+export type QuerySentenceWordArgs = {
+  sentenceId: Scalars['String'];
+  stanzaId: Scalars['Int'];
+};
+
+
+export type QueryWordsArgs = {
+  words: Array<Scalars['String']>;
 };
 
 export type Sentence = {
@@ -281,7 +288,7 @@ export type DocumentResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type DocumentStudyResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentStudyResponse'] = ResolversParentTypes['DocumentStudyResponse']> = {
-  success?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -304,10 +311,11 @@ export type NamedEntityResolvers<ContextType = any, ParentType extends Resolvers
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  words?: Resolver<Array<ResolversTypes['Word']>, ParentType, ContextType, RequireFields<QueryWordsArgs, 'words'>>;
-  due?: Resolver<ResolversTypes['Due'], ParentType, ContextType, RequireFields<QueryDueArgs, 'studyType'>>;
-  document?: Resolver<ResolversTypes['Document'], ParentType, ContextType, RequireFields<QueryDocumentArgs, 'id'>>;
   concordanceDocs?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryConcordanceDocsArgs, 'word'>>;
+  document?: Resolver<ResolversTypes['Document'], ParentType, ContextType, RequireFields<QueryDocumentArgs, 'id'>>;
+  due?: Resolver<ResolversTypes['Due'], ParentType, ContextType, RequireFields<QueryDueArgs, 'studyType'>>;
+  sentenceWord?: Resolver<Maybe<ResolversTypes['SentenceWord']>, ParentType, ContextType, RequireFields<QuerySentenceWordArgs, 'sentenceId' | 'stanzaId'>>;
+  words?: Resolver<Array<ResolversTypes['Word']>, ParentType, ContextType, RequireFields<QueryWordsArgs, 'words'>>;
 };
 
 export type SentenceResolvers<ContextType = any, ParentType extends ResolversParentTypes['Sentence'] = ResolversParentTypes['Sentence']> = {

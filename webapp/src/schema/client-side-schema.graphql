@@ -8,6 +8,10 @@
 
 # this file implements the way graphql codegen wants it done
 # https://www.graphql-code-generator.com/docs/integrations/apollo-local-state
+# MAYBE TODO -
+# refactor so that forgot is a key with an array value. that array has objects
+# with enum StudyType and forgotten Boolean. Means we don't have to interpolate
+# the enum into the key name which is messy
 
 #TODO think of something better than the forgotREAD forgotLISTEN solution
 type SentenceWord {
@@ -15,8 +19,12 @@ type SentenceWord {
   forgotREAD: Boolean
   forgotLISTEN: Boolean
 }
-
+# I don't remember what this type is for - maybe for word level study?
 type Word {
   forgotREAD: Boolean
   forgotLISTEN: Boolean
+}
+
+type Query {
+  sentenceWord(sentenceId: String!, stanzaId: Int!): SentenceWord
 }

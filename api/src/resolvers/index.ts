@@ -47,6 +47,15 @@ export const resolvers: Resolvers<IContextType> = {
     // TODO CONTINUE HERE -
     // get this mutation called when we finish studying a document.
     // then implement actual logic in this mutation!
+    // - next up - make a 'mutations.graphql' in the frontend
+    // that defines the mutation, and then try to generate a type for it'
+    // - not sure if typed document node supports mutations.
+    // TODO here on the server, transform forgottenWordsHanzi into a set
+    // Also - leave a big TODO in the code about error handling for these mutations
+    // at first, we will just ignore the return value etc for the mutation
+    //, just fire and forget it to get the app useable.
+    // but it will be required to handle errors gracefully, especially if ever ship the app
+
     documentStudy: (_, { payload, studyType }) => {
       console.log('in the mutation resolver for documentStudy');
       console.log(payload);

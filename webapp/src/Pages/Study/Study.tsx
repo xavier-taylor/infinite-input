@@ -25,10 +25,15 @@ import Concordance from '../../Components/Concordance';
 import {
   Document,
   DocumentByIdDocument,
+  DocumentStudyDocument,
+  DocumentStudyMutationVariables,
+  ForgotSentenceWordDocument,
+  ForgotSentenceWordQueryVariables,
+  ForgottenWordsDocument,
   SentenceWord,
   StudyType,
 } from '../../schema/generated';
-import { gql, useQuery } from '@apollo/client';
+import { gql, useMutation, useQuery } from '@apollo/client';
 import { cache } from '../../cache';
 
 // TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff
@@ -154,11 +159,17 @@ const Study: React.FC<StudyProps> = ({
     Partial<Pick<SentenceWord, 'sentenceId' | 'stanzaId'>>
   >({});
 
+  const [
+    studyDocument,
+    { data: _data, loading: _loading, error: _error },
+  ] = useMutation(DocumentStudyDocument);
+
   const rightButtonText: Record<studyStates, string> = {
     study: 'Show',
     check: 'Next',
   };
   //const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+  // TODO
   if (loading) return <div></div>;
   else if (error) return <div>error</div>;
   else if (!data) return <div>no data?</div>;
@@ -218,27 +229,26 @@ const Study: React.FC<StudyProps> = ({
     forgot: boolean
   ) {
     // TODO think perhaps of a neater solution than the computed 'forgotMode'
+    console.log('about to mark forgot');
+    const forgotData: Pick<SentenceWord, 'forgotLISTEN' | 'forgotREAD'> =
+      mode === StudyType.Listen
+        ? { forgotLISTEN: forgot }
+        : { forgotREAD: forgot };
     cache.writeQuery({
-      query: gql`
-    query Updated($sentenceId: String!, $index: Int!) {
-      sentenceWord(sentenceId: $sentenceId, index: $index ) {
-        index
-        sentenceId
-        forgot${mode}
-      }
-    }
-  `,
+      query: ForgotSentenceWordDocument,
       data: {
         sentenceWord: {
           __typename: 'SentenceWord',
           sentenceId,
           stanzaId,
-          [`forgot${mode}`]: forgot,
+          ...forgotData,
         },
       },
       variables: {
         sentenceId,
         stanzaId,
+        includeListen: mode === StudyType.Listen,
+        includeRead: mode === StudyType.Read,
       },
     });
   }
@@ -334,12 +344,56 @@ const Study: React.FC<StudyProps> = ({
               </Button>
               <Button
                 // disabled={isLast} // && studyState === 'check'}
-                onClick={() => {
+                onClick={async () => {
                   if (studyState === 'check') {
                     setConcordanceWord(undefined);
+                    // TODO see if I can get typedDocumentnodes for these cache queries?
+                    // TODO can I tweak this query so that it only returns documents which are marked as forgotten?
+                    // TODO how can I make these cache queries typed?
+                    const forgotten = cache.readQuery({
+                      query: ForgottenWordsDocument,
+                      variables: {
+                        documentId,
+                        includeListen: mode === StudyType.Listen,
+                        includeRead: mode === StudyType.Read,
+                      },
+                    });
+                    // I assume forgotten could only be null if this documentId didn't exist
+                    /// If the cache is missing data for any of the query's fields, readQuery returns null. It does not attempt to fetch data from your GraphQL server.
+                    let forgottenHanzi: string[];
+                    if (forgotten) {
+                      forgottenHanzi = forgotten.document.sentences.reduce<
+                        string[]
+                      >((acc, cur) => {
+                        const forgottenWord = cur.words
+                          .filter((w) => {
+                            if (mode === StudyType.Listen) {
+                              return !!w.forgotLISTEN;
+                            } else {
+                              return !!w.forgotREAD;
+                            }
+                          })
+                          .map((w) => w.wordHanzi);
+                        return [...acc, ...forgottenWord];
+                      }, []);
+                    } else {
+                      forgottenHanzi = [];
+                    }
+
+                    const _rv = await studyDocument({
+                      variables: {
+                        studyType: mode,
+                        payload: {
+                          documentId,
+                          forgottenWordsHanzi: forgottenHanzi,
+                        },
+                      },
+                    });
                     next();
                   }
-                  setStudyState(studyState === 'check' ? 'study' : 'check');
+                  if (!(isLast && studyState === 'check')) {
+                    setStudyState(studyState === 'check' ? 'study' : 'check');
+                  }
                 }}
                 variant="contained"
                 color="primary"
@@ -413,9 +467,9 @@ const Study: React.FC<StudyProps> = ({
                 }
               />
               <CardContent classes={{ root: classes.cardContentRoot }}>
-                {word.word.ccceDefinitions.map((def) => {
+                {word.word.ccceDefinitions.map((def, i) => {
                   return (
-                    <>
+                    <React.Fragment key={`cc-${i}`}>
                       <Typography
                         key={def.id}
                         color="textSecondary"
@@ -428,7 +482,7 @@ const Study: React.FC<StudyProps> = ({
                           {d}
                         </Typography>
                       ))}
-                    </>
+                    </React.Fragment>
                   );
                 })}
                 {/* {word.word.ccceDefinitions[0]?.definitions.map((d) => (

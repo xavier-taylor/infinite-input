@@ -1,0 +1,32 @@
+query ForgottenWords(
+  $documentId: String!
+  $includeListen: Boolean = false
+  $includeRead: Boolean = false
+) {
+  document(id: $documentId) {
+    sentences {
+      words {
+        forgotLISTEN @include(if: $includeListen)
+        forgotREAD @include(if: $includeRead)
+        wordHanzi
+      }
+    }
+  }
+}
+
+# not sure if the include directive will work how I need
+# as this query is being used for a writeQuery!
+# This query is used for a cache write query
+query ForgotSentenceWord(
+  $sentenceId: String!
+  $stanzaId: Int!
+  $includeRead: Boolean = false
+  $includeListen: Boolean = false
+) {
+  sentenceWord(sentenceId: $sentenceId, stanzaId: $stanzaId) {
+    stanzaId
+    sentenceId
+    forgotLISTEN @include(if: $includeListen)
+    forgotREAD @include(if: $includeRead)
+  }
+}

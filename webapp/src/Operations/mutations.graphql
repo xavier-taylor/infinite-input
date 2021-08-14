@@ -1,0 +1,8 @@
+mutation DocumentStudy(
+  $studyType: StudyType!
+  $payload: DocumentStudyPayload!
+) {
+  documentStudy(studyType: $studyType, payload: $payload) {
+    success
+  }
+}
