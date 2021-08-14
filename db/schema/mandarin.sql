@@ -64,7 +64,10 @@ CREATE TABLE mandarin.student_word
     word_hanzi text REFERENCES mandarin.word (hanzi),
     locked boolean not null,
     date_last_unlocked date,
+    date_learned date,
     learning mandarin.learning_state not null,
+    CONSTRAINT if_learned_date_learned_not_null
+        CHECK ((date_learned is not null)OR (learning != 'learned'::mandarin.learning_state)),
     CONSTRAINT if_unlocked_then_date_last_unlocked_is_not_null 
         CHECK ( ( locked) OR (date_last_unlocked IS NOT NULL) ) ,
     PRIMARY KEY (student_id, word_hanzi)

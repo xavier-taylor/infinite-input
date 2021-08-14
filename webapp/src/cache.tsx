@@ -65,7 +65,39 @@ export const haveFetchedListeningDueVar = makeVar<boolean>(false);
  * Could do more, but that is maybe enough for now. After you successfully read it
  * send a mutation that sets that student_word_listen and student_word_read
  * into 'due tomorrow' so to speak.
- * For now, we will keep it simple and not store
+ *
+ * We have a learning_state on the student_word that ideally we would  set
+ * after each word.
+ *
+ * We will introduce a new graphql type called NewWord.
+ * Should we?
+ * The point of storing learning_state is that we can update the backend with partial learning states
+ * so that interupted study sessions can be reviewed.
+ *
+ * We can use that enum on the front end via graphql, or we can not. The choice is ours.
+ * Take time to think about it before implementing something.
+ *
+ * how about: 1. query to backend gets say 15 words to learn (prioritizing words in intermediate learning_state)
+ * we store those words id in a reactive variable.
+ *  Note that if we already learned 15 words today, query returns nothing,
+ * givign us message 'already studied 15 words', can click 'study more'
+ * and requery with a FORCE param.
+ * after studying all available words, if we studied less than 15 today,
+ * message' you need to unlock more words over in browse tab'
+ * 2. we work thru the words. as we click 'done' or whatever,
+ * we optimisticallly update our cached value of the 'learning_state'
+ *
+ * How do we actually work thru the words tho? do we store our reference to them in 4 different
+ * reactive variables? That would probably work. just need to, when we grab from server,
+ * initially put them in the right reactive variable based on their learning_state
+ *
+ * Then how do we work thru them? Could just go end to end, like 'all meaning'
+ * then 'all prounciation' then 'all recognition'
+ * and just when get word wrong, put it to back of current queue rather than promote it
+ *
+ * downside would be if word is last in queue and we get it wrong, we see it again instantly
+ * might be better to do anki style 'due' based on date_time, purely local.
+ *
  *
  *
  *
