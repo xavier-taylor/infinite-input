@@ -46,6 +46,15 @@ export type Due = {
   orphans: Array<Word>;
 };
 
+export enum LearningState {
+  NotYetLearned = 'not_yet_learned',
+  Meaning = 'meaning',
+  Pronunciation = 'pronunciation',
+  Recognition = 'recognition',
+  Reading = 'reading',
+  Learned = 'learned'
+}
+
 export type Mutation = {
   __typename?: 'Mutation';
   documentStudy: DocumentStudyResponse;
@@ -123,8 +132,21 @@ export type SentenceWord = {
   wordHanzi: Scalars['String'];
 };
 
+export type StudentWord = {
+  __typename?: 'StudentWord';
+  hanzi: Scalars['String'];
+  locked: Scalars['Boolean'];
+  dateLastUnlocked?: Maybe<Scalars['String']>;
+  dateLearned?: Maybe<Scalars['String']>;
+  learning: LearningState;
+  position: Scalars['Int'];
+  tags: Array<Scalars['String']>;
+  word: Word;
+};
+
 export type StudyState = {
   __typename?: 'StudyState';
+  hanzi: Scalars['String'];
   f1: Scalars['Int'];
   f2: Scalars['Int'];
   due: Scalars['String'];
@@ -132,6 +154,8 @@ export type StudyState = {
   understood: Array<Scalars['Boolean']>;
   understoodCount: Scalars['Int'];
   underStoodDistinct: Scalars['Int'];
+  word: Word;
+  studyType: StudyType;
 };
 
 export enum StudyType {
@@ -147,8 +171,6 @@ export type Word = {
   hanzi: Scalars['String'];
   hskChar2010: Scalars['Int'];
   hskWord2010: Scalars['Int'];
-  listenStudy?: Maybe<StudyState>;
-  readStudy?: Maybe<StudyState>;
 };
 
 export type ForgottenWordsQueryVariables = Exact<{
@@ -349,26 +371,38 @@ export type SentenceWordFieldPolicy = {
 	word?: FieldPolicy<any> | FieldReadFunction<any>,
 	wordHanzi?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type StudyStateKeySpecifier = ('f1' | 'f2' | 'due' | 'previous' | 'understood' | 'understoodCount' | 'underStoodDistinct' | StudyStateKeySpecifier)[];
+export type StudentWordKeySpecifier = ('hanzi' | 'locked' | 'dateLastUnlocked' | 'dateLearned' | 'learning' | 'position' | 'tags' | 'word' | StudentWordKeySpecifier)[];
+export type StudentWordFieldPolicy = {
+	hanzi?: FieldPolicy<any> | FieldReadFunction<any>,
+	locked?: FieldPolicy<any> | FieldReadFunction<any>,
+	dateLastUnlocked?: FieldPolicy<any> | FieldReadFunction<any>,
+	dateLearned?: FieldPolicy<any> | FieldReadFunction<any>,
+	learning?: FieldPolicy<any> | FieldReadFunction<any>,
+	position?: FieldPolicy<any> | FieldReadFunction<any>,
+	tags?: FieldPolicy<any> | FieldReadFunction<any>,
+	word?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type StudyStateKeySpecifier = ('hanzi' | 'f1' | 'f2' | 'due' | 'previous' | 'understood' | 'understoodCount' | 'underStoodDistinct' | 'word' | 'studyType' | StudyStateKeySpecifier)[];
 export type StudyStateFieldPolicy = {
+	hanzi?: FieldPolicy<any> | FieldReadFunction<any>,
 	f1?: FieldPolicy<any> | FieldReadFunction<any>,
 	f2?: FieldPolicy<any> | FieldReadFunction<any>,
 	due?: FieldPolicy<any> | FieldReadFunction<any>,
 	previous?: FieldPolicy<any> | FieldReadFunction<any>,
 	understood?: FieldPolicy<any> | FieldReadFunction<any>,
 	understoodCount?: FieldPolicy<any> | FieldReadFunction<any>,
-	underStoodDistinct?: FieldPolicy<any> | FieldReadFunction<any>
+	underStoodDistinct?: FieldPolicy<any> | FieldReadFunction<any>,
+	word?: FieldPolicy<any> | FieldReadFunction<any>,
+	studyType?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type WordKeySpecifier = ('ccceDefinitions' | 'forgotLISTEN' | 'forgotREAD' | 'hanzi' | 'hskChar2010' | 'hskWord2010' | 'listenStudy' | 'readStudy' | WordKeySpecifier)[];
+export type WordKeySpecifier = ('ccceDefinitions' | 'forgotLISTEN' | 'forgotREAD' | 'hanzi' | 'hskChar2010' | 'hskWord2010' | WordKeySpecifier)[];
 export type WordFieldPolicy = {
 	ccceDefinitions?: FieldPolicy<any> | FieldReadFunction<any>,
 	forgotLISTEN?: FieldPolicy<any> | FieldReadFunction<any>,
 	forgotREAD?: FieldPolicy<any> | FieldReadFunction<any>,
 	hanzi?: FieldPolicy<any> | FieldReadFunction<any>,
 	hskChar2010?: FieldPolicy<any> | FieldReadFunction<any>,
-	hskWord2010?: FieldPolicy<any> | FieldReadFunction<any>,
-	listenStudy?: FieldPolicy<any> | FieldReadFunction<any>,
-	readStudy?: FieldPolicy<any> | FieldReadFunction<any>
+	hskWord2010?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type TypedTypePolicies = TypePolicies & {
 	CCCEDefinition?: Omit<TypePolicy, "fields" | "keyFields"> & {
@@ -406,6 +440,10 @@ export type TypedTypePolicies = TypePolicies & {
 	SentenceWord?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | SentenceWordKeySpecifier | (() => undefined | SentenceWordKeySpecifier),
 		fields?: SentenceWordFieldPolicy,
+	},
+	StudentWord?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | StudentWordKeySpecifier | (() => undefined | StudentWordKeySpecifier),
+		fields?: StudentWordFieldPolicy,
 	},
 	StudyState?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | StudyStateKeySpecifier | (() => undefined | StudyStateKeySpecifier),

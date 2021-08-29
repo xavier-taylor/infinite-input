@@ -32,73 +32,35 @@ export const haveFetchedListeningDueVar = makeVar<boolean>(false);
 
 /**
  * The following reactive variables track New words
+ * TODO(later, once app useable) add support to track how many words you already learned today (ie if you start a second session later in the day, it doesn't suggest that you learn 10 new words (unless you want to))
+ * (for this have a standalone endpoint that we automatically fetch when starting up the app, and also refetch whenever a word learning mutation fires)
  *
  */
 
 /**
- * Think through the new word flow (at high level)
- * Then think about how to implement it.
- * Where possible, minimize use of reactive variables and front end stuff
  *
- * Initially, we can't unlock a word just for reading or listening, must do it for both
+ * 1. Make a new graphql type called studentWord, a 1:1 clone of student_word. DONE
+ * 2. query for getNewWords - returns an array of up to 10 StudentWords whose LearningState is anything but learned
+ *  and who have lowest position and who are unlocked. If there aren't 10 unlocked words the response should say 'there arenlt unlocked words etc'. priotize words in intermitent state, if any, over words in not_yet_learned
+ * 3. Put the ids for into wordsToLearnVar, (also have learnedWordsVar) and set haveFetchedWordsToLearn to true
+ * 4. build a UI for cycling through these words, like the sentence study UI.
+ * 5. build a mutation for updating student_word each time you click 'next' (with optimistic local stuff?) (this includes generating creating of student_word_read/listen due tomorrow)
+ * 6. WHen done, have a button somewhere to force fetch 10 more words.
  *
- * // We will force you to listen to trad variants as well (not just read them) if you
- * want to unlock the trad variant - justification 'taiwanese pronunciation is different'
- * . So there is no need to unlock simp listen and read and trad read.
+ * Can test it out by putting student_words into the required state in pgadmin
  *
- * In what order should the backend serve up new cards, if you have lots of newcards unlocked?
- * Ideally we can support anki style user configurable sorting, although tbh that might be quite hard.
+ * *  TODO continue here ^ implement above logic
  *
- * The general idea is that the user unlocks words from the browse view (electing to optionaly also unlock trad/simp variants)
+ * NEXT UP
+ * build basic browse UI that does this
+ * 1. you can search for a word
+ * 2. returns that word and any subwords and characters in a sort of table like ui with checkboxes (TODO, design this on paper first)
+ * 3. Initially, you can just a) unlock or lock the word (with position being automatically set - custom setting of position is a future TODO)
  *
- * The most obviously useful solution is that we serve newCards up in order of how long ago they were unlocked.
- * So store unlockedDate on student_word_listen and student_word_read.
- * I think I can safely leave improving that till the future.
- * For now,
+ * NEXT UP
+ * 1. set up the SRS stuff for student_word_read/listen (for both when studying documents and studying orphan/lapsed words)
  *
- * Ok so newWords endpoint returns a list of words, with no in build knowledge about trad/simp variants
- * you store those words' (wordHanzi id) in a reactive variable toLearn[]
- * then have: 2/3 -> 1/3 meaning[] (can you remember the meaning when shown char and pronunciation/audio)
- * then into: 2/3 -> 1/3 pronunciation[] can you remember the pronunciation when shown char and meaning
- * then into: 2/3 -> 1/3 recognition[] can you pick the character (against some random others) when given audio/pronuncation and meaning
- * then into 1/3 -> 2/3 reading[] can you read the character (remember its meaning and prondunciation)
- * Could do more, but that is maybe enough for now. After you successfully read it
- * send a mutation that sets that student_word_listen and student_word_read
- * into 'due tomorrow' so to speak.
- *
- * We have a learning_state on the student_word that ideally we would  set
- * after each word.
- *
- * We will introduce a new graphql type called NewWord.
- * Should we?
- * The point of storing learning_state is that we can update the backend with partial learning states
- * so that interupted study sessions can be reviewed.
- *
- * We can use that enum on the front end via graphql, or we can not. The choice is ours.
- * Take time to think about it before implementing something.
- *
- * how about: 1. query to backend gets say 15 words to learn (prioritizing words in intermediate learning_state)
- * we store those words id in a reactive variable.
- *  Note that if we already learned 15 words today, query returns nothing,
- * givign us message 'already studied 15 words', can click 'study more'
- * and requery with a FORCE param.
- * after studying all available words, if we studied less than 15 today,
- * message' you need to unlock more words over in browse tab'
- * 2. we work thru the words. as we click 'done' or whatever,
- * we optimisticallly update our cached value of the 'learning_state'
- *
- * How do we actually work thru the words tho? do we store our reference to them in 4 different
- * reactive variables? That would probably work. just need to, when we grab from server,
- * initially put them in the right reactive variable based on their learning_state
- *
- * Then how do we work thru them? Could just go end to end, like 'all meaning'
- * then 'all prounciation' then 'all recognition'
- * and just when get word wrong, put it to back of current queue rather than promote it
- *
- * downside would be if word is last in queue and we get it wrong, we see it again instantly
- * might be better to do anki style 'due' based on date_time, purely local.
- *
- * TODO continue here ^ implement new word logic in the front end.
+ * ??? whats next?
  *
  *
  *
@@ -171,6 +133,12 @@ const typePolicies: TypedTypePolicies = {
         },
       },
     },
+  },
+  StudyState: {
+    keyFields: ['hanzi', 'studyType'],
+  },
+  StudentWord: {
+    keyFields: ['hanzi'],
   },
   Word: {
     keyFields: ['hanzi'],

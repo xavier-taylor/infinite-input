@@ -48,6 +48,15 @@ export type Due = {
   orphans: Array<Word>;
 };
 
+export enum LearningState {
+  NotYetLearned = 'not_yet_learned',
+  Meaning = 'meaning',
+  Pronunciation = 'pronunciation',
+  Recognition = 'recognition',
+  Reading = 'reading',
+  Learned = 'learned'
+}
+
 export type Mutation = {
   __typename?: 'Mutation';
   documentStudy: DocumentStudyResponse;
@@ -125,8 +134,21 @@ export type SentenceWord = {
   wordHanzi: Scalars['String'];
 };
 
+export type StudentWord = {
+  __typename?: 'StudentWord';
+  hanzi: Scalars['String'];
+  locked: Scalars['Boolean'];
+  dateLastUnlocked?: Maybe<Scalars['String']>;
+  dateLearned?: Maybe<Scalars['String']>;
+  learning: LearningState;
+  position: Scalars['Int'];
+  tags: Array<Scalars['String']>;
+  word: Word;
+};
+
 export type StudyState = {
   __typename?: 'StudyState';
+  hanzi: Scalars['String'];
   f1: Scalars['Int'];
   f2: Scalars['Int'];
   due: Scalars['String'];
@@ -134,6 +156,8 @@ export type StudyState = {
   understood: Array<Scalars['Boolean']>;
   understoodCount: Scalars['Int'];
   underStoodDistinct: Scalars['Int'];
+  word: Word;
+  studyType: StudyType;
 };
 
 export enum StudyType {
@@ -149,8 +173,6 @@ export type Word = {
   hanzi: Scalars['String'];
   hskChar2010: Scalars['Int'];
   hskWord2010: Scalars['Int'];
-  listenStudy?: Maybe<StudyState>;
-  readStudy?: Maybe<StudyState>;
 };
 
 
@@ -238,13 +260,15 @@ export type ResolversTypes = {
   DocumentStudyResponse: ResolverTypeWrapper<DocumentStudyResponse>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   Due: ResolverTypeWrapper<Omit<Due, 'documents' | 'orphans'> & { documents: Array<ResolversTypes['Document']>, orphans: Array<ResolversTypes['Word']> }>;
+  LearningState: LearningState;
   Mutation: ResolverTypeWrapper<{}>;
   NamedEntity: ResolverTypeWrapper<NamedEntity>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Query: ResolverTypeWrapper<{}>;
   Sentence: ResolverTypeWrapper<sentence>;
   SentenceWord: ResolverTypeWrapper<sentence_word>;
-  StudyState: ResolverTypeWrapper<StudyState>;
+  StudentWord: ResolverTypeWrapper<Omit<StudentWord, 'word'> & { word: ResolversTypes['Word'] }>;
+  StudyState: ResolverTypeWrapper<Omit<StudyState, 'word'> & { word: ResolversTypes['Word'] }>;
   StudyType: StudyType;
   Word: ResolverTypeWrapper<word>;
 };
@@ -264,7 +288,8 @@ export type ResolversParentTypes = {
   Query: {};
   Sentence: sentence;
   SentenceWord: sentence_word;
-  StudyState: StudyState;
+  StudentWord: Omit<StudentWord, 'word'> & { word: ResolversParentTypes['Word'] };
+  StudyState: Omit<StudyState, 'word'> & { word: ResolversParentTypes['Word'] };
   Word: word;
 };
 
@@ -339,7 +364,20 @@ export type SentenceWordResolvers<ContextType = any, ParentType extends Resolver
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type StudentWordResolvers<ContextType = any, ParentType extends ResolversParentTypes['StudentWord'] = ResolversParentTypes['StudentWord']> = {
+  hanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  locked?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  dateLastUnlocked?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  dateLearned?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  learning?: Resolver<ResolversTypes['LearningState'], ParentType, ContextType>;
+  position?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  tags?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  word?: Resolver<ResolversTypes['Word'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type StudyStateResolvers<ContextType = any, ParentType extends ResolversParentTypes['StudyState'] = ResolversParentTypes['StudyState']> = {
+  hanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   f1?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   f2?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   due?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -347,6 +385,8 @@ export type StudyStateResolvers<ContextType = any, ParentType extends ResolversP
   understood?: Resolver<Array<ResolversTypes['Boolean']>, ParentType, ContextType>;
   understoodCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   underStoodDistinct?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  word?: Resolver<ResolversTypes['Word'], ParentType, ContextType>;
+  studyType?: Resolver<ResolversTypes['StudyType'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -357,8 +397,6 @@ export type WordResolvers<ContextType = any, ParentType extends ResolversParentT
   hanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   hskChar2010?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   hskWord2010?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  listenStudy?: Resolver<Maybe<ResolversTypes['StudyState']>, ParentType, ContextType>;
-  readStudy?: Resolver<Maybe<ResolversTypes['StudyState']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -372,6 +410,7 @@ export type Resolvers<ContextType = any> = {
   Query?: QueryResolvers<ContextType>;
   Sentence?: SentenceResolvers<ContextType>;
   SentenceWord?: SentenceWordResolvers<ContextType>;
+  StudentWord?: StudentWordResolvers<ContextType>;
   StudyState?: StudyStateResolvers<ContextType>;
   Word?: WordResolvers<ContextType>;
 };

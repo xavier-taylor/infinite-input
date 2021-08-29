@@ -26,6 +26,7 @@ export interface document {
   previous_document: string | null;
   english: string | null;
   chinese: string;
+  n_non_punct: number;
 }
 export interface listen_log {
   date_time: Date;
@@ -85,13 +86,13 @@ export interface student_document {
 export interface student_document_listen {
   student_id: string;
   document_id: string;
-  listen_count: string;
+  listen_count: number;
   last_listened: Date | null;
 }
 export interface student_document_read {
   student_id: string;
   document_id: string;
-  read_count: string;
+  read_count: number;
   last_read: Date | null;
 }
 export interface student_word {
@@ -100,28 +101,32 @@ export interface student_word {
   locked: boolean;
   date_last_unlocked: Date | null;
   learning: learning_state;
+  date_learned: Date | null;
+  tags?: string[];
+  position: number;
+  due: Date | null;
 }
 export interface student_word_listen {
   student_id: string;
   word_hanzi: string;
-  f1: string;
-  f2: string;
+  f1: number;
+  f2: number;
   due: Date;
   previous: Date;
   understood: any;
-  understood_count: string;
-  understood_distinct_documents_count: string;
+  understood_count: number;
+  understood_distinct_documents_count: number;
 }
 export interface student_word_read {
   student_id: string;
   word_hanzi: string;
-  f1: string;
-  f2: string;
+  f1: number;
+  f2: number;
   due: Date;
   previous: Date;
   understood: any;
-  understood_count: string;
-  understood_distinct_documents_count: string;
+  understood_count: number;
+  understood_distinct_documents_count: number;
 }
 export interface sub_corpus {
   title: string;

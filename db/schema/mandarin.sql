@@ -50,6 +50,8 @@ CREATE TABLE mandarin.student
 );
 
 /*
+ * When in state 'not_yet_learned, you first get shown a card with all the details about that word there - then you read it, try and learn it, click next
+  - state gets set to 'meaning' and a due gets set.
  * then have: 2/3 -> 1/3 meaning[] (can you remember the meaning when shown char and pronunciation/audio)
  * then into: 2/3 -> 1/3 pronunciation[] can you remember the pronunciation when shown char and meaning
  * then into: 2/3 -> 1/3 recognition[] can you pick the character (against some random others) when given audio/pronuncation and meaning
@@ -63,9 +65,18 @@ CREATE TABLE mandarin.student_word
     student_id bigint REFERENCES mandarin.student (id),
     word_hanzi text REFERENCES mandarin.word (hanzi),
     locked boolean not null,
-    date_last_unlocked date,
-    date_learned date,
+    date_last_unlocked timestamp with time zone, -- not used for now, could be useful to sort by these in browser
+    date_learned timestamp with time zone,
     learning mandarin.learning_state not null,
+    due timestamp with time zone, -- when in learning state other than not_yet_learned or learned, you must have a 'due'
+    position int not null,-- this tracks the priority for when a word is pulled for study.
+    -- basically, the lower the better. By default, when we unlock a word, we just set this to 
+    -- current max + 1
+     --todo will need code to limit the magnitude of this int!
+     -- TODO will need code to control the size of this tags list
+    tags text[] not null,
+    CONSTRAINT if_learning_need_due
+        CHECK ((due is not null)OR (learning = 'learned'::mandarin.learning_state OR learning ='not_yet_learned'::mandarin.learning_state)),
     CONSTRAINT if_learned_date_learned_not_null
         CHECK ((date_learned is not null)OR (learning != 'learned'::mandarin.learning_state)),
     CONSTRAINT if_unlocked_then_date_last_unlocked_is_not_null 
@@ -73,22 +84,25 @@ CREATE TABLE mandarin.student_word
     PRIMARY KEY (student_id, word_hanzi)
 );
 
--- locked could have gone on the mandarin.word itself. This approachs allows more finegrained
--- locking and unlocking, however. To start with, I will just have words unlocked as pairs (listen and read)
--- but in future UI could allow you to lock just the reads, for example.
--- This approch is also better because the flexibility might allow me to
--- block the unlocking of say, student_word_listen for traditional variants
+-- for now 'locked' is only on student_word
+-- if we want to ability to lock student_word_listen or student_word_read
+-- we will have to either a) merge those tables with student_word or b)
+-- give them their own locked property. Will do that once I need it.
+-- It might be nicer to have these next two tables as aprt of student_word. Can think about that
+-- in future.
 CREATE TABLE mandarin.student_word_listen
 (
     student_id bigint REFERENCES mandarin.student (id),
     word_hanzi text REFERENCES mandarin.word (hanzi),
-    f1 bigint NOT NULL,
-    f2 bigint NOT NULL,
-    due date NOT NULL,         
-    previous date NOT NULL,  
+    f1 int NOT NULL,
+    f2 int NOT NULL,
+    due timestamp with time zone NOT NULL,         
+    previous timestamp with time zone NOT NULL,  
     understood boolean[] CONSTRAINT ten_elements CHECK (cardinality(understood) < 11) NOT NULL,
-    understood_count bigint NOT NULL,
-    understood_distinct_documents_count bigint NOT NULL, -- increment this only when a new student_document_listen is created for this word
+    -- TODO need logic for when these understood_count ints
+    -- get to their max size
+    understood_count int NOT NULL,
+    understood_distinct_documents_count int NOT NULL, -- increment this only when a new student_document_listen is created for this word
     FOREIGN KEY (student_id, word_hanzi) REFERENCES mandarin.student_word (student_id, word_hanzi),
     PRIMARY KEY (student_id, word_hanzi)
 );
@@ -99,13 +113,13 @@ CREATE TABLE mandarin.student_word_read
 (
     student_id bigint REFERENCES mandarin.student (id),
     word_hanzi text REFERENCES mandarin.word (hanzi),
-    f1 bigint NOT NULL,
-    f2 bigint NOT NULL,
-    due date NOT NULL,
-    previous date NOT NULL,
+    f1 int NOT NULL,
+    f2 int NOT NULL,
+    due timestamp with time zone NOT NULL,
+    previous timestamp with time zone NOT NULL,
     understood boolean[] CONSTRAINT ten_elements CHECK (cardinality(understood) < 11) NOT NULL,
-    understood_count bigint NOT NULL,
-    understood_distinct_documents_count bigint NOT NULL, -- increment this only when a new student_document_listen is created for this word
+    understood_count int NOT NULL,
+    understood_distinct_documents_count int NOT NULL, -- increment this only when a new student_document_listen is created for this word
     FOREIGN KEY (student_id, word_hanzi) REFERENCES mandarin.student_word (student_id, word_hanzi),
     PRIMARY KEY (student_id, word_hanzi)
 );
@@ -192,8 +206,8 @@ CREATE TABLE mandarin.student_document_read
 (
     student_id bigint REFERENCES mandarin.student (id),
     document_id bigint REFERENCES mandarin.document (id),
-    read_count bigint NOT NULL,
-    last_read date, -- UTC
+    read_count int NOT NULL,
+    last_read timestamp with time zone,
     PRIMARY KEY (student_id, document_id)
 );
 
@@ -201,8 +215,8 @@ CREATE TABLE mandarin.student_document_listen
 (
     student_id bigint REFERENCES mandarin.student (id),
     document_id bigint REFERENCES mandarin.document (id),
-    listen_count bigint NOT NULL,
-    last_listened date, -- UTC
+    listen_count int NOT NULL,
+    last_listened timestamp with time zone,
     PRIMARY KEY (student_id, document_id)
 );
 
@@ -219,7 +233,7 @@ CREATE TABLE mandarin.student_document
 -- not planning to use these two  short term. these tables would grow pretty big and I am not sure what the value would be
 CREATE TABLE mandarin.read_log
 (
-    date_time date,
+    date_time timestamp with time zone,
     student_id bigint REFERENCES mandarin.student (id),
     understood boolean NOT NULL,
     sentence_word_id int,
@@ -230,7 +244,7 @@ CREATE TABLE mandarin.read_log
 
 CREATE TABLE mandarin.listen_log
 (
-    date_time date,
+    date_time timestamp with time zone,
     student_id bigint REFERENCES mandarin.student (id),
     understood boolean NOT NULL,
     sentence_word_id int,
