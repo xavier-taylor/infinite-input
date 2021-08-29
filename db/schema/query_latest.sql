@@ -1,12 +1,26 @@
 SET search_path TO mandarin;
 
+
 with candidates as ( 
 SELECT 
-	chinese,id, english 
+	chinese,id, english, n_non_punct 
 FROM
 	document 
--- doesn't exist a word I don't know
-WHERE NOT EXISTS (
+WHERE
+	
+/*	exists ( -- exists at least one word that is due (with this, the 'candidates' query gets all the docs we need in 7.4 seconds)
+	SELECT 
+		1
+	FROM
+		sentence_word
+	JOIN
+		student_word_read
+	ON
+		student_word_read.student_id = 1 AND student_word_read.word_hanzi = sentence_word.word_hanzi AND due <= CURRENT_DATE
+	WHERE
+		sentence_word.document_id = document.id 
+) and*/ NOT EXISTS ( -- doesn't exist a word I don't know
+
 	SELECT 
 		1
 	FROM
@@ -17,12 +31,26 @@ WHERE NOT EXISTS (
 		student_word_read.student_id = 1 AND student_word_read.word_hanzi = sentence_word.word_hanzi
 	WHERE
 		student_word_read.word_hanzi IS null AND sentence_word.document_id = document.id AND sentence_word.universal_part_of_speech NOT IN ('PUNCT', 'NUM')
-) ),
+)
+ 
+
+),
 
 due as (SELECT word_hanzi FROM student_word_read WHERE student_id = 1 AND due <= CURRENT_DATE)
 -- exists a word that is due today
 select 
-	id, chinese, english, count(distinct(sentence_word.word_hanzi)), array_agg(distinct(sentence_word.word_hanzi)) as due, cast(count(distinct(sentence_word.word_hanzi)) as float)/cast((length(chinese)) as float) as fraction_due 
+	id, chinese, english, count(distinct(sentence_word.word_hanzi)), array_agg(distinct(sentence_word.word_hanzi)) as due, 
+	-- I think there is whitespace, a newline i think, at the end. data problem TODO tidy. so have to do this regexp replace
+	
+	-- actually cancel that. the problem (lol) is that length is of course returning the number of characters in the string, not the number of words lol.
+	-- so fraction due is hopelessly wrong. need a better query! (one that has a count of how many words are in the sentence!!!)
+	-- the column n_non_punct can be 0 so need to handle that
+	(case when n_non_punct =0 then 0 else 
+	cast(count(distinct(sentence_word.word_hanzi)) as float)/cast(n_non_punct as float) 
+	end) as fraction_due,
+	
+	
+	n_non_punct as sentence_len
 from 
 	candidates 
 JOIN 
@@ -30,8 +58,9 @@ JOIN
 JOIN 
 	due on sentence_word.word_hanzi = due.word_hanzi 
 group by 
-	id, chinese, english 
+	id, chinese, english, n_non_punct 
 order by 
+	--id
 	count(distinct(sentence_word.word_hanzi)) desc, fraction_due desc
 ;
 

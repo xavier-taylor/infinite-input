@@ -1,11 +1,11 @@
 SET search_path TO mandarin;
 
-/*
+
 CREATE MATERIALIZED VIEW mandarin.document_augmented
-	(document_id, document_chinese, document_english, unique_words_no_punct, unique_words_no_num_no_punct)
+	(document_id, document_chinese, document_english, n_non_punct, unique_words_no_punct, unique_words_no_num_no_punct)
 	AS 
 
-(SELECT document.id, document.chinese, document.english, 
+(SELECT document.id, document.chinese, document.english, document.n_non_punct,
  array(
 	 (select distinct(sentence_word.word_hanzi) from sentence  JOIN
 sentence_word on sentence.id = sentence_word.sentence_id
@@ -22,10 +22,12 @@ WHERE document.id = sentence.document_id
 	 FROM
 document)
 
-WITH DATA;  */
+WITH DATA;  
 
 --CREATE INDEX idx_mv_1 on mandarin.document_augmented using gin  (unique_words_no_punct); 
 --CREATE INDEX idx_mv_2 on mandarin.document_augmented using gin  (unique_words_no_num_no_punct); 
+--CREATE INDEX idx_mv_3 on mandarin.document_augmented (unique_words_no_punct); 
+--CREATE INDEX idx_mv_4 on mandarin.document_augmented  (unique_words_no_num_no_punct); 
 
 select * from document_augmented where
 array(SELECT word_hanzi FROM student_word_read WHERE student_id = 1 AND due <= CURRENT_DATE) && unique_words_no_punct

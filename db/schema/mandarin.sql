@@ -137,6 +137,7 @@ CREATE TABLE mandarin.document
     previous_document bigint NULL REFERENCES mandarin.document (id),
     english text NULL,
     chinese text NOT NULL,
+    n_non_punct integer NOT NULL, -- the number of sentence_words this document has that aren't upos punct
     FOREIGN KEY (corpus_title, sub_corpus_title) REFERENCES mandarin.sub_corpus (corpus_title, title),
     PRIMARY KEY (id)
 );

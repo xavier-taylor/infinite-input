@@ -98,6 +98,7 @@ export const haveFetchedListeningDueVar = makeVar<boolean>(false);
  * downside would be if word is last in queue and we get it wrong, we see it again instantly
  * might be better to do anki style 'due' based on date_time, purely local.
  *
+ * TODO continue here ^ implement new word logic in the front end.
  *
  *
  *
