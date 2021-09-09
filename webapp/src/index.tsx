@@ -12,7 +12,7 @@ import {
 } from '@apollo/client';
 import { cache } from './cache';
 
-const client = new ApolloClient({
+export const client = new ApolloClient({
   uri: 'http://localhost:4000/graphql',
   cache,
   connectToDevTools: true, // process.env.NODE_ENV === ‘development’

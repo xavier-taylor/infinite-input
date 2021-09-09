@@ -1,0 +1,7 @@
+Unfortunately graphql doesn't have a date as a built in.
+
+For now, all dates, date times etc are existing in graphql as strings.
+
+These strings area teh result of calling new Date().toISOString()
+
+They are stored in sql as timestamp with timezone, which I believe is nice and specifc

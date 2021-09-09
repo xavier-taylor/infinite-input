@@ -1,3 +1,22 @@
+query NewWords($count: Int!, $force: Boolean!) {
+  newWords(count: $count, force: $force) {
+    wordsLearnedToday
+    haveEnoughUnlockedWords
+    words {
+      hanzi
+      learning
+      word {
+        ccceDefinitions {
+          simplified
+          traditional
+          pinyin
+          definitions
+        }
+      }
+    }
+  }
+}
+
 query Concordance($word: String!) {
   concordanceDocs(word: $word) {
     id

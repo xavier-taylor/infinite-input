@@ -76,12 +76,21 @@ export type NamedEntity = {
   end: Scalars['Int'];
 };
 
+export type NewWordsResponse = {
+  __typename?: 'NewWordsResponse';
+  words: Array<StudentWord>;
+  wordsLearnedToday: Scalars['Int'];
+  haveEnoughUnlockedWords: Scalars['Boolean'];
+};
+
 export type Query = {
   __typename?: 'Query';
   concordanceDocs: Array<Document>;
   document: Document;
   due: Due;
+  newWords: NewWordsResponse;
   sentenceWord?: Maybe<SentenceWord>;
+  studentWord: StudentWord;
   words: Array<Word>;
 };
 
@@ -101,9 +110,20 @@ export type QueryDueArgs = {
 };
 
 
+export type QueryNewWordsArgs = {
+  count: Scalars['Int'];
+  force: Scalars['Boolean'];
+};
+
+
 export type QuerySentenceWordArgs = {
   sentenceId: Scalars['String'];
   stanzaId: Scalars['Int'];
+};
+
+
+export type QueryStudentWordArgs = {
+  hanzi: Scalars['String'];
 };
 
 
@@ -144,6 +164,7 @@ export type StudentWord = {
   position: Scalars['Int'];
   tags: Array<Scalars['String']>;
   word: Word;
+  due?: Maybe<Scalars['String']>;
 };
 
 export type StudyState = {
@@ -264,6 +285,7 @@ export type ResolversTypes = {
   Mutation: ResolverTypeWrapper<{}>;
   NamedEntity: ResolverTypeWrapper<NamedEntity>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
+  NewWordsResponse: ResolverTypeWrapper<Omit<NewWordsResponse, 'words'> & { words: Array<ResolversTypes['StudentWord']> }>;
   Query: ResolverTypeWrapper<{}>;
   Sentence: ResolverTypeWrapper<sentence>;
   SentenceWord: ResolverTypeWrapper<sentence_word>;
@@ -285,6 +307,7 @@ export type ResolversParentTypes = {
   Mutation: {};
   NamedEntity: NamedEntity;
   Int: Scalars['Int'];
+  NewWordsResponse: Omit<NewWordsResponse, 'words'> & { words: Array<ResolversParentTypes['StudentWord']> };
   Query: {};
   Sentence: sentence;
   SentenceWord: sentence_word;
@@ -333,11 +356,20 @@ export type NamedEntityResolvers<ContextType = any, ParentType extends Resolvers
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type NewWordsResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['NewWordsResponse'] = ResolversParentTypes['NewWordsResponse']> = {
+  words?: Resolver<Array<ResolversTypes['StudentWord']>, ParentType, ContextType>;
+  wordsLearnedToday?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  haveEnoughUnlockedWords?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   concordanceDocs?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryConcordanceDocsArgs, 'word'>>;
   document?: Resolver<ResolversTypes['Document'], ParentType, ContextType, RequireFields<QueryDocumentArgs, 'id'>>;
   due?: Resolver<ResolversTypes['Due'], ParentType, ContextType, RequireFields<QueryDueArgs, 'studyType'>>;
+  newWords?: Resolver<ResolversTypes['NewWordsResponse'], ParentType, ContextType, RequireFields<QueryNewWordsArgs, 'count' | 'force'>>;
   sentenceWord?: Resolver<Maybe<ResolversTypes['SentenceWord']>, ParentType, ContextType, RequireFields<QuerySentenceWordArgs, 'sentenceId' | 'stanzaId'>>;
+  studentWord?: Resolver<ResolversTypes['StudentWord'], ParentType, ContextType, RequireFields<QueryStudentWordArgs, 'hanzi'>>;
   words?: Resolver<Array<ResolversTypes['Word']>, ParentType, ContextType, RequireFields<QueryWordsArgs, 'words'>>;
 };
 
@@ -373,6 +405,7 @@ export type StudentWordResolvers<ContextType = any, ParentType extends Resolvers
   position?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   tags?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   word?: Resolver<ResolversTypes['Word'], ParentType, ContextType>;
+  due?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -407,6 +440,7 @@ export type Resolvers<ContextType = any> = {
   Due?: DueResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   NamedEntity?: NamedEntityResolvers<ContextType>;
+  NewWordsResponse?: NewWordsResponseResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Sentence?: SentenceResolvers<ContextType>;
   SentenceWord?: SentenceWordResolvers<ContextType>;

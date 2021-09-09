@@ -5,10 +5,12 @@ import { StudyType } from '../../schema/generated';
 import Study from './Study';
 
 interface Props {
-  drawerOpen: boolean;
   mode: StudyType;
 }
-export const StudyContainer: React.FC<Props> = ({ mode, drawerOpen }) => {
+
+// TODO - on a weekend/mentally fresh day, consider whether this file is required - why not have it all in Study?
+
+export const StudyContainer: React.FC<Props> = ({ mode }) => {
   const { nextDocument, isLast, current, loading, finished } = useDocuments(
     mode
   );
@@ -22,7 +24,6 @@ export const StudyContainer: React.FC<Props> = ({ mode, drawerOpen }) => {
       documentId={current}
       isLast={isLast}
       next={nextDocument}
-      drawerOpen={drawerOpen}
       mode={mode}
     />
   );

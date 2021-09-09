@@ -7,19 +7,28 @@ import { ThemeProvider } from '@material-ui/styles';
 import { createTheme } from '@material-ui/core/styles';
 
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import { DueDocument, DueQuery, StudyType } from '../schema/generated';
+import {
+  DueDocument,
+  DueQuery,
+  NewWordsDocument,
+  NewWordsQuery,
+  StudyType,
+} from '../schema/generated';
 import { ReactiveVar, useQuery, useReactiveVar } from '@apollo/client';
 import {
   docsToListenVar,
   docsToReadVar,
   DocumentIdList,
   haveFetchedListeningDueVar,
+  haveFetchedNewWordsToLearnVar,
   haveFetchedReadingDueVar,
+  newWordsToLearnVar,
   WordHanziList,
   wordsToListenVar,
   wordsToReadVar,
 } from '../cache';
 import { StudyContainer } from './Study/StudyContainer';
+import { NewWordsContainer } from './NewWords/NewWordsContainer';
 
 const baseTheme = createTheme({
   overrides: {
@@ -63,6 +72,11 @@ function setDue(
   wordsToStudyVar(data.due.orphans.map((w) => w.hanzi));
 }
 
+export function setNewWords(data: NewWordsQuery) {
+  newWordsToLearnVar(data.newWords.words.map((w) => w.hanzi));
+  haveFetchedNewWordsToLearnVar(true);
+}
+
 const App: React.FC = () => {
   const classes = useStyles();
   // TODO media query whether drawer starts open?
@@ -70,7 +84,24 @@ const App: React.FC = () => {
   const [drawerOpen, setDrawer] = useState(true);
   const drawer = { drawerOpen, setDrawer };
 
-  // Fetch new words TODO
+  // Fetch new words
+  const haveFetchedNewWordsToLearn = useReactiveVar(
+    haveFetchedNewWordsToLearnVar
+  );
+  const newWordsRV = useQuery(NewWordsDocument, {
+    variables: {
+      count: 10,
+      force: false,
+    },
+    skip: haveFetchedNewWordsToLearn,
+  });
+  useEffect(() => {
+    console.log('in useEffect for new words');
+    if (newWordsRV.data && !haveFetchedNewWordsToLearn) {
+      console.log('will call setDue for new words');
+      setNewWords(newWordsRV.data);
+    }
+  }, [newWordsRV.data, haveFetchedNewWordsToLearn]);
 
   // TODO error handling for these two queries
   // Fetch due reading
@@ -135,10 +166,11 @@ Warning: Cannot update a component (`StudyContainer`) while rendering a differen
                 <div>some kind of home page</div>
               </Route>
               <Route path="/word/new">
+                <NewWordsContainer />
                 <div>learn new words</div>
               </Route>
               <Route path="/read/sentence">
-                <StudyContainer mode={StudyType.Read} drawerOpen={drawerOpen} />
+                <StudyContainer mode={StudyType.Read} />
               </Route>
               <Route path="/read/word">
                 <div>read orphan words</div>

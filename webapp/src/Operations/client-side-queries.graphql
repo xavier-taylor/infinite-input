@@ -30,3 +30,11 @@ query ForgotSentenceWord(
     forgotREAD @include(if: $includeRead)
   }
 }
+
+query StudentWord($hanzi: String!) {
+  studentWord(hanzi: $hanzi) {
+    hanzi
+    learning
+    due
+  }
+}

@@ -35,6 +35,7 @@ import {
 } from '../../schema/generated';
 import { gql, useMutation, useQuery } from '@apollo/client';
 import { cache } from '../../cache';
+import { client } from '../..';
 
 // TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff
 
@@ -124,7 +125,6 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface StudyProps {
-  drawerOpen: boolean; // TODO determine if we need this prop!
   mode: StudyType;
   documentId: Document['id'];
   isLast: boolean;
@@ -132,13 +132,7 @@ interface StudyProps {
 }
 // TODO strip newlines from sentences in database! - ie update ingestion script?
 
-const Study: React.FC<StudyProps> = ({
-  drawerOpen,
-  mode,
-  documentId,
-  isLast,
-  next,
-}) => {
+const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
   const { data, loading, error } = useQuery(DocumentByIdDocument, {
     variables: { id: documentId },
   });
@@ -234,7 +228,7 @@ const Study: React.FC<StudyProps> = ({
       mode === StudyType.Listen
         ? { forgotLISTEN: forgot }
         : { forgotREAD: forgot };
-    cache.writeQuery({
+    client.writeQuery({
       query: ForgotSentenceWordDocument,
       data: {
         sentenceWord: {
@@ -265,7 +259,7 @@ const Study: React.FC<StudyProps> = ({
 
     setRecentWord({ sentenceId, stanzaId });
 
-    cache.writeQuery({
+    client.writeQuery({
       query: gql`
         query UpdateLastClicked($sentenceId: String!, $stanzaId: Int!) {
           sentenceWord(sentenceId: $sentenceId, stanzaId: $stanzaId) {
@@ -349,8 +343,7 @@ const Study: React.FC<StudyProps> = ({
                     setConcordanceWord(undefined);
                     // TODO see if I can get typedDocumentnodes for these cache queries?
                     // TODO can I tweak this query so that it only returns documents which are marked as forgotten?
-                    // TODO how can I make these cache queries typed?
-                    const forgotten = cache.readQuery({
+                    const forgotten = client.readQuery({
                       query: ForgottenWordsDocument,
                       variables: {
                         documentId,
@@ -391,6 +384,9 @@ const Study: React.FC<StudyProps> = ({
                     });
                     next();
                   }
+                  // TODO consider whether isLast is actually necassary now,
+                  // given that the parent container stops rendering this component
+                  // once it gets to 'finished' state?
                   if (!(isLast && studyState === 'check')) {
                     setStudyState(studyState === 'check' ? 'study' : 'check');
                   }

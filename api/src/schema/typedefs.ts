@@ -51,6 +51,7 @@ export const typeDefs = gql`
     position: Int!
     tags: [String!]!
     word: Word!
+    due: String # This can be null when learning = not yet learned or learned
   }
 
   type Word {
@@ -107,13 +108,25 @@ export const typeDefs = gql`
     LISTEN
   }
 
+  type NewWordsResponse {
+    words: [StudentWord!]!
+    wordsLearnedToday: Int!
+    # True only if there were enough unlocked words to satisfyy f(count, force, words per day)
+    haveEnoughUnlockedWords: Boolean!
+  }
+
   type Query {
+    # Count is the number of new words you are after. Cannot override the 'words per day' unless force is set to true
+    # Force means 'give me new words even if I have already studied new words today!
+    # (The backend will have a 'words per day' hardcoded at 10. Could make it user configureable)
+    newWords(count: Int!, force: Boolean!): NewWordsResponse!
     words(words: [String!]!): [Word!]! # the param words is the hanzi strins
     #word: Word
     #document: Document
     due(studyType: StudyType!): Due!
     document(id: String!): Document!
     concordanceDocs(word: String!): [Document!]!
+    studentWord(hanzi: String!): StudentWord!
   }
 
   # TODO enrich this as required for cache updating or error handling

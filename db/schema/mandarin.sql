@@ -59,6 +59,9 @@ CREATE TABLE mandarin.student
 */
 CREATE TYPE mandarin.learning_state AS ENUM ('not_yet_learned', 'meaning', 'pronunciation', 'recognition', 'reading', 'learned');
 
+-- Note that whenever we createa a student_word, we start it with learning_state in not_yet_learned. 
+-- Note that when a card is in 'not_yet_learned' there should not be an option to 'get it wrong' in the UI - you are just reading it!
+-- future TODO - have button to skip straight from 'not_yet_learned' to 'learned' if you already know it.
 
 CREATE TABLE mandarin.student_word 
 (

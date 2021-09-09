@@ -42,7 +42,7 @@ export const useDocuments = (mode: StudyType) => {
     isLast: useReactiveVar(haveFetchedDueVar) && toStudyLength === 1,
     current: useReactiveVar(docsToStudyVar)[0],
     loading: !useReactiveVar(haveFetchedDueVar),
-    finished: haveFetchedDueVar() && docsToStudyVar().length === 0,
+    finished: haveFetchedDueVar() && toStudyLength === 0,
     countRemaining: useReactiveVar(docsToStudyVar).length,
   };
 };

@@ -44,7 +44,7 @@ export const resolvers: Resolvers<IContextType> = {
       repo.getSentences(id as string),
   },
   Mutation: {
-    // TODO CONTINUE HERE -
+    // TODO once front end done CONTINUE HERE -
     // get this mutation called when we finish studying a document.
     // then implement actual logic in this mutation!
     // - next up - make a 'mutations.graphql' in the frontend
@@ -55,6 +55,8 @@ export const resolvers: Resolvers<IContextType> = {
     // at first, we will just ignore the return value etc for the mutation
     //, just fire and forget it to get the app useable.
     // but it will be required to handle errors gracefully, especially if ever ship the app
+
+    // After get this mutation done, also do mutations for new word learning and single word study
 
     documentStudy: (_, { payload, studyType }) => {
       console.log('in the mutation resolver for documentStudy');

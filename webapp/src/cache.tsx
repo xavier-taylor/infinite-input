@@ -9,6 +9,10 @@ import {
 export type DocumentIdList = Array<Document['id']>;
 export type WordHanziList = Array<Word['hanzi']>;
 
+// TODO code review - originally I had vars like 'readWordsVar' 'listenedDocsVar'
+// because I wanted to be able to undo in the UI. I no longer allow that - should
+// I simplify code by getting rid of these extra reactive vars or do I need/use them?
+
 /**
  * The following reactive variables track:
  *  1. documents for review
@@ -32,10 +36,13 @@ export const haveFetchedListeningDueVar = makeVar<boolean>(false);
 
 /**
  * The following reactive variables track New words
- * TODO(later, once app useable) add support to track how many words you already learned today (ie if you start a second session later in the day, it doesn't suggest that you learn 10 new words (unless you want to))
- * (for this have a standalone endpoint that we automatically fetch when starting up the app, and also refetch whenever a word learning mutation fires)
  *
  */
+export const newWordsToLearnVar = makeVar<WordHanziList>([]);
+export const learnedNewWordsVar = makeVar<WordHanziList>([]);
+// This var represents the first fetch of new words for today
+// It doesnt( yet?) represent subsequent above and beyond new words.
+export const haveFetchedNewWordsToLearnVar = makeVar<boolean>(false);
 
 /**
  *
@@ -43,7 +50,7 @@ export const haveFetchedListeningDueVar = makeVar<boolean>(false);
  * 2. query for getNewWords - returns an array of up to 10 StudentWords whose LearningState is anything but learned
  *  and who have lowest position and who are unlocked. If there aren't 10 unlocked words the response should say 'there arenlt unlocked words etc'. priotize words in intermitent state, if any, over words in not_yet_learned
  * 3. Put the ids for into wordsToLearnVar, (also have learnedWordsVar) and set haveFetchedWordsToLearn to true
- * 4. build a UI for cycling through these words, like the sentence study UI.
+ * 4. build a UI for cycling through these words, like the sentence study UI - this should involve factoring common code out of Study.
  * 5. build a mutation for updating student_word each time you click 'next' (with optimistic local stuff?) (this includes generating creating of student_word_read/listen due tomorrow)
  * 6. WHen done, have a button somewhere to force fetch 10 more words.
  *
@@ -82,6 +89,8 @@ const typePolicies: TypedTypePolicies = {
         },
       },
       // Not currently using this reactive variables via the cache, but may do so...
+      // TODO read the docs and look at my code and think about whether I should query reactive vars
+      // only via propery queries of hte cache...
       haveFetchedReadingDue: {
         read() {
           return haveFetchedReadingDueVar();
