@@ -77,6 +77,7 @@ const typePolicies: TypedTypePolicies = {
   Query: {
     fields: {
       document: {
+        // TODO this and similar logic could potentially be replaced with use of readQuery
         read(_, { args, toReference }) {
           // This tells us to try the query Document (which is a by id query) first against our cache.
           // note that if there is a cache miss, it still queries the server

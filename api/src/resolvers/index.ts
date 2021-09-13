@@ -1,7 +1,40 @@
 import { IContextType } from '../server';
-import { Resolvers, StudyType } from '../schema/gql-model';
+import { LearningState, Resolvers, StudyType } from '../schema/gql-model';
+import { learning_state } from '../repository/sql-model';
+
+function toGQLLearningStateEnum(ls: learning_state): LearningState {
+  switch (ls) {
+    case learning_state.not_yet_learned:
+      return LearningState.NotYetLearned;
+    case learning_state.meaning:
+      return LearningState.Meaning;
+    case learning_state.pronunciation:
+      return LearningState.Pronunciation;
+    case learning_state.recognition:
+      return LearningState.Recognition;
+    case learning_state.reading:
+      return LearningState.Reading;
+    case learning_state.learned:
+      return LearningState.Learned;
+    default:
+      const _ex = ls;
+      return _ex;
+  }
+}
 
 export const resolvers: Resolvers<IContextType> = {
+  StudentWord: {
+    hanzi: ({ word_hanzi }) => word_hanzi,
+    locked: ({ locked }) => locked,
+    dateLastUnlocked: ({ date_last_unlocked }) =>
+      date_last_unlocked?.toISOString() ?? null,
+    dateLearned: ({ date_learned }) => date_learned?.toISOString() ?? null,
+    learning: ({ learning }) => toGQLLearningStateEnum(learning),
+    position: ({ position }) => position,
+    tags: ({ tags }) => tags ?? [],
+    word: ({ word_hanzi }, _, { repo }) => repo.getWord(word_hanzi),
+    due: ({ due }) => due?.toISOString() ?? null,
+  },
   CCCEDefinition: {
     simplified: ({ simplified }) => simplified,
     traditional: ({ traditional }) => traditional,
@@ -93,5 +126,16 @@ export const resolvers: Resolvers<IContextType> = {
     concordanceDocs: (_parent, { word }, { repo }, _info) =>
       repo.getDocuments({ including: [word] }),
     // TODO add document_word or whatever this query is relying on to source control
+    newWords: (_, {}, { repo }) => {
+      const userId = `1`; // TODO get this from ctx or whatever
+      return {
+        wordsLearnedToday: 0,
+        haveEnoughUnlockedWords: true,
+        // TODO continue here as part of NewWords.tsx
+        // Note - I was in the process of writing code for
+        // getNewWords, see the sql file seed_new_words.sql
+        words: repo.getNewWords(userId),
+      };
+    },
   },
 };

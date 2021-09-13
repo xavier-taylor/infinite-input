@@ -264,6 +264,10 @@ WHERE NOT EXISTS (
       .where({ id })
       .first() as unknown) as document; // todo make this less bad
   }
+
+  async getNewWords(userId: string) {
+    return this.knex('');
+  }
 }
 
 /*

@@ -13,6 +13,7 @@ generates:
         SentenceWord: ../repository/sql-model#sentence_word
         Word: ../repository/sql-model#word
         CCCEDefinition: ../repository/sql-model#cc_cedict
+        StudentWord: ../repository/sql-model#student_word
     plugins:
       - 'typescript'
       - 'typescript-resolvers'

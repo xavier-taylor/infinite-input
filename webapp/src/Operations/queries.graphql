@@ -5,6 +5,7 @@ query NewWords($count: Int!, $force: Boolean!) {
     words {
       hanzi
       learning
+      due
       word {
         ccceDefinitions {
           simplified

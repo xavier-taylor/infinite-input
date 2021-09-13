@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo } from 'graphql';
-import { document, sentence, sentence_word, word, cc_cedict } from '../repository/sql-model';
+import { document, sentence, sentence_word, word, cc_cedict, student_word } from '../repository/sql-model';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
@@ -289,7 +289,7 @@ export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>;
   Sentence: ResolverTypeWrapper<sentence>;
   SentenceWord: ResolverTypeWrapper<sentence_word>;
-  StudentWord: ResolverTypeWrapper<Omit<StudentWord, 'word'> & { word: ResolversTypes['Word'] }>;
+  StudentWord: ResolverTypeWrapper<student_word>;
   StudyState: ResolverTypeWrapper<Omit<StudyState, 'word'> & { word: ResolversTypes['Word'] }>;
   StudyType: StudyType;
   Word: ResolverTypeWrapper<word>;
@@ -311,7 +311,7 @@ export type ResolversParentTypes = {
   Query: {};
   Sentence: sentence;
   SentenceWord: sentence_word;
-  StudentWord: Omit<StudentWord, 'word'> & { word: ResolversParentTypes['Word'] };
+  StudentWord: student_word;
   StudyState: Omit<StudyState, 'word'> & { word: ResolversParentTypes['Word'] };
   Word: word;
 };

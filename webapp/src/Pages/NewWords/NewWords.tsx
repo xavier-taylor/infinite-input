@@ -1,9 +1,12 @@
+import { useQuery } from '@apollo/client';
+import { StudentWordForLearningDocument } from '../../schema/generated';
+
 interface Props {
   wordHanzi: string;
   isLast: boolean;
   next: () => void; // call this !after! you have updated cache values(and backend)
 }
-const NewWords: React.FC<Props> = () => {
+const NewWords: React.FC<Props> = ({ wordHanzi }) => {
   // This component must handle updating the state of words
   // in the apollo store itself. ie with writequery
 
@@ -22,8 +25,17 @@ const NewWords: React.FC<Props> = () => {
    *   once it gets to 'finished' state
    *
    */
+  const { data, loading, error } = useQuery(StudentWordForLearningDocument, {
+    variables: {
+      hanzi: wordHanzi,
+    },
+  });
+  // TODO
+  if (loading) return <div></div>;
+  else if (error) return <div>error</div>;
+  else if (!data) return <div>no data?</div>;
 
-  return <div>new words</div>;
+  return <div>{data.studentWord.hanzi}</div>;
 };
 
 export default NewWords;

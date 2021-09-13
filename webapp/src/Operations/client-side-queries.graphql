@@ -38,3 +38,19 @@ query StudentWord($hanzi: String!) {
     due
   }
 }
+
+query StudentWordForLearning($hanzi: String!) {
+  studentWord(hanzi: $hanzi) {
+    hanzi
+    learning
+    due
+    word {
+      ccceDefinitions {
+        simplified
+        traditional
+        pinyin
+        definitions
+      }
+    }
+  }
+}
