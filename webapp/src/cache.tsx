@@ -2,6 +2,7 @@ import { InMemoryCache, InMemoryCacheConfig, makeVar } from '@apollo/client';
 import {
   Document,
   DocumentByIdQueryVariables,
+  StudentWordForLearningQueryVariables,
   TypedTypePolicies,
   Word,
 } from './schema/generated';
@@ -46,17 +47,7 @@ export const haveFetchedNewWordsToLearnVar = makeVar<boolean>(false);
 
 /**
  *
- * 1. Make a new graphql type called studentWord, a 1:1 clone of student_word. DONE
- * 2. query for getNewWords - returns an array of up to 10 StudentWords whose LearningState is anything but learned
- *  and who have lowest position and who are unlocked. If there aren't 10 unlocked words the response should say 'there arenlt unlocked words etc'. priotize words in intermitent state, if any, over words in not_yet_learned
- * 3. Put the ids for into wordsToLearnVar, (also have learnedWordsVar) and set haveFetchedWordsToLearn to true
- * 4. build a UI for cycling through these words, like the sentence study UI - this should involve factoring common code out of Study.
- * 5. build a mutation for updating student_word each time you click 'next' (with optimistic local stuff?) (this includes generating creating of student_word_read/listen due tomorrow)
- * 6. WHen done, have a button somewhere to force fetch 10 more words.
- *
- * Can test it out by putting student_words into the required state in pgadmin
- *
- * *  TODO continue here ^ implement above logic
+ * once finished the basic new word flow
  *
  * NEXT UP
  * build basic browse UI that does this
@@ -87,6 +78,12 @@ const typePolicies: TypedTypePolicies = {
             __typename: 'Document',
             id: vars.id,
           });
+        },
+      },
+      studentWord: {
+        read(_, { args, toReference }) {
+          const vars = args as StudentWordForLearningQueryVariables;
+          return toReference({ __typename: 'StudentWord', hanzi: vars.hanzi });
         },
       },
       // Not currently using this reactive variables via the cache, but may do so...
@@ -144,6 +141,7 @@ const typePolicies: TypedTypePolicies = {
       },
     },
   },
+  // Note - if you specify a keyFields, you need to include it in any query (apollo requirement) https://github.com/apollographql/apollo-client/issues/5711
   StudyState: {
     keyFields: ['hanzi', 'studyType'],
   },
@@ -193,4 +191,7 @@ const config: InMemoryCacheConfig = {
   typePolicies,
 };
 
+// I seem to remember reading that we shouldnt call methods on the cache object,
+// just on the client object - cant find a reference, but beware.
+// Apollo docs do show it as client.readQuery. Maybe only that is a reactive query?
 export const cache = new InMemoryCache(config);

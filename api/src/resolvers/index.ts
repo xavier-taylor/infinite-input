@@ -1,6 +1,6 @@
 import { IContextType } from '../server';
 import { LearningState, Resolvers, StudyType } from '../schema/gql-model';
-import { learning_state } from '../repository/sql-model';
+import { learning_state, student_word } from '../repository/sql-model';
 
 function toGQLLearningStateEnum(ls: learning_state): LearningState {
   switch (ls) {
@@ -22,6 +22,7 @@ function toGQLLearningStateEnum(ls: learning_state): LearningState {
   }
 }
 
+const WORDS_PER_DAY = 10;
 export const resolvers: Resolvers<IContextType> = {
   StudentWord: {
     hanzi: ({ word_hanzi }) => word_hanzi,
@@ -77,20 +78,6 @@ export const resolvers: Resolvers<IContextType> = {
       repo.getSentences(id as string),
   },
   Mutation: {
-    // TODO once front end done CONTINUE HERE -
-    // get this mutation called when we finish studying a document.
-    // then implement actual logic in this mutation!
-    // - next up - make a 'mutations.graphql' in the frontend
-    // that defines the mutation, and then try to generate a type for it'
-    // - not sure if typed document node supports mutations.
-    // TODO here on the server, transform forgottenWordsHanzi into a set
-    // Also - leave a big TODO in the code about error handling for these mutations
-    // at first, we will just ignore the return value etc for the mutation
-    //, just fire and forget it to get the app useable.
-    // but it will be required to handle errors gracefully, especially if ever ship the app
-
-    // After get this mutation done, also do mutations for new word learning and single word study
-
     documentStudy: (_, { payload, studyType }) => {
       console.log('in the mutation resolver for documentStudy');
       console.log(payload);
@@ -126,16 +113,45 @@ export const resolvers: Resolvers<IContextType> = {
     concordanceDocs: (_parent, { word }, { repo }, _info) =>
       repo.getDocuments({ including: [word] }),
     // TODO add document_word or whatever this query is relying on to source control
-    newWords: (_, {}, { repo }) => {
+
+    newWords: async (_, { dayStartUTC }, { repo }) => {
       const userId = `1`; // TODO get this from ctx or whatever
+      // TODO optimization can I run these queries in parallel plz
+      const wordsLearnedAlreadyToday = await repo.getCountWordsAlreadyLearnedToday(
+        userId,
+        dayStartUTC
+      );
+      console.log(wordsLearnedAlreadyToday);
+
+      const wordsRemaining = WORDS_PER_DAY - wordsLearnedAlreadyToday;
+
+      let words: student_word[];
+      if (wordsRemaining > 0) {
+        words = await repo.getNewWords(userId, wordsRemaining);
+      } else {
+        words = [];
+      }
+
       return {
-        wordsLearnedToday: 0,
-        haveEnoughUnlockedWords: true,
-        // TODO continue here as part of NewWords.tsx
-        // Note - I was in the process of writing code for
-        // getNewWords, see the sql file seed_new_words.sql
-        words: repo.getNewWords(userId),
+        wordsLearnedToday: wordsLearnedAlreadyToday,
+        haveEnoughUnlockedWords: !(words.length < wordsRemaining),
+        words,
       };
     },
+    moreNewWords: async (_, { dayStartUTC, count }, { repo }) => {
+      const userId = `1`; // TODO get this from ctx or whatever
+      // TODO optimization can I run these queries in parallel plz
+      const wordsLearnedAlreadyToday = await repo.getCountWordsAlreadyLearnedToday(
+        userId,
+        dayStartUTC
+      );
+      const words = await repo.getNewWords(userId, count);
+      return {
+        wordsLearnedToday: wordsLearnedAlreadyToday,
+        haveEnoughUnlockedWords: !(words.length < count),
+        words,
+      };
+    },
+    dailyNewWordsGoal: () => WORDS_PER_DAY,
   },
 };

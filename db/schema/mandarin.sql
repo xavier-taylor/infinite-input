@@ -69,13 +69,14 @@ CREATE TABLE mandarin.student_word
     word_hanzi text REFERENCES mandarin.word (hanzi),
     locked boolean not null,
     date_last_unlocked timestamp with time zone, -- not used for now, could be useful to sort by these in browser
-    date_learned timestamp with time zone,
+    date_learned timestamp with time zone, -- the time learning was set to learned, in UTC absolute time
     learning mandarin.learning_state not null,
     due timestamp with time zone, -- when in learning state other than not_yet_learned or learned, you must have a 'due'
     position int not null,-- this tracks the priority for when a word is pulled for study.
     -- basically, the lower the better. By default, when we unlock a word, we just set this to 
     -- current max + 1
      --todo will need code to limit the magnitude of this int!
+        -- for example set it to max javascript int
      -- TODO will need code to control the size of this tags list
     tags text[] not null,
     CONSTRAINT if_learning_need_due

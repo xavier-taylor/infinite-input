@@ -265,7 +265,6 @@ for subcorpus in corpus.sub_corpuses:
             
 
 '''
-TODO continue here
 status: I have this file 'runnable' again (don't forget to run delete script and set Corpus boolean before running again).
 The problem is, I don't have my pytorch and or cuda etc set up right - I get various errors, ie:
 My next task is to resolve these errors

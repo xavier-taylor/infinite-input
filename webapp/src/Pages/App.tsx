@@ -29,6 +29,7 @@ import {
 } from '../cache';
 import { StudyContainer } from './Study/StudyContainer';
 import { NewWordsContainer } from './NewWords/NewWordsContainer';
+import { DateTime } from 'luxon';
 
 const baseTheme = createTheme({
   overrides: {
@@ -89,10 +90,7 @@ const App: React.FC = () => {
     haveFetchedNewWordsToLearnVar
   );
   const newWordsRV = useQuery(NewWordsDocument, {
-    variables: {
-      count: 10,
-      force: false,
-    },
+    variables: { dayStartUTC: DateTime.now().startOf('day').toUTC().toISO() },
     skip: haveFetchedNewWordsToLearn,
   });
   useEffect(() => {

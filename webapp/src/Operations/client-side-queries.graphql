@@ -1,3 +1,5 @@
+# TODO check that all of these are just queries of the cache
+
 query ForgottenWords(
   $documentId: String!
   $includeListen: Boolean = false
@@ -39,12 +41,15 @@ query StudentWord($hanzi: String!) {
   }
 }
 
+# Note we are just using is to query the cache - we don't currently even have a
+# resolver for this at the backend!
 query StudentWordForLearning($hanzi: String!) {
   studentWord(hanzi: $hanzi) {
     hanzi
     learning
     due
     word {
+      hanzi
       ccceDefinitions {
         simplified
         traditional

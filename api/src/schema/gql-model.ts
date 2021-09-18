@@ -86,8 +86,10 @@ export type NewWordsResponse = {
 export type Query = {
   __typename?: 'Query';
   concordanceDocs: Array<Document>;
+  dailyNewWordsGoal: Scalars['Int'];
   document: Document;
   due: Due;
+  moreNewWords: NewWordsResponse;
   newWords: NewWordsResponse;
   sentenceWord?: Maybe<SentenceWord>;
   studentWord: StudentWord;
@@ -110,9 +112,14 @@ export type QueryDueArgs = {
 };
 
 
-export type QueryNewWordsArgs = {
+export type QueryMoreNewWordsArgs = {
+  dayStartUTC: Scalars['String'];
   count: Scalars['Int'];
-  force: Scalars['Boolean'];
+};
+
+
+export type QueryNewWordsArgs = {
+  dayStartUTC: Scalars['String'];
 };
 
 
@@ -365,9 +372,11 @@ export type NewWordsResponseResolvers<ContextType = any, ParentType extends Reso
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   concordanceDocs?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryConcordanceDocsArgs, 'word'>>;
+  dailyNewWordsGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   document?: Resolver<ResolversTypes['Document'], ParentType, ContextType, RequireFields<QueryDocumentArgs, 'id'>>;
   due?: Resolver<ResolversTypes['Due'], ParentType, ContextType, RequireFields<QueryDueArgs, 'studyType'>>;
-  newWords?: Resolver<ResolversTypes['NewWordsResponse'], ParentType, ContextType, RequireFields<QueryNewWordsArgs, 'count' | 'force'>>;
+  moreNewWords?: Resolver<ResolversTypes['NewWordsResponse'], ParentType, ContextType, RequireFields<QueryMoreNewWordsArgs, 'dayStartUTC' | 'count'>>;
+  newWords?: Resolver<ResolversTypes['NewWordsResponse'], ParentType, ContextType, RequireFields<QueryNewWordsArgs, 'dayStartUTC'>>;
   sentenceWord?: Resolver<Maybe<ResolversTypes['SentenceWord']>, ParentType, ContextType, RequireFields<QuerySentenceWordArgs, 'sentenceId' | 'stanzaId'>>;
   studentWord?: Resolver<ResolversTypes['StudentWord'], ParentType, ContextType, RequireFields<QueryStudentWordArgs, 'hanzi'>>;
   words?: Resolver<Array<ResolversTypes['Word']>, ParentType, ContextType, RequireFields<QueryWordsArgs, 'words'>>;

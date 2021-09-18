@@ -1,6 +1,7 @@
 import { ReactiveVar, useReactiveVar } from '@apollo/client';
 import { InMemoryCache, InMemoryCacheConfig, makeVar } from '@apollo/client';
 import { ResultOf } from '@graphql-typed-document-node/core';
+import { client } from '..';
 import { cache, WordHanziList } from '../cache';
 import {
   learnedNewWordsVar,
@@ -28,7 +29,7 @@ export const useNewWords = (): NewWords => {
     // 1) Check if There is a word in toLearn in state learned - if so, bump it into learned
     const augmentedToLearn: Array<ToLearnStudentWordPartial> = toLearn.map(
       (hanzi) => {
-        const rv = cache.readQuery({
+        const rv = client.readQuery({
           query: StudentWordDocument,
           variables: {
             hanzi,

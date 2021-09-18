@@ -1,7 +1,39 @@
 Unfortunately graphql doesn't have a date as a built in.
 
 For now, all dates, date times etc are existing in graphql as strings.
-
-These strings area teh result of calling new Date().toISOString()
-
+These strings area generally teh result of calling new Date().toISOString()
 They are stored in sql as timestamp with timezone, which I believe is nice and specifc
+
+The string that you get from new Date().toISOString() can be stored losslessly in a timestamp with timezone.
+When you get the value back from the database, you can pass it into the new Date() constructor.
+Then you can pass new Date().toISOString() to the frontend etc.
+
+What is the definition of 'today'?
+
+Today is calculated relative to the users own timezone (lets leave adding custom day start/end times, like anki, till later).
+
+For queries where we need to ask questions like (relative to the users timezone) how many words have they learned today?
+
+GOT IT:
+1. import luxon's DateTime.
+2. get now: now = DateTime.now() 
+this gets the current time (ie in local time, with offset etc)
+3. get start = now.startOf('day')
+4. start.toUTC().toISO()
+
+That gets us the UTC time of the start of the users current day.
+Then we can just plus a day to that to get the end of the user's current day.
+
+
+
+What does it mean for something to be due?
+    for student_word - due is just absolute point in UTC time.
+    Why? Because we dont grab 'words that are due today', we just grab
+    x either words with intermediate learning state, or just unlocked word based on
+    position.
+
+    for student_word_read and student_word_listen
+    due is a point in absolute time. But what words shall we return when,
+    on their local 13 sep 2022, they hit api for due words?
+    We shall like the above luxon logic, calculate the ISOstring UTC for the start of that users day
+    and thus parametize the api call.

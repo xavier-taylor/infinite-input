@@ -133,6 +133,9 @@ interface StudyProps {
 // TODO strip newlines from sentences in database! - ie update ingestion script?
 
 const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
+  // TODO since we are meant to only be grabbing documents
+  // that we already have in the cache, rather than using useQuery, we could
+  // use client.readQuery
   const { data, loading, error } = useQuery(DocumentByIdDocument, {
     variables: { id: documentId },
   });

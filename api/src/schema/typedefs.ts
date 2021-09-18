@@ -110,16 +110,24 @@ export const typeDefs = gql`
 
   type NewWordsResponse {
     words: [StudentWord!]!
+    # Number of words already learned today, not including the words in this response
+    # will be used for message like 'you already learned 10 words today, do you want to unlock more?' etc
     wordsLearnedToday: Int!
-    # True only if there were enough unlocked words to satisfyy f(count, force, words per day)
+    # whether there there enouggh unlocked words eitehr for count, or for the balance
+    # of 'words to learn' that were remaining (for the newWords query)
     haveEnoughUnlockedWords: Boolean!
   }
 
   type Query {
-    # Count is the number of new words you are after. Cannot override the 'words per day' unless force is set to true
-    # Force means 'give me new words even if I have already studied new words today!
-    # (The backend will have a 'words per day' hardcoded at 10. Could make it user configureable)
-    newWords(count: Int!, force: Boolean!): NewWordsResponse!
+    # returns the set of new words to learn today.
+    newWords(
+      # currently hardcoded to 10.
+      # the start of the users local day, converted into a UTC time in ISO format
+      # used to calculate how many words they already learned today, if any
+      dayStartUTC: String!
+    ): NewWordsResponse!
+    moreNewWords(dayStartUTC: String!, count: Int!): NewWordsResponse!
+    dailyNewWordsGoal: Int!
     words(words: [String!]!): [Word!]! # the param words is the hanzi strins
     #word: Word
     #document: Document

@@ -5,10 +5,17 @@ import {
   document,
   sentence,
   sentence_word,
+  student_word,
   word,
 } from './sql-model';
 import Knex from 'knex';
 import DataLoader from 'dataloader';
+import { DateTime } from 'luxon';
+import {
+  MAX_GRAPHQL_INT,
+  MIN_GRAPHQL_INT,
+  toGraphQLInteger,
+} from '../utils/number';
 
 // IMPORTANT - cannot reuse dataloader instances across requests.
 // so cannot use datasource instance across requests.
@@ -265,8 +272,49 @@ WHERE NOT EXISTS (
       .first() as unknown) as document; // todo make this less bad
   }
 
-  async getNewWords(userId: string) {
-    return this.knex('');
+  /**
+   *
+   * @param userId
+   * @param count
+   */
+  async getNewWords(userId: string, count: number) {
+    return this.knex('student_word')
+      .select<student_word[]>('*')
+      .where({ student_id: userId, locked: false })
+      .whereNot({ learning: 'learned' })
+      .orderBy([
+        { column: 'learning', order: 'desc' },
+        { column: 'position', order: 'asc' },
+      ])
+      .limit(count);
+  }
+
+  async getUnLockedNewWordCount(userId: string): Promise<number> {
+    const res = await this.knex('student_word')
+      .count('*')
+      .where({ student_id: userId, locked: false })
+      .whereNot({ learning: 'learned' });
+
+    const count = res[0]['count'];
+    // FALSE: The value of count will, by default, have type of string | number. This may be counter-intuitive but some connectors (eg. postgres) will automatically cast BigInt result to string when javascript's Number type is not large enough for the value.
+    // note leaving this misleading statemetn from the docs here for posterity. The type of count was a string - even when its value was zero!
+    return toGraphQLInteger(count);
+  }
+
+  // dont think I need this query, leaving it in case i do but TODO delete.
+  async getCountWordsAlreadyLearnedToday(
+    userId: string,
+    dayStartUTC: string
+  ): Promise<number> {
+    const dayStart = DateTime.fromISO(dayStartUTC);
+    const tomorrow = dayStart.plus({ days: 1 });
+    const res = await this.knex('student_word')
+      .count('*')
+      .where({ student_id: userId })
+      .where('date_learned', '>=', dayStartUTC)
+      .where('date_learned', '<', tomorrow.toUTC().toISO());
+    const count = res[0]['count'];
+    return toGraphQLInteger(count);
   }
 }
 

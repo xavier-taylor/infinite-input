@@ -1,5 +1,5 @@
-query NewWords($count: Int!, $force: Boolean!) {
-  newWords(count: $count, force: $force) {
+query NewWords($dayStartUTC: String!) {
+  newWords(dayStartUTC: $dayStartUTC) {
     wordsLearnedToday
     haveEnoughUnlockedWords
     words {
@@ -7,6 +7,28 @@ query NewWords($count: Int!, $force: Boolean!) {
       learning
       due
       word {
+        hanzi
+        ccceDefinitions {
+          simplified
+          traditional
+          pinyin
+          definitions
+        }
+      }
+    }
+  }
+}
+
+query MoreNewWords($dayStartUTC: String!, $count: Int!) {
+  moreNewWords(dayStartUTC: $dayStartUTC, count: $count) {
+    wordsLearnedToday
+    haveEnoughUnlockedWords
+    words {
+      hanzi
+      learning
+      due
+      word {
+        hanzi
         ccceDefinitions {
           simplified
           traditional

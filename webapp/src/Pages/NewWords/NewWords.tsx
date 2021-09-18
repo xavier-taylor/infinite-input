@@ -25,6 +25,8 @@ const NewWords: React.FC<Props> = ({ wordHanzi }) => {
    *   once it gets to 'finished' state
    *
    */
+
+  // This could be a cache query instead... ie client.readQuery.
   const { data, loading, error } = useQuery(StudentWordForLearningDocument, {
     variables: {
       hanzi: wordHanzi,
@@ -32,7 +34,7 @@ const NewWords: React.FC<Props> = ({ wordHanzi }) => {
   });
   // TODO
   if (loading) return <div></div>;
-  else if (error) return <div>error</div>;
+  else if (error) return <div>{JSON.stringify(error)}</div>;
   else if (!data) return <div>no data?</div>;
 
   return <div>{data.studentWord.hanzi}</div>;

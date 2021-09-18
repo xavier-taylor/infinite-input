@@ -23,7 +23,15 @@ not exists (select 1 from student_word sw1 where sw1.word_hanzi= w.hanzi)
 group by h
 limit 3;
 
+-- sample new words query that puts partially learned words above not_yet_learned, and then sorts by order
 select * from student_word
 where learning != 'learned'::learning_state
+and student_id = 1
+and locked = false
 order by learning desc, position asc
 limit 10;
+
+select count(*) from student_word
+where learning != 'learned'::learning_state
+and student_id = 1
+and locked = false
