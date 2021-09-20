@@ -50,7 +50,6 @@ export enum LearningState {
   NotYetLearned = 'not_yet_learned',
   Meaning = 'meaning',
   Pronunciation = 'pronunciation',
-  Recognition = 'recognition',
   Reading = 'reading',
   Learned = 'learned'
 }

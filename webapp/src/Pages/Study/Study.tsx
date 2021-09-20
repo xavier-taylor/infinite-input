@@ -36,6 +36,7 @@ import {
 import { gql, useMutation, useQuery } from '@apollo/client';
 import { cache } from '../../cache';
 import { client } from '../..';
+import { GridContainer, GridRow, RowCard } from '../../Components/Layout/Grid';
 
 // TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff
 
@@ -82,29 +83,10 @@ const useStyles = makeStyles((theme: Theme) =>
     sentenceHanzi: {
       fontSize: '1.5rem',
     },
-    sentenceRowRoot: {
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-around',
-    },
-    rowContainer: {
-      height: `calc(33% - ${theme.spacing(1)}px)`,
-      margin: theme.spacing(1),
-      marginBottom: 0,
-      flexWrap: 'nowrap',
-      width: `calc(100% - ${theme.spacing(2)}px)`,
-    },
+
     rowCard: {
       borderRadius: 15,
       padding: theme.spacing(1),
-    },
-    gridContainer: {
-      height: 'calc(100% - 64px)', // TODO improve this, get rid of reliance on hardcode 64px (which is height of appbar ONLY IN SOME SITUATIONS)
-      // the minus should instead come from theme.mixins.toolbar/ from the height of the appbar
-      //position: 'relative', NOTE there might be a way to do this using position rather than the hacky height thing above...
-      // bottom: 0,
-      // top: 0,
     },
     definition: {
       overflowY: 'auto',
@@ -288,15 +270,14 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
   }
 
   return (
-    <Grid
+    <GridContainer
       container
       direction="column"
       justifyContent="flex-start"
       alignItems="stretch"
-      className={classes.gridContainer}
     >
-      <Grid className={classes.rowContainer} item>
-        <Card classes={{ root: classes.sentenceRowRoot }} elevation={2}>
+      <GridRow item>
+        <RowCard elevation={2}>
           <Typography
             className={classes.sentenceHanzi}
             variant="body1"
@@ -402,9 +383,9 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
               </Button>
             </ButtonGroup>
           </CardActions>
-        </Card>
-      </Grid>
-      <Grid className={classes.rowContainer} item container>
+        </RowCard>
+      </GridRow>
+      <GridRow item container>
         {wordsToShow.map((word) => (
           <Grid
             className={classes.definitionContainer}
@@ -417,6 +398,7 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
             key={`${word.wordHanzi}-${word.stanzaId}-${word.sentenceId}`}
           >
             <Card
+              elevation={2}
               className={clsx(
                 word.stanzaId === recentWord.stanzaId &&
                   word.sentenceId === recentWord.sentenceId &&
@@ -441,6 +423,15 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
                     <IconButton>
                       <RecordVoiceOverIcon color="action" />
                     </IconButton>
+                    <IconButton onClick={() => markForgot(word, mode, true)}>
+                      <ThumbDown
+                        style={{
+                          color: forgot(mode, word)
+                            ? theme.palette.error.main
+                            : theme.palette.action.active,
+                        }}
+                      />
+                    </IconButton>
                     <IconButton
                       // disabled={!forgot(mode, word)}
                       onClick={() => markForgot(word, mode, false)}
@@ -450,15 +441,6 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
                           color: forgot(mode, word)
                             ? theme.palette.action.active
                             : theme.palette.success.main,
-                        }}
-                      />
-                    </IconButton>
-                    <IconButton onClick={() => markForgot(word, mode, true)}>
-                      <ThumbDown
-                        style={{
-                          color: forgot(mode, word)
-                            ? theme.palette.error.main
-                            : theme.palette.action.active,
                         }}
                       />
                     </IconButton>
@@ -491,9 +473,9 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
             </Card>
           </Grid>
         ))}
-      </Grid>
+      </GridRow>
 
-      <Grid className={classes.rowContainer} item>
+      <GridRow item>
         {
           concordanceWord ? (
             <Concordance word={concordanceWord}></Concordance>
@@ -502,8 +484,8 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
           )
           // TODO make the concordance handle undefined concordance word, and check that it handles concordance words that it cant find..
         }
-      </Grid>
-    </Grid>
+      </GridRow>
+    </GridContainer>
   );
 };
 

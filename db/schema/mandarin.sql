@@ -54,10 +54,9 @@ CREATE TABLE mandarin.student
   - state gets set to 'meaning' and a due gets set.
  * then have: 2/3 -> 1/3 meaning[] (can you remember the meaning when shown char and pronunciation/audio)
  * then into: 2/3 -> 1/3 pronunciation[] can you remember the pronunciation when shown char and meaning
- * then into: 2/3 -> 1/3 recognition[] can you pick the character (against some random others) when given audio/pronuncation and meaning
  * then into 1/3 -> 2/3 reading[] can you read the character (remember its meaning and pronunciation)
 */
-CREATE TYPE mandarin.learning_state AS ENUM ('not_yet_learned', 'meaning', 'pronunciation', 'recognition', 'reading', 'learned');
+CREATE TYPE mandarin.learning_state AS ENUM ('not_yet_learned', 'meaning', 'pronunciation', 'reading', 'learned');
 
 -- Note that whenever we createa a student_word, we start it with learning_state in not_yet_learned. 
 -- Note that when a card is in 'not_yet_learned' there should not be an option to 'get it wrong' in the UI - you are just reading it!

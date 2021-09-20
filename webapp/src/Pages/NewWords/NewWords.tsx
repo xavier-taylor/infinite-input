@@ -1,5 +1,34 @@
 import { useQuery } from '@apollo/client';
+import { Grid, styled, Card, Typography } from '@material-ui/core';
+import { GridContainer, GridRow, RowCard } from '../../Components/Layout/Grid';
 import { StudentWordForLearningDocument } from '../../schema/generated';
+
+const fakeData = {
+  studentWord: {
+    __typename: 'StudentWord',
+    due: '2021-09-11T14:00:00.000Z',
+    hanzi: '上游',
+    learning: 'meaning',
+    word: {
+      __typename: 'Word',
+      ccceDefinitions: [
+        {
+          __typename: 'CCCEDefinition',
+          definitions: [
+            'upper reaches (of a river)',
+            'upper level',
+            'upper echelon',
+            'upstream',
+          ],
+          pinyin: 'shang4 you2',
+          simplified: '上游',
+          traditional: '上游',
+        },
+      ],
+      hanzi: '上游',
+    },
+  },
+};
 
 interface Props {
   wordHanzi: string;
@@ -15,7 +44,8 @@ const NewWords: React.FC<Props> = ({ wordHanzi }) => {
 
   // TODO continue here
   /**
-   * 1. fetch the current word for learning from the cache
+   * 1. fetch the current word for learning from the cache- done
+   * CURRENTLY at step 2 over in NewWords.tsx
    * 2. refactor some code out of Study and create study UI
    *   the study ui shows whatever part is indicated by the learning state, (just show pinyin rather than sound for now)
    * then shows all when u click next etc
@@ -32,12 +62,31 @@ const NewWords: React.FC<Props> = ({ wordHanzi }) => {
       hanzi: wordHanzi,
     },
   });
+
   // TODO
   if (loading) return <div></div>;
   else if (error) return <div>{JSON.stringify(error)}</div>;
   else if (!data) return <div>no data?</div>;
 
-  return <div>{data.studentWord.hanzi}</div>;
+  return (
+    <GridContainer
+      container
+      direction="column"
+      justifyContent="flex-start"
+      alignItems="flex-start"
+    >
+      <GridRow item>
+        <RowCard elevation={2}>
+          <Typography>Pronduncation icon, concordance</Typography>
+          {/* TODO - make this tex fontize shrink to fit the viewport available space when necassary */}
+          <Typography align="center" variant="h2" lang="zh">
+            四世同堂
+          </Typography>
+          <Typography>again | next</Typography>
+        </RowCard>
+      </GridRow>
+    </GridContainer>
+  );
 };
 
 export default NewWords;

@@ -10,8 +10,6 @@ function toGQLLearningStateEnum(ls: learning_state): LearningState {
       return LearningState.Meaning;
     case learning_state.pronunciation:
       return LearningState.Pronunciation;
-    case learning_state.recognition:
-      return LearningState.Recognition;
     case learning_state.reading:
       return LearningState.Reading;
     case learning_state.learned:

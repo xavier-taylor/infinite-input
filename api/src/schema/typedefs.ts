@@ -36,7 +36,6 @@ export const typeDefs = gql`
     not_yet_learned
     meaning
     pronunciation
-    recognition
     reading
     learned
   }

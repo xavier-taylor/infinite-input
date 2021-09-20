@@ -133,6 +133,10 @@ export interface sub_corpus {
   corpus_title: string;
   summary: string;
 }
+export interface time_testing {
+  due: Date;
+  id?: number;
+}
 export interface word {
   hanzi: string;
   hsk_word_2010: number | null;
@@ -142,7 +146,6 @@ export enum learning_state {
   not_yet_learned = 'not_yet_learned',
   meaning = 'meaning',
   pronunciation = 'pronunciation',
-  recognition = 'recognition',
   reading = 'reading',
   learned = 'learned',
 }
