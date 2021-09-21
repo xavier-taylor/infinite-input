@@ -31,19 +31,6 @@ import { StudyContainer } from './Study/StudyContainer';
 import { NewWordsContainer } from './NewWords/NewWordsContainer';
 import { DateTime } from 'luxon';
 
-const baseTheme = createTheme({
-  overrides: {
-    MuiCssBaseline: {
-      '@global': {
-        ':lang(zh)': {
-          // any component with lang='zh' will get this font
-          fontFamily: "'Noto Serif SC', serif",
-        },
-      },
-    },
-  },
-});
-
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
@@ -147,58 +134,56 @@ Warning: Cannot update a component (`StudyContainer`) while rendering a differen
   }, [listeningRV.data, haveFetchedListening]);
 
   return (
-    <ThemeProvider theme={baseTheme}>
-      <Router>
-        <div className={classes.root}>
-          <CssBaseline />
-          <Header drawer={drawer} />
-          <MenuDrawer
-            drawer={drawer}
-            loadingReading={!haveFetchedReading || readingRV.loading}
-            loadingListening={!haveFetchedListening || listeningRV.loading}
-          />
-          <main className={classes.content}>
-            <div className={classes.appBarSpacer} />
-            <Switch>
-              <Route exact path="/">
-                <div>some kind of home page</div>
-              </Route>
-              <Route path="/word/new">
-                <NewWordsContainer />
-                <div>learn new words</div>
-              </Route>
-              <Route path="/read/sentence">
-                <StudyContainer mode={StudyType.Read} />
-              </Route>
-              <Route path="/read/word">
-                <div>read orphan words</div>
-              </Route>
-              <Route path="/listen/sentence">
-                <div>Listen document page goes here</div>
-              </Route>
-              <Route path="/listen/word">
-                <div>listen orphan words</div>
-              </Route>
-              <Route path="/browse">
-                <div>browse and control words (ie whether locked )</div>
-              </Route>
-              <Route path="/settings/appearance">
-                <div>Appearance settings</div>
-              </Route>
-              <Route path="/settings/keyboard">
-                <div>keyboard shortcuts etc?</div>
-              </Route>
-              <Route path="/settings/study">
-                <div>study settings</div>
-              </Route>
-              <Route path="/user">
-                <div>user profile</div>
-              </Route>
-            </Switch>
-          </main>
-        </div>
-      </Router>
-    </ThemeProvider>
+    <Router>
+      <div className={classes.root}>
+        <CssBaseline />
+        <Header drawer={drawer} />
+        <MenuDrawer
+          drawer={drawer}
+          loadingReading={!haveFetchedReading || readingRV.loading}
+          loadingListening={!haveFetchedListening || listeningRV.loading}
+        />
+        <main className={classes.content}>
+          <div className={classes.appBarSpacer} />
+          <Switch>
+            <Route exact path="/">
+              <div>some kind of home page</div>
+            </Route>
+            <Route path="/word/new">
+              <NewWordsContainer />
+              <div>learn new words</div>
+            </Route>
+            <Route path="/read/sentence">
+              <StudyContainer mode={StudyType.Read} />
+            </Route>
+            <Route path="/read/word">
+              <div>read orphan words</div>
+            </Route>
+            <Route path="/listen/sentence">
+              <div>Listen document page goes here</div>
+            </Route>
+            <Route path="/listen/word">
+              <div>listen orphan words</div>
+            </Route>
+            <Route path="/browse">
+              <div>browse and control words (ie whether locked )</div>
+            </Route>
+            <Route path="/settings/appearance">
+              <div>Appearance settings</div>
+            </Route>
+            <Route path="/settings/keyboard">
+              <div>keyboard shortcuts etc?</div>
+            </Route>
+            <Route path="/settings/study">
+              <div>study settings</div>
+            </Route>
+            <Route path="/user">
+              <div>user profile</div>
+            </Route>
+          </Switch>
+        </main>
+      </div>
+    </Router>
   );
 };
 

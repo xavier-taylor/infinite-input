@@ -11,6 +11,7 @@ import {
   InMemoryCacheConfig,
 } from '@apollo/client';
 import { cache } from './cache';
+import { createTheme, ThemeProvider } from '@material-ui/core';
 
 export const client = new ApolloClient({
   uri: 'http://localhost:4000/graphql',
@@ -18,10 +19,25 @@ export const client = new ApolloClient({
   connectToDevTools: true, // process.env.NODE_ENV === ‘development’
 });
 
+const baseTheme = createTheme({
+  overrides: {
+    MuiCssBaseline: {
+      '@global': {
+        ':lang(zh)': {
+          // any component with lang='zh' will get this font
+          fontFamily: "'Noto Serif SC', serif",
+        },
+      },
+    },
+  },
+});
+
 ReactDOM.render(
   <ApolloProvider client={client}>
     <React.StrictMode>
-      <App />
+      <ThemeProvider theme={baseTheme}>
+        <App />
+      </ThemeProvider>
     </React.StrictMode>
   </ApolloProvider>,
   document.getElementById('root')
