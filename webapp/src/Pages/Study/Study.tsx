@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-import MenuBookIcon from '@material-ui/icons/MenuBook';
-import RecordVoiceOverIcon from '@material-ui/icons/RecordVoiceOver';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
 import clsx from 'clsx';
-import {
-  makeStyles,
-  createStyles,
-  Theme,
-  useTheme,
-} from '@material-ui/core/styles';
+import { Theme, useTheme } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
+import createStyles from '@mui/styles/createStyles';
 import {
   Button,
   ButtonGroup,
@@ -19,8 +16,8 @@ import {
   CardHeader,
   CardContent,
   IconButton,
-} from '@material-ui/core';
-import { ThumbDown, ThumbUp } from '@material-ui/icons';
+} from '@mui/material';
+import { ThumbDown, ThumbUp } from '@mui/icons-material';
 import Concordance from '../../Components/Concordance';
 import {
   Document,
@@ -91,7 +88,7 @@ const useStyles = makeStyles((theme: Theme) =>
       height: '100%',
     },
     definitionContainer: {
-      height: `calc(100% - ${theme.spacing(1)}px)`,
+      height: `calc(100% - ${theme.spacing(1)})`,
       margin: theme.spacing(0.5),
       '&:nth-child(1)': {
         marginLeft: '0px',
@@ -121,10 +118,10 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
 
   const classes = useStyles();
   const theme = useTheme();
-  const xs = useMediaQuery(theme.breakpoints.down('xs'));
-  const sm = useMediaQuery(theme.breakpoints.down('sm'));
-  const md = useMediaQuery(theme.breakpoints.down('md'));
-  const lg = useMediaQuery(theme.breakpoints.down('lg'));
+  const xs = useMediaQuery(theme.breakpoints.down('sm'));
+  const sm = useMediaQuery(theme.breakpoints.down('md'));
+  const md = useMediaQuery(theme.breakpoints.down('lg'));
+  const lg = useMediaQuery(theme.breakpoints.down('xl'));
   let numberToShow = xs ? 1 : sm ? 2 : md ? 3 : lg ? 4 : 6; // if it wasn't large, it was xl
   type studyStates = 'study' | 'check';
   const [studyState, setStudyState] = useState<studyStates>('study'); // whether you are reading/listening, or looking at translation etc
@@ -312,9 +309,7 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
                   setStudyState(studyState === 'check' ? 'study' : 'check');
                 }}
                 variant="outlined"
-                color="default"
-                size="medium"
-              >
+                size="medium">
                 Hide
               </Button>
               <Button
@@ -412,15 +407,13 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
                 title={<span lang="zh">{word.word.hanzi}</span>}
                 action={
                   <ButtonGroup>
-                    <IconButton
-                      onClick={() => setConcordanceWord(word.word.hanzi)}
-                    >
+                    <IconButton onClick={() => setConcordanceWord(word.word.hanzi)} size="large">
                       <MenuBookIcon color="action"></MenuBookIcon>
                     </IconButton>
-                    <IconButton>
+                    <IconButton size="large">
                       <RecordVoiceOverIcon color="action" />
                     </IconButton>
-                    <IconButton onClick={() => markForgot(word, mode, true)}>
+                    <IconButton onClick={() => markForgot(word, mode, true)} size="large">
                       <ThumbDown
                         style={{
                           color: forgot(mode, word)
@@ -432,7 +425,7 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
                     <IconButton
                       // disabled={!forgot(mode, word)}
                       onClick={() => markForgot(word, mode, false)}
-                    >
+                      size="large">
                       <ThumbUp
                         style={{
                           color: forgot(mode, word)

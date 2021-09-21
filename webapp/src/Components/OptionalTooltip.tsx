@@ -1,4 +1,4 @@
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 import React, { ReactElement } from 'react';
 
 interface Props {
@@ -12,7 +12,11 @@ export const OptionalTooltip: React.FC<Props> = ({
   children,
 }) => {
   if (showTooltip) {
-    return <Tooltip title={text}>{children}</Tooltip>;
+    return (
+      <Tooltip title={text} placement="right">
+        {children}
+      </Tooltip>
+    );
   } else {
     return <>{children}</>;
   }

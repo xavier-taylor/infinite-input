@@ -1,4 +1,4 @@
-import { LinearProgress } from '@material-ui/core';
+import { LinearProgress } from '@mui/material';
 import React from 'react';
 import { useNewWords } from '../../Hooks/newWords';
 import NewWords from './NewWords';

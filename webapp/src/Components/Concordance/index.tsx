@@ -1,5 +1,7 @@
 import React from 'react';
-import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
+import { Theme } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
+import createStyles from '@mui/styles/createStyles';
 import clsx from 'clsx';
 
 import {
@@ -9,7 +11,7 @@ import {
   FormControlLabel,
   Switch,
   LinearProgress,
-} from '@material-ui/core';
+} from '@mui/material';
 import KeyWordInContext from './KWICView';
 import ListView from './ListView';
 import { useQuery } from '@apollo/client';
@@ -85,7 +87,7 @@ const useStyles = makeStyles((theme: Theme) =>
       '&:last-child': {
         paddingBottom: '0px',
       },
-      height: `calc(100% - ${theme.spacing(5.5)}px)`,
+      height: `calc(100% - ${theme.spacing(5.5)})`,
     },
     ccRootAligned: {
       display: 'flex',

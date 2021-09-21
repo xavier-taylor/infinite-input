@@ -6,9 +6,10 @@ import {
   CircularProgress,
   Avatar,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import React from 'react';
-import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
+import { Theme, useTheme } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 import { OptionalTooltip } from './OptionalTooltip';
 

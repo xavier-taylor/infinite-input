@@ -1,14 +1,9 @@
-import {
-  AppBar,
-  IconButton,
-  makeStyles,
-  Toolbar,
-  Typography,
-} from '@material-ui/core';
+import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import React from 'react';
 import { DrawerState } from '../Pages/App';
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import MenuIcon from '@material-ui/icons/Menu';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
@@ -48,11 +43,12 @@ const Header: React.FC<HeaderProps> = (props) => {
         <IconButton
           edge="start"
           color="inherit"
-          aria-label="open drawer" // does this need to change when closed?
+          // does this need to change when closed?
+          aria-label="open drawer"
           onClick={() => setDrawer(!drawerOpen)}
-          className={classes.menuButton}
           //className={clsx(classes.menuButton, drawerOpen && classes.menuButtonHidden)}
-        >
+          className={classes.menuButton}
+          size="large">
           <MenuIcon />
         </IconButton>
         <Typography
@@ -64,7 +60,7 @@ const Header: React.FC<HeaderProps> = (props) => {
         >
           Infinite Input
         </Typography>
-        <IconButton onClick={() => history.push('/user')} color="inherit">
+        <IconButton onClick={() => history.push('/user')} color="inherit" size="large">
           <AccountCircleIcon />
         </IconButton>
       </Toolbar>

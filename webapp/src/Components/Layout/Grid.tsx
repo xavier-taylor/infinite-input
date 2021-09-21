@@ -1,4 +1,4 @@
-import { Card, Grid, styled } from '@material-ui/core';
+import { Card, Grid, styled } from '@mui/material';
 
 // TODO improve this, get rid of reliance on hardcode 64px (which is height of appbar ONLY IN SOME SITUATIONS)
 // the minus should instead come from theme.mixins.toolbar/ from the height of the appbar
@@ -8,11 +8,11 @@ export const GridContainer = styled(Grid)({
 });
 
 export const GridRow = styled(Grid)(({ theme }) => ({
-  height: `calc(33% - ${theme.spacing(1)}px)`,
+  height: `calc(33% - ${theme.spacing(1)})`,
   margin: theme.spacing(1),
   marginBottom: 0,
   flexWrap: 'nowrap',
-  width: `calc(100% - ${theme.spacing(2)}px)`,
+  width: `calc(100% - ${theme.spacing(2)})`,
 }));
 
 export const RowCard = styled(Card)(({ theme }) => ({

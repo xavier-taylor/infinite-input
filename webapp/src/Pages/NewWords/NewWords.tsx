@@ -7,7 +7,7 @@ import {
   CardActions,
   ButtonGroup,
   Button,
-} from '@material-ui/core';
+} from '@mui/material';
 import { BLANK_SPACE } from '../../Components/Layout/Constants';
 import { GridContainer, GridRow, RowCard } from '../../Components/Layout/Grid';
 import { StudentWordForLearningDocument } from '../../schema/generated';

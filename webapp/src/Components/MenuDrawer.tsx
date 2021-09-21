@@ -6,20 +6,20 @@ import {
   List,
   ListSubheader,
   useTheme,
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import Collapse from '@material-ui/core/Collapse';
-import ListItemText from '@material-ui/core/ListItemText';
-import SearchIcon from '@material-ui/icons/Search';
-import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications';
-import KeyboardIcon from '@material-ui/icons/Keyboard';
-import BrushIcon from '@material-ui/icons/Brush';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Collapse from '@mui/material/Collapse';
+import ListItemText from '@mui/material/ListItemText';
+import SearchIcon from '@mui/icons-material/Search';
+import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
+import KeyboardIcon from '@mui/icons-material/Keyboard';
+import BrushIcon from '@mui/icons-material/Brush';
 import { DrawerState } from '../Pages/App';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { useHistory } from 'react-router-dom';
 import { MenuListItem } from './MenuListItem';
 import { useDocuments } from '../Hooks/documents';
@@ -100,7 +100,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
       open={drawerOpen}
     >
       <div className={classes.toolbarIcon}>
-        <IconButton onClick={() => setDrawer(!drawerOpen)}>
+        <IconButton onClick={() => setDrawer(!drawerOpen)} size="large">
           <ChevronLeftIcon />
         </IconButton>
       </div>

@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { CssBaseline } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { CssBaseline } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import Header from '../Components/Header';
 import MenuDrawer from '../Components/MenuDrawer';
-import { ThemeProvider } from '@material-ui/styles';
-import { createTheme } from '@material-ui/core/styles';
+import { createTheme } from '@mui/material/styles';
 
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import {
