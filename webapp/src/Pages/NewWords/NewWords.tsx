@@ -1,5 +1,14 @@
 import { useQuery } from '@apollo/client';
-import { Grid, styled, Card, Typography } from '@material-ui/core';
+import {
+  Grid,
+  styled,
+  Card,
+  Typography,
+  CardActions,
+  ButtonGroup,
+  Button,
+} from '@material-ui/core';
+import { BLANK_SPACE } from '../../Components/Layout/Constants';
 import { GridContainer, GridRow, RowCard } from '../../Components/Layout/Grid';
 import { StudentWordForLearningDocument } from '../../schema/generated';
 
@@ -82,7 +91,12 @@ const NewWords: React.FC<Props> = ({ wordHanzi }) => {
           <Typography align="center" variant="h2" lang="zh">
             四世同堂
           </Typography>
-          <Typography>again | next</Typography>
+          <CardActions style={{ justifyContent: 'center' }}>
+            <ButtonGroup variant="outlined" size="medium">
+              <Button style={{ width: '50%' }}>Again</Button>
+              <Button style={{ width: '50%' }}>Good</Button>
+            </ButtonGroup>
+          </CardActions>
         </RowCard>
       </GridRow>
     </GridContainer>

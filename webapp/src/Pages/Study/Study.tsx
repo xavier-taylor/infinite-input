@@ -34,9 +34,9 @@ import {
   StudyType,
 } from '../../schema/generated';
 import { gql, useMutation, useQuery } from '@apollo/client';
-import { cache } from '../../cache';
 import { client } from '../..';
 import { GridContainer, GridRow, RowCard } from '../../Components/Layout/Grid';
+import { BLANK_SPACE } from '../../Components/Layout/Constants';
 
 // TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff
 
@@ -48,9 +48,6 @@ const useStyles = makeStyles((theme: Theme) =>
     buttonGroupGrouped: {
       // fontFamily: "'Roboto Mono', monospace",
       width: '50%', // works for 2 buttons with similar length labels
-    },
-    cardActionRoot: {
-      justifyContent: 'center',
     },
     cardHeaderRoot: {
       padding: theme.spacing(1),
@@ -304,10 +301,10 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
             {
               studyState === 'check'
                 ? document.english
-                : '⠀' /*invis char for spacing*/
+                : BLANK_SPACE /*invis char for spacing*/
             }
           </Typography>
-          <CardActions classes={{ root: classes.cardActionRoot }}>
+          <CardActions style={{ justifyContent: 'center' }}>
             <ButtonGroup classes={{ grouped: classes.buttonGroupGrouped }}>
               <Button
                 disabled={studyState === 'study'}
