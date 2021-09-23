@@ -37,7 +37,7 @@ export type DocumentStudyPayload = {
   forgottenWordsHanzi: Array<Scalars['String']>;
 };
 
-export type DocumentStudyResponse = {
+export type DocumentStudyResponse = MutationResponse & {
   __typename?: 'DocumentStudyResponse';
   success: Scalars['Boolean'];
 };
@@ -58,7 +58,14 @@ export enum LearningState {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  newWordStudy: NewWordStudyResponse;
   documentStudy: DocumentStudyResponse;
+};
+
+
+export type MutationNewWordStudyArgs = {
+  hanzi: Scalars['String'];
+  understood: Scalars['Boolean'];
 };
 
 
@@ -67,12 +74,22 @@ export type MutationDocumentStudyArgs = {
   payload: DocumentStudyPayload;
 };
 
+export type MutationResponse = {
+  success: Scalars['Boolean'];
+};
+
 export type NamedEntity = {
   __typename?: 'NamedEntity';
   chinese: Scalars['String'];
   entityType: Scalars['String'];
   start: Scalars['Int'];
   end: Scalars['Int'];
+};
+
+export type NewWordStudyResponse = MutationResponse & {
+  __typename?: 'NewWordStudyResponse';
+  success: Scalars['Boolean'];
+  studentWord: StudentWord;
 };
 
 export type NewWordsResponse = {
@@ -289,8 +306,10 @@ export type ResolversTypes = {
   Due: ResolverTypeWrapper<Omit<Due, 'documents' | 'orphans'> & { documents: Array<ResolversTypes['Document']>, orphans: Array<ResolversTypes['Word']> }>;
   LearningState: LearningState;
   Mutation: ResolverTypeWrapper<{}>;
+  MutationResponse: ResolversTypes['DocumentStudyResponse'] | ResolversTypes['NewWordStudyResponse'];
   NamedEntity: ResolverTypeWrapper<NamedEntity>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
+  NewWordStudyResponse: ResolverTypeWrapper<Omit<NewWordStudyResponse, 'studentWord'> & { studentWord: ResolversTypes['StudentWord'] }>;
   NewWordsResponse: ResolverTypeWrapper<Omit<NewWordsResponse, 'words'> & { words: Array<ResolversTypes['StudentWord']> }>;
   Query: ResolverTypeWrapper<{}>;
   Sentence: ResolverTypeWrapper<sentence>;
@@ -311,8 +330,10 @@ export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'];
   Due: Omit<Due, 'documents' | 'orphans'> & { documents: Array<ResolversParentTypes['Document']>, orphans: Array<ResolversParentTypes['Word']> };
   Mutation: {};
+  MutationResponse: ResolversParentTypes['DocumentStudyResponse'] | ResolversParentTypes['NewWordStudyResponse'];
   NamedEntity: NamedEntity;
   Int: Scalars['Int'];
+  NewWordStudyResponse: Omit<NewWordStudyResponse, 'studentWord'> & { studentWord: ResolversParentTypes['StudentWord'] };
   NewWordsResponse: Omit<NewWordsResponse, 'words'> & { words: Array<ResolversParentTypes['StudentWord']> };
   Query: {};
   Sentence: sentence;
@@ -351,7 +372,13 @@ export type DueResolvers<ContextType = any, ParentType extends ResolversParentTy
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  newWordStudy?: Resolver<ResolversTypes['NewWordStudyResponse'], ParentType, ContextType, RequireFields<MutationNewWordStudyArgs, 'hanzi' | 'understood'>>;
   documentStudy?: Resolver<ResolversTypes['DocumentStudyResponse'], ParentType, ContextType, RequireFields<MutationDocumentStudyArgs, 'studyType' | 'payload'>>;
+};
+
+export type MutationResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['MutationResponse'] = ResolversParentTypes['MutationResponse']> = {
+  __resolveType: TypeResolveFn<'DocumentStudyResponse' | 'NewWordStudyResponse', ParentType, ContextType>;
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
 };
 
 export type NamedEntityResolvers<ContextType = any, ParentType extends ResolversParentTypes['NamedEntity'] = ResolversParentTypes['NamedEntity']> = {
@@ -359,6 +386,12 @@ export type NamedEntityResolvers<ContextType = any, ParentType extends Resolvers
   entityType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   start?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   end?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type NewWordStudyResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['NewWordStudyResponse'] = ResolversParentTypes['NewWordStudyResponse']> = {
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  studentWord?: Resolver<ResolversTypes['StudentWord'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -447,7 +480,9 @@ export type Resolvers<ContextType = any> = {
   DocumentStudyResponse?: DocumentStudyResponseResolvers<ContextType>;
   Due?: DueResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
+  MutationResponse?: MutationResponseResolvers<ContextType>;
   NamedEntity?: NamedEntityResolvers<ContextType>;
+  NewWordStudyResponse?: NewWordStudyResponseResolvers<ContextType>;
   NewWordsResponse?: NewWordsResponseResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Sentence?: SentenceResolvers<ContextType>;

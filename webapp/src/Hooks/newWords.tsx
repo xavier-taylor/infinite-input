@@ -20,7 +20,8 @@ interface NewWords {
 export type ToLearnStudentWordPartial = ResultOf<
   typeof StudentWordDocument
 >['studentWord'];
-
+// TODO must go through all graphql useQuery and check if
+// I need to set a different than default fetch policy (which is cache first)
 export const useNewWords = (): NewWords => {
   // NOTE - this function must be called *after* updated to the StudentWords in the cache!
   const nextNewWord = () => {

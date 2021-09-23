@@ -51,6 +51,7 @@ query StudentWordForLearning($hanzi: String!) {
     word {
       hanzi
       ccceDefinitions {
+        id
         simplified
         traditional
         pinyin

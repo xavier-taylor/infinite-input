@@ -16,7 +16,6 @@ import {
   ThemeProvider,
   Theme,
   StyledEngineProvider,
-  adaptV4Theme,
 } from '@mui/material';
 
 export const client = new ApolloClient({
@@ -25,32 +24,32 @@ export const client = new ApolloClient({
   connectToDevTools: true, // process.env.NODE_ENV === ‘development’
 });
 
+// This came from the mui v4-v5 code, not sure what it does
 declare module '@mui/styles/defaultTheme' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface DefaultTheme extends Theme {}
 }
 
-// TODO UPGRADE update this theme - it currently isnt even working - the font aint getting applied
-const baseTheme = createTheme(
-  adaptV4Theme({
-    overrides: {
-      MuiCssBaseline: {
-        '@global': {
-          ':lang(zh)': {
-            // any component with lang='zh' will get this font
-            fontFamily: "'Noto Serif SC', serif",
-          },
-        },
-      },
+const theme = createTheme({
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: `
+      .MuiTypography-root:lang(zh) {
+         font-family: 'Noto Serif SC', serif;
+      }
+       :lang(zh) {
+         font-family: 'Noto Serif SC', serif;
+       }
+     `,
     },
-  })
-);
+  },
+});
 
 ReactDOM.render(
   <ApolloProvider client={client}>
     <React.StrictMode>
       <StyledEngineProvider injectFirst>
-        <ThemeProvider theme={baseTheme}>
+        <ThemeProvider theme={theme}>
           <App />
         </ThemeProvider>
       </StyledEngineProvider>

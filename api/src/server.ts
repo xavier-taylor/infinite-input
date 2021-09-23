@@ -16,7 +16,7 @@ const connection = {
   database: 'infinite_input',
 };
 
-const knexConfig: Knex.Config = {
+const knexConfig = {
   client: 'pg',
   connection,
   searchPath: ['mandarin'],

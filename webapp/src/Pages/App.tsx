@@ -150,7 +150,6 @@ Warning: Cannot update a component (`StudyContainer`) while rendering a differen
             </Route>
             <Route path="/word/new">
               <NewWordsContainer />
-              <div>learn new words</div>
             </Route>
             <Route path="/read/sentence">
               <StudyContainer mode={StudyType.Read} />

@@ -1,0 +1,55 @@
+fragment StudentWordForLearning on StudentWord {
+  hanzi
+  learning
+  due
+  word {
+    hanzi
+    ccceDefinitions {
+      id
+      simplified
+      traditional
+      pinyin
+      definitions
+    }
+  }
+}
+
+fragment EntireDocument on Document {
+  id
+  english
+  chinese
+  sentences {
+    id
+    chinese
+    words {
+      sentenceId
+      stanzaId
+      lastClicked @client
+      forgotLISTEN @client
+      forgotREAD @client
+      wordHanzi
+      lemma
+      partOfSpeech
+      universalPartOfSpeech
+      due
+      namedEntity {
+        chinese
+        entityType
+        start
+        end
+      }
+      word {
+        hanzi
+        hskWord2010
+        hskChar2010
+        ccceDefinitions {
+          id
+          simplified
+          traditional
+          pinyin
+          definitions
+        }
+      }
+    }
+  }
+}

@@ -82,6 +82,13 @@ export const resolvers: Resolvers<IContextType> = {
       console.log(studyType);
       return { success: true };
     },
+    newWordStudy: (_, { hanzi, understood }, { repo }) => {
+      console.log('in the mutation resolver for new word study');
+      return {
+        success: true,
+        studentWord: {},
+      };
+    },
   },
   Query: {
     // just to demonstrate if the dataloader on the definition is working

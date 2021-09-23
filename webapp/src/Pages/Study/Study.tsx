@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
 import clsx from 'clsx';
 import { Theme, useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
@@ -17,7 +15,12 @@ import {
   CardContent,
   IconButton,
 } from '@mui/material';
-import { ThumbDown, ThumbUp } from '@mui/icons-material';
+import {
+  ThumbDown,
+  ThumbUp,
+  MenuBook,
+  RecordVoiceOver,
+} from '@mui/icons-material';
 import Concordance from '../../Components/Concordance';
 import {
   Document,
@@ -32,23 +35,23 @@ import {
 } from '../../schema/generated';
 import { gql, useMutation, useQuery } from '@apollo/client';
 import { client } from '../..';
-import { GridContainer, GridRow, RowCard } from '../../Components/Layout/Grid';
+import {
+  ResponsiveGridItem,
+  GridContainer,
+  GridRow,
+  RowCard,
+  DefinitionCard,
+  DefinitionCardHeader,
+  DefinitionCardContent,
+} from '../../Components/Layout/Common';
 import { BLANK_SPACE } from '../../Components/Layout/Constants';
 
 // TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff
 
-// TODO break this study component out into multiple components, and take the appropriate part of this
-// mamoth makeStyles with them. In particuarl, for things like 'cardHeaderRoot', ideally that should be a 'root' within a CreateStyles
-// TODO tidy up the CSS - it got pretty disorderly - even the layout of the first two rows is needlessly messy and complicated
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     buttonGroupGrouped: {
-      // fontFamily: "'Roboto Mono', monospace",
       width: '50%', // works for 2 buttons with similar length labels
-    },
-    cardHeaderRoot: {
-      padding: theme.spacing(1),
-      paddingBottom: '0px',
     },
     '@keyframes example': {
       '0%': { backgroundColor: theme.palette.background.default },
@@ -62,44 +65,17 @@ const useStyles = makeStyles((theme: Theme) =>
       animationName: '$example',
       animationDuration: '2s',
     },
-    cardHeaderAction: {
-      padding: theme.spacing(0.5),
-    },
-    cardContentRoot: {
-      padding: theme.spacing(1),
-      // TODO making this paddingBottom work, currently it is getting overwritten by some pseudo class or something
-      paddingBottom: '0px',
-      paddingTop: '0px',
-      '&:last-child': {
-        paddingBottom: '0px',
-      },
-    },
     sentenceHanzi: {
       fontSize: '1.5rem',
     },
-
     rowCard: {
       borderRadius: 15,
       padding: theme.spacing(1),
     },
-    definition: {
-      overflowY: 'auto',
-      borderRadius: 7.5,
-      height: '100%',
-    },
-    definitionContainer: {
-      height: `calc(100% - ${theme.spacing(1)})`,
-      margin: theme.spacing(0.5),
-      '&:nth-child(1)': {
-        marginLeft: '0px',
-      },
-      '&:last-child': {
-        marginRight: '0px',
-      },
-    },
   })
 );
 
+export type studyStates = 'study' | 'check';
 interface StudyProps {
   mode: StudyType;
   documentId: Document['id'];
@@ -123,7 +99,6 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
   const md = useMediaQuery(theme.breakpoints.down('lg'));
   const lg = useMediaQuery(theme.breakpoints.down('xl'));
   let numberToShow = xs ? 1 : sm ? 2 : md ? 3 : lg ? 4 : 6; // if it wasn't large, it was xl
-  type studyStates = 'study' | 'check';
   const [studyState, setStudyState] = useState<studyStates>('study'); // whether you are reading/listening, or looking at translation etc
   const [concordanceWord, setConcordanceWord] = useState<string | undefined>(
     undefined
@@ -162,7 +137,6 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
       return bSIndex - aSIndex;
     }
   });
-  // OPTIMIZATION: since I am not really using the grid, perhaps remove it and just have a simple flexbox?
   const forgot = (mode: StudyType, word: SentenceWord) =>
     !!(mode === StudyType.Read && word.forgotREAD) ||
     !!(mode === StudyType.Listen && word.forgotLISTEN);
@@ -283,6 +257,7 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
                 // react component with things like onhover behaviour etc
                 // TODO make it not clickable if it is puncutation!
                 // when doing so extact that common logic from the filter on puncutation (use same constant at least)
+                // TODO make it typography
                 <span
                   style={{ cursor: 'pointer' }}
                   onClick={() => handleWordClick(w, mode, studyState)}
@@ -309,7 +284,7 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
                   setStudyState(studyState === 'check' ? 'study' : 'check');
                 }}
                 variant="outlined"
-                size="medium">
+              >
                 Hide
               </Button>
               <Button
@@ -360,12 +335,7 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
                     });
                     next();
                   }
-                  // TODO consider whether isLast is actually necassary now,
-                  // given that the parent container stops rendering this component
-                  // once it gets to 'finished' state?
-                  if (!(isLast && studyState === 'check')) {
-                    setStudyState(studyState === 'check' ? 'study' : 'check');
-                  }
+                  setStudyState(studyState === 'check' ? 'study' : 'check');
                 }}
                 variant="contained"
                 color="primary"
@@ -379,41 +349,40 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
       </GridRow>
       <GridRow item container>
         {wordsToShow.map((word) => (
-          <Grid
-            className={classes.definitionContainer}
-            item
-            xs={12}
-            sm={6}
-            md={4}
-            lg={3}
-            xl={2}
+          <ResponsiveGridItem
             key={`${word.wordHanzi}-${word.stanzaId}-${word.sentenceId}`}
           >
-            <Card
+            <DefinitionCard
               elevation={2}
               className={clsx(
                 word.stanzaId === recentWord.stanzaId &&
                   word.sentenceId === recentWord.sentenceId &&
-                  classes.recentCard,
-                classes.definition
+                  classes.recentCard
               )}
             >
               {/* TODO make cardheader fixed (ie doesnt move when scrolling thru card contents - might be as simple as setting overflow behaviour on card contents...) */}
-              <CardHeader
-                classes={{
-                  action: classes.cardHeaderAction,
-                  root: classes.cardHeaderRoot,
-                }}
-                title={<span lang="zh">{word.word.hanzi}</span>}
+              <DefinitionCardHeader
+                // TODO make it typography
+                title={
+                  <Typography variant="h6" lang="zh">
+                    {word.word.hanzi}
+                  </Typography>
+                }
                 action={
                   <ButtonGroup>
-                    <IconButton onClick={() => setConcordanceWord(word.word.hanzi)} size="large">
-                      <MenuBookIcon color="action"></MenuBookIcon>
+                    <IconButton
+                      onClick={() => setConcordanceWord(word.word.hanzi)}
+                      size="large"
+                    >
+                      <MenuBook color="action"></MenuBook>
                     </IconButton>
                     <IconButton size="large">
-                      <RecordVoiceOverIcon color="action" />
+                      <RecordVoiceOver color="action" />
                     </IconButton>
-                    <IconButton onClick={() => markForgot(word, mode, true)} size="large">
+                    <IconButton
+                      onClick={() => markForgot(word, mode, true)}
+                      size="large"
+                    >
                       <ThumbDown
                         style={{
                           color: forgot(mode, word)
@@ -425,7 +394,8 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
                     <IconButton
                       // disabled={!forgot(mode, word)}
                       onClick={() => markForgot(word, mode, false)}
-                      size="large">
+                      size="large"
+                    >
                       <ThumbUp
                         style={{
                           color: forgot(mode, word)
@@ -437,7 +407,7 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
                   </ButtonGroup>
                 }
               />
-              <CardContent classes={{ root: classes.cardContentRoot }}>
+              <DefinitionCardContent>
                 {word.word.ccceDefinitions.map((def, i) => {
                   return (
                     <React.Fragment key={`cc-${i}`}>
@@ -456,12 +426,9 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
                     </React.Fragment>
                   );
                 })}
-                {/* {word.word.ccceDefinitions[0]?.definitions.map((d) => (
-                  <Typography variant="body2">{d}</Typography>
-                ))} */}
-              </CardContent>
-            </Card>
-          </Grid>
+              </DefinitionCardContent>
+            </DefinitionCard>
+          </ResponsiveGridItem>
         ))}
       </GridRow>
 

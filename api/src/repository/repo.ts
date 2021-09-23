@@ -8,7 +8,7 @@ import {
   student_word,
   word,
 } from './sql-model';
-import Knex from 'knex';
+import { Knex } from 'knex';
 import DataLoader from 'dataloader';
 import { DateTime } from 'luxon';
 import {
@@ -315,6 +315,18 @@ WHERE NOT EXISTS (
       .where('date_learned', '<', tomorrow.toUTC().toISO());
     const count = res[0]['count'];
     return toGraphQLInteger(count);
+  }
+
+  async updateStudentWord(
+    userId: string,
+    hanzi: string,
+    understood: boolean
+  ): Promise<student_word> {
+    if (understood) {
+      // TODO continue here - update the learning state and set new due
+    } else {
+      // set new due
+    }
   }
 }
 

@@ -136,9 +136,20 @@ export const typeDefs = gql`
     studentWord(hanzi: String!): StudentWord!
   }
 
-  # TODO enrich this as required for cache updating or error handling
-  type DocumentStudyResponse {
+  interface MutationResponse {
     success: Boolean!
+    # message: String! TODO implement these
+    # code: String!
+  }
+
+  # TODO enrich this as required for cache updating or error handling
+  type DocumentStudyResponse implements MutationResponse {
+    success: Boolean!
+  }
+
+  type NewWordStudyResponse implements MutationResponse {
+    success: Boolean!
+    studentWord: StudentWord!
   }
 
   input DocumentStudyPayload {
@@ -147,6 +158,10 @@ export const typeDefs = gql`
   }
 
   type Mutation {
+    newWordStudy(
+      hanzi: String! # The hanzi from the StudentWord
+      understood: Boolean! # true only if the study was successful, ie you remembered how to read it etc
+    ): NewWordStudyResponse!
     documentStudy(
       studyType: StudyType!
       payload: DocumentStudyPayload!

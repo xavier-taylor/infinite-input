@@ -6,3 +6,19 @@ mutation DocumentStudy(
     success
   }
 }
+
+# This mutation automatically updates
+# the student word in the cache https://www.apollographql.com/blog/apollo-client/caching/demystifying-cache-normalization/
+
+# Note, we could refetch the StudentWords after each query
+# but I don't want to do that. Instead, we just rely on our nextNewWord() function
+# plus the fact that this mutation updates the cached value for that studentword
+# The above linked article does lead me to think I might have done things a different way...
+mutation NewWordStudy($hanzi: String!, $understood: Boolean!) {
+  newWordStudy(hanzi: $hanzi, understood: $understood) {
+    success
+    studentWord {
+      ...StudentWordForLearning
+    }
+  }
+}
