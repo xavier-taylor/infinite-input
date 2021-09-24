@@ -12,8 +12,8 @@
     "test": "jest -c jest.config.js",
     "int": "psql xavier -d test -f ../db/schema/mandarin.sql && jest --setupFiles dotenv/config  -c jest.config.integration.js",
     "lint-fix": "eslint --ext ts --fix src",
-    "rebuild-psql": "psql xavier -d infinite_input -f ../db/schema/mandarin.sql ",
-    "refresh": "npm run rebuild-psql && npm run gen-sql-types && npm run cedict",
+    "CAREFUL-rebuild-psql": "psql_ACCIDENT_GUARD xavier -d infinite_input -f ../db/schema/mandarin.sql ",
+    "refresh": "npm_ACCIDENT_GUARD run rebuild-psql && npm run gen-sql-types && npm run cedict",
     "gen-gql-types": "graphql-codegen --config codegen.yml",
     "gql": "npm run gen-gql-types"
   },

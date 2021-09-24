@@ -14,8 +14,12 @@ mutation DocumentStudy(
 # but I don't want to do that. Instead, we just rely on our nextNewWord() function
 # plus the fact that this mutation updates the cached value for that studentword
 # The above linked article does lead me to think I might have done things a different way...
-mutation NewWordStudy($hanzi: String!, $understood: Boolean!) {
-  newWordStudy(hanzi: $hanzi, understood: $understood) {
+mutation NewWordStudy(
+  $hanzi: String!
+  $newDue: String!
+  $newLearning: LearningState!
+) {
+  newWordStudy(hanzi: $hanzi, newDue: $newDue, newLearning: $newLearning) {
     success
     studentWord {
       ...StudentWordForLearning

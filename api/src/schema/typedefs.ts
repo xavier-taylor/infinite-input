@@ -160,7 +160,10 @@ export const typeDefs = gql`
   type Mutation {
     newWordStudy(
       hanzi: String! # The hanzi from the StudentWord
-      understood: Boolean! # true only if the study was successful, ie you remembered how to read it etc
+      # UTC timezoned ISO string for when now due
+      # Note that when newLearning is 'Learned', the newDue will get applied to the read/write cards
+      newDue: String!
+      newLearning: LearningState! # the new learning state to set - note it can be the same as it was before.
     ): NewWordStudyResponse!
     documentStudy(
       studyType: StudyType!

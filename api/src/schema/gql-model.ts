@@ -65,7 +65,8 @@ export type Mutation = {
 
 export type MutationNewWordStudyArgs = {
   hanzi: Scalars['String'];
-  understood: Scalars['Boolean'];
+  newDue: Scalars['String'];
+  newLearning: LearningState;
 };
 
 
@@ -372,7 +373,7 @@ export type DueResolvers<ContextType = any, ParentType extends ResolversParentTy
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  newWordStudy?: Resolver<ResolversTypes['NewWordStudyResponse'], ParentType, ContextType, RequireFields<MutationNewWordStudyArgs, 'hanzi' | 'understood'>>;
+  newWordStudy?: Resolver<ResolversTypes['NewWordStudyResponse'], ParentType, ContextType, RequireFields<MutationNewWordStudyArgs, 'hanzi' | 'newDue' | 'newLearning'>>;
   documentStudy?: Resolver<ResolversTypes['DocumentStudyResponse'], ParentType, ContextType, RequireFields<MutationDocumentStudyArgs, 'studyType' | 'payload'>>;
 };
 

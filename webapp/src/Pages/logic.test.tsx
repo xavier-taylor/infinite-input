@@ -1,6 +1,4 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import App from './App';
 import { compare, ToLearnStudentWordPartial } from '../Hooks/newWords';
 import { LearningState } from '../schema/generated';
 

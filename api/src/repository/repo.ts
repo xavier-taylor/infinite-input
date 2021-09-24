@@ -324,6 +324,13 @@ WHERE NOT EXISTS (
   ): Promise<student_word> {
     if (understood) {
       // TODO continue here - update the learning state and set new due
+      // NOTE I just realized the front end will need to send the 'next due'
+      // values (and may as well send the 'next learning state' values)
+      // why? For normal due, we just say next due is now+ say, 10 seconds or 30 seconds etc
+      // However, when a cards learning state gets upgraded till the next day
+      // (ie, when you finish learning a word and unlock readword and listen word),
+      // we need to set their 'due' as next calendar day, not now + 24 hours
+      // (ie if I was studing at 9pm tuesday then start studying 1pm wednesday.)
     } else {
       // set new due
     }

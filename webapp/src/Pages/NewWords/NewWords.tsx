@@ -26,12 +26,14 @@ import {
   ResponsiveItem,
 } from '../../Components/Layout/Common';
 import {
+  LearningState,
   NewWordStudyDocument,
   StudentWordForLearningDocument,
 } from '../../schema/generated';
 import { useState } from 'react';
 import { studyStates } from '../Study/Study';
 import { nextTick } from 'process';
+import { DateTime } from 'luxon';
 
 const fakeData = {
   studentWord: {
@@ -244,6 +246,51 @@ const fakeData = {
   },
 };
 
+type NonLearnedStates = Exclude<LearningState, LearningState.Learned>;
+interface NewProperties {
+  newLearning: LearningState;
+  newDue: string;
+}
+function getNewProperties(
+  currentLearningState: NonLearnedStates,
+  understood: boolean
+): NewProperties {
+  const now = DateTime.now();
+  if (!understood) {
+    return {
+      newLearning: currentLearningState,
+      newDue: now.plus({ seconds: 30 }).toUTC().toISO(),
+    };
+  } else {
+    switch (currentLearningState) {
+      case LearningState.NotYetLearned:
+        return {
+          newLearning: LearningState.Meaning,
+          newDue: now.plus({ minutes: 2 }).toUTC().toISO(),
+        };
+      case LearningState.Meaning:
+        return {
+          newLearning: LearningState.Pronunciation,
+          newDue: now.plus({ minutes: 2 }).toUTC().toISO(),
+        };
+      case LearningState.Pronunciation:
+        return {
+          newLearning: LearningState.Reading,
+          newDue: now.plus({ minutes: 2 }).toUTC().toISO(),
+        };
+      case LearningState.Reading:
+        return {
+          newLearning: LearningState.Learned,
+          // The due for the read/write cards we will now create.
+          newDue: now.plus({ days: 1 }).startOf('day').toUTC().toISO(),
+        };
+      default:
+        const _ex: never = currentLearningState;
+        return { newLearning: _ex, newDue: '' };
+    }
+  }
+}
+
 interface Props {
   wordHanzi: string;
   isLast: boolean;
@@ -281,8 +328,14 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
     { data: _data, loading: loadingMutation, error: _error, called: _called },
   ] = useMutation(NewWordStudyDocument);
 
-  async function handleWordStudy(understood: boolean, hanzi: string) {
-    const _res = await studyWord({ variables: { understood, hanzi } });
+  async function handleWordStudy(
+    currentLS: NonLearnedStates,
+    understood: boolean
+  ) {
+    const { newDue, newLearning } = getNewProperties(currentLS, understood);
+    const _res = await studyWord({
+      variables: { newDue, newLearning, hanzi: wordHanzi },
+    });
     next();
   }
   const [studyState, setStudyState] = useState<studyStates>('study'); // whether you are reading/listening, or looking at translation etc
@@ -327,8 +380,17 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
               variant="outlined"
             >
               <Button
-                disabled={studying || loadingMutation}
-                onClick={() => handleWordStudy(false, wordHanzi)}
+                disabled={
+                  studying ||
+                  loadingMutation ||
+                  data.studentWord.learning === LearningState.NotYetLearned
+                }
+                onClick={() =>
+                  handleWordStudy(
+                    data.studentWord.learning as NonLearnedStates, // words that are 'Learned' do not appear here
+                    false
+                  )
+                }
                 color="error"
                 sx={{
                   width: '50%',
@@ -337,7 +399,12 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
                 Again
               </Button>
               <Button
-                onClick={() => handleWordStudy(true, wordHanzi)}
+                onClick={() =>
+                  handleWordStudy(
+                    data.studentWord.learning as NonLearnedStates, // words that are 'Learned' do not appear here
+                    true
+                  )
+                }
                 disabled={loadingMutation}
                 sx={{ width: '50%' }}
               >

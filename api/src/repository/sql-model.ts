@@ -23,8 +23,8 @@ export interface document {
   id?: string;
   sub_corpus_title: string;
   corpus_title: string;
-  previous_document: string | null;
-  english: string | null;
+  previous_document?: string | null;
+  english?: string | null;
   chinese: string;
   n_non_punct: number;
 }
@@ -71,7 +71,7 @@ export interface sentence_word {
   start_char: number;
   end_char: number;
   ner: string;
-  named_entity_id: string | null;
+  named_entity_id?: string | null;
 }
 export interface student {
   id?: string;
@@ -87,24 +87,24 @@ export interface student_document_listen {
   student_id: string;
   document_id: string;
   listen_count: number;
-  last_listened: Date | null;
+  last_listened?: Date | null;
 }
 export interface student_document_read {
   student_id: string;
   document_id: string;
   read_count: number;
-  last_read: Date | null;
+  last_read?: Date | null;
 }
 export interface student_word {
   student_id: string;
   word_hanzi: string;
   locked: boolean;
-  date_last_unlocked: Date | null;
+  date_last_unlocked?: Date | null;
   learning: learning_state;
-  date_learned: Date | null;
+  date_learned?: Date | null;
   tags?: string[];
   position: number;
-  due: Date | null;
+  due?: Date | null;
 }
 export interface student_word_listen {
   student_id: string;
@@ -139,8 +139,8 @@ export interface time_testing {
 }
 export interface word {
   hanzi: string;
-  hsk_word_2010: number | null;
-  hsk_char_2010: number | null;
+  hsk_word_2010?: number | null;
+  hsk_char_2010?: number | null;
 }
 export enum learning_state {
   not_yet_learned = 'not_yet_learned',

@@ -15,7 +15,7 @@ function toGQLLearningStateEnum(ls: learning_state): LearningState {
     case learning_state.learned:
       return LearningState.Learned;
     default:
-      const _ex = ls;
+      const _ex: never = ls;
       return _ex;
   }
 }
@@ -82,11 +82,21 @@ export const resolvers: Resolvers<IContextType> = {
       console.log(studyType);
       return { success: true };
     },
-    newWordStudy: (_, { hanzi, understood }, { repo }) => {
-      console.log('in the mutation resolver for new word study');
+    newWordStudy: (_, { hanzi, newDue, newLearning }, { repo }) => {
+      console.log(
+        'in the mutation resolver for new word study',
+        hanzi,
+        newDue,
+        newLearning
+      );
+      // Update student_word and create student_word_listen/read
+      // TODO continue here
+      if (newLearning === LearningState.Learned) {
+      } else {
+      }
       return {
         success: true,
-        studentWord: {},
+        studentWord: {} as any,
       };
     },
   },

@@ -80,17 +80,28 @@ CREATE TABLE mandarin.student_word
     tags text[] not null,
     CONSTRAINT if_learning_need_due
         CHECK ((due is not null)OR (learning = 'learned'::mandarin.learning_state OR learning ='not_yet_learned'::mandarin.learning_state)),
+    -- the due state is only for tracking this card while it is in learning states
+    CONSTRAINT if_not_learning_due_is_null
+        CHECK ((due is null)OR NOT (learning = 'learned'::mandarin.learning_state OR learning ='not_yet_learned'::mandarin.learning_state)),
     CONSTRAINT if_learned_date_learned_not_null
         CHECK ((date_learned is not null)OR (learning != 'learned'::mandarin.learning_state)),
     CONSTRAINT if_unlocked_then_date_last_unlocked_is_not_null 
         CHECK ( ( locked) OR (date_last_unlocked IS NOT NULL) ) ,
+   -- This last constraint just formalizes my decision to make it so that you cant lock a word once it moves into the learned
+   -- state. The only reason for this is I CBF supporting that yet.
+    CONSTRAINT if_learned_then_not_locked 
+        CHECK (NOT (( locked) AND (learning ='learned'::mandarin.learning_state)) ) ;
     PRIMARY KEY (student_id, word_hanzi)
 );
+
+-- TODO if only because it does make sense to keep ability to lock etc, I think when I have time I should merge
+-- student_word and student_word_listen. Keeping them separate might make the browser difficult too..
+-- TODO - think about this!!!! - probably betterto do this sooner rather than later.
 
 -- for now 'locked' is only on student_word
 -- if we want to ability to lock student_word_listen or student_word_read
 -- we will have to either a) merge those tables with student_word or b)
--- give them their own locked property. Will do that once I need it.
+-- give them their own locked property. Will do that once I need it!!!
 -- It might be nicer to have these next two tables as aprt of student_word. Can think about that
 -- in future.
 CREATE TABLE mandarin.student_word_listen
