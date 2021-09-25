@@ -1,7 +1,7 @@
 Unfortunately graphql doesn't have a date as a built in.
 
 For now, all dates, date times etc are existing in graphql as strings.
-These strings area generally teh result of calling new Date().toISOString()
+These strings area generally teh result of calling new Date().toISOString() (or luxon equivalent)
 They are stored in sql as timestamp with timezone, which I believe is nice and specifc
 
 The string that you get from new Date().toISOString() can be stored losslessly in a timestamp with timezone.
@@ -36,4 +36,12 @@ What does it mean for something to be due?
     due is a point in absolute time. But what words shall we return when,
     on their local 13 sep 2022, they hit api for due words?
     We shall like the above luxon logic, calculate the ISOstring UTC for the start of that users day
-    and thus parametize the api call.
+    and thus parametize the api call. More specifically,
+    lets say in the users timezone it is 9pm on the 10th. We get the UTC time for 00:00 (in their timezone) on the 11th.
+    Then we say 'any card due before the UTC time for 00:00 on the 11th in their locale is due.
+
+Why do we always convert things to UTC and store them in the db?
+    One reason is that this helps us avoid timezone issues. In the frontend, we use luxon to figure out what some relevant time is,
+    in their local timezone, and luxon handles things like daylight savings issues. That is the relevant 'point in time'. 
+    Then we store that as a UTC timezone equivalent point in time in the db.
+

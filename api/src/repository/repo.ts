@@ -301,7 +301,6 @@ WHERE NOT EXISTS (
     return toGraphQLInteger(count);
   }
 
-  // dont think I need this query, leaving it in case i do but TODO delete.
   async getCountWordsAlreadyLearnedToday(
     userId: string,
     dayStartUTC: string

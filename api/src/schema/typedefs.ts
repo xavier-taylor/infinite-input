@@ -18,7 +18,8 @@ export const typeDefs = gql`
     definitions: [String!]!
   }
 
-  # this represents student_word_listen and student_word_read
+  # this represents student_word_listen and student_word_read TODO better name - we are using the word 'studyState elsewhere for something else...
+  # we aren't currently using this... should probably delete it.
   type StudyState {
     hanzi: String!
     f1: Int!
@@ -154,7 +155,7 @@ export const typeDefs = gql`
 
   input DocumentStudyPayload {
     documentId: String!
-    forgottenWordsHanzi: [String!]!
+    forgottenWordsHanzi: [String!]! # TODO add remembered words hanzi
   }
 
   type Mutation {
