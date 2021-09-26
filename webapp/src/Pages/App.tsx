@@ -3,7 +3,6 @@ import { CssBaseline } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import Header from '../Components/Header';
 import MenuDrawer from '../Components/MenuDrawer';
-import { createTheme } from '@mui/material/styles';
 
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import {

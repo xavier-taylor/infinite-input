@@ -3,7 +3,6 @@ import {
   CardHeader,
   Grid,
   styled,
-  CardHeaderClasses,
   cardHeaderClasses,
   CardContent,
 } from '@mui/material';

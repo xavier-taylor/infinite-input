@@ -100,6 +100,12 @@ export type NewWordsResponse = {
   haveEnoughUnlockedWords: Scalars['Boolean'];
 };
 
+export type Pronunciation = {
+  __typename?: 'Pronunciation';
+  hanzi: Scalars['String'];
+  url?: Maybe<Scalars['String']>;
+};
+
 export type Query = {
   __typename?: 'Query';
   concordanceDocs: Array<Document>;
@@ -110,6 +116,7 @@ export type Query = {
   newWords: NewWordsResponse;
   sentenceWord?: Maybe<SentenceWord>;
   studentWord: StudentWord;
+  wordPronunciation: Pronunciation;
   words: Array<Word>;
 };
 
@@ -147,6 +154,11 @@ export type QuerySentenceWordArgs = {
 
 
 export type QueryStudentWordArgs = {
+  hanzi: Scalars['String'];
+};
+
+
+export type QueryWordPronunciationArgs = {
   hanzi: Scalars['String'];
 };
 
@@ -312,6 +324,7 @@ export type ResolversTypes = {
   Int: ResolverTypeWrapper<Scalars['Int']>;
   NewWordStudyResponse: ResolverTypeWrapper<Omit<NewWordStudyResponse, 'studentWord'> & { studentWord: ResolversTypes['StudentWord'] }>;
   NewWordsResponse: ResolverTypeWrapper<Omit<NewWordsResponse, 'words'> & { words: Array<ResolversTypes['StudentWord']> }>;
+  Pronunciation: ResolverTypeWrapper<Pronunciation>;
   Query: ResolverTypeWrapper<{}>;
   Sentence: ResolverTypeWrapper<sentence>;
   SentenceWord: ResolverTypeWrapper<sentence_word>;
@@ -336,6 +349,7 @@ export type ResolversParentTypes = {
   Int: Scalars['Int'];
   NewWordStudyResponse: Omit<NewWordStudyResponse, 'studentWord'> & { studentWord: ResolversParentTypes['StudentWord'] };
   NewWordsResponse: Omit<NewWordsResponse, 'words'> & { words: Array<ResolversParentTypes['StudentWord']> };
+  Pronunciation: Pronunciation;
   Query: {};
   Sentence: sentence;
   SentenceWord: sentence_word;
@@ -403,6 +417,12 @@ export type NewWordsResponseResolvers<ContextType = any, ParentType extends Reso
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type PronunciationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Pronunciation'] = ResolversParentTypes['Pronunciation']> = {
+  hanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   concordanceDocs?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryConcordanceDocsArgs, 'word'>>;
   dailyNewWordsGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -412,6 +432,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   newWords?: Resolver<ResolversTypes['NewWordsResponse'], ParentType, ContextType, RequireFields<QueryNewWordsArgs, 'dayStartUTC'>>;
   sentenceWord?: Resolver<Maybe<ResolversTypes['SentenceWord']>, ParentType, ContextType, RequireFields<QuerySentenceWordArgs, 'sentenceId' | 'stanzaId'>>;
   studentWord?: Resolver<ResolversTypes['StudentWord'], ParentType, ContextType, RequireFields<QueryStudentWordArgs, 'hanzi'>>;
+  wordPronunciation?: Resolver<ResolversTypes['Pronunciation'], ParentType, ContextType, RequireFields<QueryWordPronunciationArgs, 'hanzi'>>;
   words?: Resolver<Array<ResolversTypes['Word']>, ParentType, ContextType, RequireFields<QueryWordsArgs, 'words'>>;
 };
 
@@ -485,6 +506,7 @@ export type Resolvers<ContextType = any> = {
   NamedEntity?: NamedEntityResolvers<ContextType>;
   NewWordStudyResponse?: NewWordStudyResponseResolvers<ContextType>;
   NewWordsResponse?: NewWordsResponseResolvers<ContextType>;
+  Pronunciation?: PronunciationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Sentence?: SentenceResolvers<ContextType>;
   SentenceWord?: SentenceWordResolvers<ContextType>;

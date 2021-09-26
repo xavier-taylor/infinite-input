@@ -6,13 +6,10 @@ import createStyles from '@mui/styles/createStyles';
 import {
   Button,
   ButtonGroup,
-  Grid,
   Typography,
   Card,
   useMediaQuery,
   CardActions,
-  CardHeader,
-  CardContent,
   IconButton,
 } from '@mui/material';
 import {
@@ -26,9 +23,7 @@ import {
   Document,
   DocumentByIdDocument,
   DocumentStudyDocument,
-  DocumentStudyMutationVariables,
   ForgotSentenceWordDocument,
-  ForgotSentenceWordQueryVariables,
   ForgottenWordsDocument,
   SentenceWord,
   StudyType,
@@ -109,7 +104,7 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
 
   const [
     studyDocument,
-    { data: _data, loading: _loading, error: _error },
+    // { data: _data, loading: _loading, error: _error },
   ] = useMutation(DocumentStudyDocument);
 
   const rightButtonText: Record<studyStates, string> = {
@@ -324,7 +319,7 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
                       forgottenHanzi = [];
                     }
 
-                    const _rv = await studyDocument({
+                    /* const _rv  =*/ await studyDocument({
                       variables: {
                         studyType: mode,
                         payload: {

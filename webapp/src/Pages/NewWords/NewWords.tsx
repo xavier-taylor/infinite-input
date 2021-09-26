@@ -1,10 +1,6 @@
-import { useMutation, useQuery } from '@apollo/client';
-import { css } from '@emotion/react';
-import { MenuBook, RecordVoiceOver } from '@mui/icons-material';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
+import { Help, MenuBook, RecordVoiceOver } from '@mui/icons-material';
 import {
-  Grid,
-  styled,
-  Card,
   Typography,
   CardActions,
   ButtonGroup,
@@ -13,8 +9,8 @@ import {
   IconButton,
   CardHeader,
   Box,
+  Tooltip,
 } from '@mui/material';
-import { BLANK_SPACE } from '../../Components/Layout/Constants';
 import {
   GridContainer,
   GridRow,
@@ -22,229 +18,19 @@ import {
   DefinitionCard,
   DefinitionCardHeader,
   DefinitionCardContent,
-  ResponsiveGridItem,
   ResponsiveItem,
 } from '../../Components/Layout/Common';
 import {
   LearningState,
   NewWordStudyDocument,
   StudentWordForLearningDocument,
+  WordPronunciationDocument,
 } from '../../schema/generated';
 import { useState } from 'react';
-import { studyStates } from '../Study/Study';
-import { nextTick } from 'process';
 import { DateTime } from 'luxon';
-
-const fakeData = {
-  studentWord: {
-    __typename: 'StudentWord',
-    due: '2021-09-11T14:00:00.000Z',
-    hanzi: '上游',
-    learning: 'meaning',
-    word: {
-      __typename: 'Word',
-      ccceDefinitions: [
-        {
-          id: '1',
-          __typename: 'CCCEDefinition',
-          definitions: [
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-          ],
-          pinyin: 'shang4 you2',
-          simplified: '無一事而不學，無一時而不學，無一處而不得',
-          traditional: '上游無一事而不學，無一時而不學，無一處而',
-        },
-        {
-          id: '1',
-          __typename: 'CCCEDefinition',
-          definitions: [
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-          ],
-          pinyin: 'shang4 you2',
-          simplified: '上游',
-          traditional: '上游',
-        },
-        {
-          id: '1',
-          __typename: 'CCCEDefinition',
-          definitions: [
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-          ],
-          pinyin: 'shang4 you2',
-          simplified: '上游',
-          traditional: '上游',
-        },
-        {
-          id: '1',
-          __typename: 'CCCEDefinition',
-          definitions: [
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-          ],
-          pinyin: 'shang4 you2',
-          simplified: '上游',
-          traditional: '上游',
-        },
-        {
-          id: '1',
-          __typename: 'CCCEDefinition',
-          definitions: [
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-          ],
-          pinyin: 'shang4 you2',
-          simplified: '上游',
-          traditional: '上游',
-        },
-        {
-          id: '1',
-          __typename: 'CCCEDefinition',
-          definitions: [
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-          ],
-          pinyin: 'shang4 you2',
-          simplified: '上游',
-          traditional: '上游',
-        },
-        {
-          id: '1',
-          __typename: 'CCCEDefinition',
-          definitions: [
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-          ],
-          pinyin: 'shang4 you2',
-          simplified: '上游',
-          traditional: '上游',
-        },
-        {
-          id: '1',
-          __typename: 'CCCEDefinition',
-          definitions: [
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-          ],
-          pinyin: 'shang4 you2',
-          simplified: '上游',
-          traditional: '上游',
-        },
-        {
-          id: '1',
-          __typename: 'CCCEDefinition',
-          definitions: [
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-          ],
-          pinyin: 'shang4 you2',
-          simplified: '上游',
-          traditional: '上游',
-        },
-        {
-          id: '1',
-          __typename: 'CCCEDefinition',
-          definitions: [
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-          ],
-          pinyin: 'shang4 you2',
-          simplified: '上游',
-          traditional: '上游',
-        },
-        {
-          id: '1',
-          __typename: 'CCCEDefinition',
-          definitions: [
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-          ],
-          pinyin: 'shang4 you2',
-          simplified: '上游',
-          traditional: '上游',
-        },
-        {
-          id: '1',
-          __typename: 'CCCEDefinition',
-          definitions: [
-            'upper reaches (of a river)',
-            'upper level',
-            'upper echelon',
-            'upstream',
-          ],
-          pinyin: 'shang4 you2',
-          simplified: '上游',
-          traditional: '上游',
-        },
-      ],
-      hanzi: '上游',
-    },
-  },
-};
+import { useEffect } from 'react';
+import WordPronunciation from './WordPronunciation';
+import { BLANK_SPACE } from '../../Components/Layout/Constants';
 
 type NonLearnedStates = Exclude<LearningState, LearningState.Learned>;
 interface NewProperties {
@@ -291,11 +77,41 @@ function getNewProperties(
   }
 }
 
+function friendlyLS(ls: NonLearnedStates): { title: string; tooltip: string } {
+  switch (ls) {
+    case LearningState.NotYetLearned:
+      return {
+        title: 'New word',
+        tooltip: 'Take your time to learn this new word',
+      };
+    case LearningState.Meaning:
+      return {
+        title: 'Meaning',
+        tooltip: 'Did you remember the meaning of this word?',
+      };
+    case LearningState.Pronunciation:
+      return {
+        title: 'Pronunciation',
+        tooltip: 'Did you remember the pronunciation of this word?',
+      };
+    case LearningState.Reading:
+      return {
+        title: 'Reading',
+        tooltip:
+          'Were you able to read this word, remembering pronunciation and meaning?',
+      };
+    default:
+      const _ex: never = ls;
+      return { title: _ex, tooltip: _ex };
+  }
+}
+
 interface Props {
   wordHanzi: string;
   isLast: boolean;
   next: () => void; // call this !after! you have updated cache values(and backend)
 }
+
 const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
   // This component must handle updating the state of words
   // in the apollo store itself. ie with writequery
@@ -325,7 +141,11 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
   });
   const [
     studyWord,
-    { data: _data, loading: loadingMutation, error: _error, called: _called },
+    {
+      // data: _data,
+      loading: loadingMutation,
+      // error: _error, called: _called
+    },
   ] = useMutation(NewWordStudyDocument);
 
   async function handleWordStudy(
@@ -333,19 +153,18 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
     understood: boolean
   ) {
     const { newDue, newLearning } = getNewProperties(currentLS, understood);
-    const _res = await studyWord({
+    /* const _res = */ await studyWord({
       variables: { newDue, newLearning, hanzi: wordHanzi },
     });
     next();
   }
-  const [studyState, setStudyState] = useState<studyStates>('study'); // whether you are reading/listening, or looking at translation etc
-  const studying = studyState === 'study';
+  const [studyState, setStudyState] = useState<'test' | 'check'>('test'); // whether you are reading/listening, or looking at translation etc
+  const testing = studyState === 'test'; // test is when you cant see all the info
   // TODO
   if (loading) return <div></div>;
   else if (error) return <div>{JSON.stringify(error)}</div>;
   else if (!data) return <div>no data?</div>;
-
-  const mode = data.studentWord.learning;
+  const mode = data.studentWord.learning as NonLearnedStates; // we don't return learned states
   return (
     <GridContainer
       container
@@ -356,19 +175,39 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
       <GridRow item>
         <RowCard elevation={2}>
           <CardHeader
+            disableTypography
+            title={
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="h5" display="inline">
+                  {friendlyLS(mode).title}
+                </Typography>
+                <Tooltip
+                  enterTouchDelay={0}
+                  title={friendlyLS(mode).tooltip}
+                  placement="bottom"
+                >
+                  <IconButton size="small">
+                    <Help />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            }
             action={
               <ButtonGroup>
+                {(studyState === 'check' ||
+                  [LearningState.NotYetLearned, LearningState.Meaning].includes(
+                    mode
+                  )) && (
+                  <WordPronunciation wordHanzi={wordHanzi}></WordPronunciation>
+                )}
                 <IconButton onClick={() => null} size="large">
                   <MenuBook color="action"></MenuBook>
-                </IconButton>
-                <IconButton size="large">
-                  <RecordVoiceOver color="action" />
                 </IconButton>
               </ButtonGroup>
             }
           ></CardHeader>
           <Typography align="center" variant="h2" lang="zh">
-            {fakeData.studentWord.hanzi}
+            {data.studentWord.hanzi}
           </Typography>
           <CardActions style={{ justifyContent: 'center' }}>
             <ButtonGroup
@@ -381,16 +220,17 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
             >
               <Button
                 disabled={
-                  studying ||
+                  testing ||
                   loadingMutation ||
                   data.studentWord.learning === LearningState.NotYetLearned
                 }
-                onClick={() =>
+                onClick={() => {
                   handleWordStudy(
                     data.studentWord.learning as NonLearnedStates, // words that are 'Learned' do not appear here
                     false
-                  )
-                }
+                  );
+                  setStudyState('test');
+                }}
                 color="error"
                 sx={{
                   width: '50%',
@@ -399,16 +239,21 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
                 Again
               </Button>
               <Button
-                onClick={() =>
-                  handleWordStudy(
-                    data.studentWord.learning as NonLearnedStates, // words that are 'Learned' do not appear here
-                    true
-                  )
-                }
+                onClick={() => {
+                  if (testing) {
+                    setStudyState('check');
+                  } else {
+                    handleWordStudy(
+                      data.studentWord.learning as NonLearnedStates, // words that are 'Learned' do not appear here
+                      true
+                    );
+                    setStudyState('test'); // TODO consider putting this before handleWordStudy
+                  }
+                }}
                 disabled={loadingMutation}
                 sx={{ width: '50%' }}
               >
-                Good
+                {testing ? 'Show' : 'Good'}
               </Button>
             </ButtonGroup>
           </CardActions>
@@ -417,62 +262,83 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
       <GridRow
         item
         sx={{
-          overflowX: 'scroll',
+          overflowX: 'auto',
           overflowY: 'hidden',
           whiteSpace: 'nowrap',
         }}
       >
-        {studying &&
-          fakeData.studentWord.word.ccceDefinitions.map((def, i) => (
-            <ResponsiveItem>
-              <DefinitionCard elevation={2}>
-                <DefinitionCardHeader
-                  title={<Typography variant="h6">{def.pinyin}</Typography>}
-                />
+        {data.studentWord.word.ccceDefinitions.map((def, i) => (
+          <ResponsiveItem>
+            <DefinitionCard elevation={2}>
+              <DefinitionCardHeader
+                title={
+                  <Typography variant="h6">
+                    {studyState === 'check' ||
+                    [
+                      LearningState.NotYetLearned,
+                      LearningState.Meaning,
+                    ].includes(mode)
+                      ? def.pinyin
+                      : BLANK_SPACE}
+                  </Typography>
+                }
+              />
 
-                <DefinitionCardContent>
-                  <Box
-                    lang="zh"
-                    sx={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <Box>
-                      <Typography
-                        display="inline"
-                        color="GrayText"
-                        variant="body1"
-                      >
-                        简：
-                      </Typography>
-                      <Typography display="inline" variant="body1">
-                        {def.simplified}
-                      </Typography>
-                    </Box>
-                    <Box>
-                      <Typography
-                        display="inline"
-                        color="GrayText"
-                        variant="body1"
-                      >
-                        繁：
-                      </Typography>
-                      <Typography display="inline" variant="body1">
-                        {def.traditional}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  {def.definitions.map((d, i) => (
-                    <Typography key={`${def.id}-${i}`} variant="body2">
-                      {d}
+              <DefinitionCardContent>
+                <Box
+                  lang="zh"
+                  sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Box>
+                    <Typography
+                      display="inline"
+                      color="GrayText"
+                      variant="body1"
+                    >
+                      简：
                     </Typography>
-                  ))}
-                </DefinitionCardContent>
-              </DefinitionCard>
-            </ResponsiveItem>
-          ))}
+                    <Typography display="inline" variant="body1">
+                      {def.simplified}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography
+                      display="inline"
+                      color="GrayText"
+                      variant="body1"
+                    >
+                      繁：
+                    </Typography>
+                    <Typography display="inline" variant="body1">
+                      {def.traditional}
+                    </Typography>
+                  </Box>
+                </Box>
+                <ul
+                  style={{
+                    paddingLeft: '1rem',
+                    listStyle: 'square',
+                  }}
+                >
+                  {(studyState === 'check' ||
+                    [
+                      LearningState.NotYetLearned,
+                      LearningState.Pronunciation,
+                    ].includes(mode)) &&
+                    def.definitions.map((d, i) => (
+                      <li key={`${def.id}-${i}`}>
+                        <Typography variant="body2">{d}</Typography>
+                      </li>
+                    ))}
+                </ul>
+              </DefinitionCardContent>
+            </DefinitionCard>
+          </ResponsiveItem>
+        ))}
       </GridRow>
     </GridContainer>
   );

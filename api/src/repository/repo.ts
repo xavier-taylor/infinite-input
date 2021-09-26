@@ -1,11 +1,19 @@
 import { Pool } from 'pg';
-import { Document, SentenceWord, StudyType, Word } from '../schema/gql-model';
+import {
+  Document,
+  LearningState,
+  SentenceWord,
+  StudyType,
+  Word,
+} from '../schema/gql-model';
 import {
   cc_cedict,
   document,
   sentence,
   sentence_word,
   student_word,
+  student_word_listen,
+  student_word_read,
   word,
 } from './sql-model';
 import { Knex } from 'knex';
@@ -16,6 +24,7 @@ import {
   MIN_GRAPHQL_INT,
   toGraphQLInteger,
 } from '../utils/number';
+import { toSQLLearningStateEnum } from '../utils/typeConversions';
 
 // IMPORTANT - cannot reuse dataloader instances across requests.
 // so cannot use datasource instance across requests.
@@ -319,20 +328,51 @@ WHERE NOT EXISTS (
   async updateStudentWord(
     userId: string,
     hanzi: string,
-    understood: boolean
+    newDue: string,
+    newLearning: LearningState
   ): Promise<student_word> {
-    if (understood) {
-      // TODO continue here - update the learning state and set new due
-      // NOTE I just realized the front end will need to send the 'next due'
-      // values (and may as well send the 'next learning state' values)
-      // why? For normal due, we just say next due is now+ say, 10 seconds or 30 seconds etc
-      // However, when a cards learning state gets upgraded till the next day
-      // (ie, when you finish learning a word and unlock readword and listen word),
-      // we need to set their 'due' as next calendar day, not now + 24 hours
-      // (ie if I was studing at 9pm tuesday then start studying 1pm wednesday.)
-    } else {
-      // set new due
-    }
+    const res = await this.knex<student_word>('student_word')
+      .update({
+        due: new Date(newDue),
+        learning: toSQLLearningStateEnum(newLearning),
+      })
+      .where('student_id', '=', userId)
+      .where('word_hanzi', '=', hanzi)
+      .returning('*');
+    return res[0];
+  }
+  // A special case of updateStudentWord, when a word is set to 'learned',
+  // we need to create corresponding rows in student_word_read/listen
+  async learnWord(
+    userId: string,
+    hanzi: string,
+    newDue: string,
+    newLearning: LearningState.Learned
+  ): Promise<student_word> {
+    // TODO wrap in try catch etc https://knexjs.org/#Transactions
+    const updatedStudentWord = await this.knex.transaction(async (trx) => {
+      const res = await trx<student_word>('student_word')
+        .update({
+          due: null,
+          learning: toSQLLearningStateEnum(newLearning),
+          date_learned: DateTime.now().toUTC().toJSDate(),
+        })
+        .where('student_id', '=', userId)
+        .where('word_hanzi', '=', hanzi)
+        .returning('*');
+
+      const newRow: student_word_read | student_word_listen = {
+        due: new Date(newDue),
+        student_id: userId,
+        interval: 1,
+        word_hanzi: hanzi,
+      };
+      await trx<student_word_read>('student_word_read').insert(newRow);
+      await trx<student_word_listen>('student_word_listen').insert(newRow);
+
+      return res[0];
+    });
+    return updatedStudentWord;
   }
 }
 

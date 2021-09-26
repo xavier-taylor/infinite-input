@@ -108,15 +108,13 @@ CREATE TABLE mandarin.student_word_listen
 (
     student_id bigint REFERENCES mandarin.student (id),
     word_hanzi text REFERENCES mandarin.word (hanzi),
-    f1 int NOT NULL,
-    f2 int NOT NULL,
+    interval double precision not null, -- the current interval, in days, ie 1.5 means 'card will next be due in 1.5 days from when this was calculated'
     due timestamp with time zone NOT NULL,         
-    previous timestamp with time zone NOT NULL,  
-    understood boolean[] CONSTRAINT ten_elements CHECK (cardinality(understood) < 11) NOT NULL,
-    -- TODO need logic for when these understood_count ints
-    -- get to their max size
-    understood_count int NOT NULL,
-    understood_distinct_documents_count int NOT NULL, -- increment this only when a new student_document_listen is created for this word
+    -- Dropped these columns, can re add them or something like them in the future if need it.
+    -- understood boolean[] CONSTRAINT ten_elements CHECK (cardinality(understood) < 11) NOT NULL,
+    -- understood_count int NOT NULL,
+    -- understood_distinct_documents_count int NOT NULL, -- increment this only when a new student_document_listen is created for this word
+
     FOREIGN KEY (student_id, word_hanzi) REFERENCES mandarin.student_word (student_id, word_hanzi),
     PRIMARY KEY (student_id, word_hanzi)
 );
@@ -127,13 +125,9 @@ CREATE TABLE mandarin.student_word_read
 (
     student_id bigint REFERENCES mandarin.student (id),
     word_hanzi text REFERENCES mandarin.word (hanzi),
-    f1 int NOT NULL,
-    f2 int NOT NULL,
+    interval double precision not null,
     due timestamp with time zone NOT NULL,
-    previous timestamp with time zone NOT NULL,
-    understood boolean[] CONSTRAINT ten_elements CHECK (cardinality(understood) < 11) NOT NULL,
-    understood_count int NOT NULL,
-    understood_distinct_documents_count int NOT NULL, -- increment this only when a new student_document_listen is created for this word
+    
     FOREIGN KEY (student_id, word_hanzi) REFERENCES mandarin.student_word (student_id, word_hanzi),
     PRIMARY KEY (student_id, word_hanzi)
 );

@@ -2,14 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './Pages/App';
 import reportWebVitals from './reportWebVitals';
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  useQuery,
-  gql,
-  InMemoryCacheConfig,
-} from '@apollo/client';
+import { ApolloClient, ApolloProvider } from '@apollo/client';
 import { cache } from './cache';
 import {
   createTheme,
@@ -33,6 +26,8 @@ declare module '@mui/styles/defaultTheme' {
 const theme = createTheme({
   components: {
     MuiCssBaseline: {
+      // TODO swap approach - this results in a laggy UI
+      // instead just have a ChineseText styled component version of Typography or something like that
       styleOverrides: `
       .MuiTypography-root:lang(zh) {
          font-family: 'Noto Serif SC', serif;

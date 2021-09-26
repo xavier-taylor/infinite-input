@@ -109,24 +109,14 @@ export interface student_word {
 export interface student_word_listen {
   student_id: string;
   word_hanzi: string;
-  f1: number;
-  f2: number;
   due: Date;
-  previous: Date;
-  understood: any;
-  understood_count: number;
-  understood_distinct_documents_count: number;
+  interval: number;
 }
 export interface student_word_read {
   student_id: string;
   word_hanzi: string;
-  f1: number;
-  f2: number;
   due: Date;
-  previous: Date;
-  understood: any;
-  understood_count: number;
-  understood_distinct_documents_count: number;
+  interval: number;
 }
 export interface sub_corpus {
   title: string;

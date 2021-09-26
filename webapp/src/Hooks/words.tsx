@@ -46,5 +46,6 @@ export const useWords = (mode: StudyType) => {
   return {
     next: nextWord,
     countRemaining: useReactiveVar(wordsToStudyVar).length,
+    haveFetchedDueVar,
   };
 };

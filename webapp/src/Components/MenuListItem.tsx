@@ -5,10 +5,8 @@ import {
   ListItemText,
   CircularProgress,
   Avatar,
-  Typography,
 } from '@mui/material';
 import React from 'react';
-import { Theme, useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 import { OptionalTooltip } from './OptionalTooltip';

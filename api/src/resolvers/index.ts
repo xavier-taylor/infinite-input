@@ -1,27 +1,31 @@
 import { IContextType } from '../server';
-import { LearningState, Resolvers, StudyType } from '../schema/gql-model';
+import {
+  DocumentStudyResponse,
+  LearningState,
+  NewWordStudyResponse,
+  Resolvers,
+  StudyType,
+} from '../schema/gql-model';
 import { learning_state, student_word } from '../repository/sql-model';
+import { toGQLLearningStateEnum } from '../utils/typeConversions';
+import axios from 'axios';
+import { ForvoApiResponse } from '../utils/forvo';
 
-function toGQLLearningStateEnum(ls: learning_state): LearningState {
-  switch (ls) {
-    case learning_state.not_yet_learned:
-      return LearningState.NotYetLearned;
-    case learning_state.meaning:
-      return LearningState.Meaning;
-    case learning_state.pronunciation:
-      return LearningState.Pronunciation;
-    case learning_state.reading:
-      return LearningState.Reading;
-    case learning_state.learned:
-      return LearningState.Learned;
-    default:
-      const _ex: never = ls;
-      return _ex;
-  }
-}
+const USER_ID = `1`; // TODO get this from ctx or whatever
 
 const WORDS_PER_DAY = 10;
 export const resolvers: Resolvers<IContextType> = {
+  MutationResponse: {
+    __resolveType(MutationResponse) {
+      const NewWordStudyResponse = MutationResponse as NewWordStudyResponse;
+      // const DocumentStudyResponse = MutationResponse as DocumentStudyResponse;
+      if (NewWordStudyResponse.studentWord) {
+        return 'NewWordStudyResponse';
+      } else {
+        return 'DocumentStudyResponse';
+      }
+    },
+  },
   StudentWord: {
     hanzi: ({ word_hanzi }) => word_hanzi,
     locked: ({ locked }) => locked,
@@ -70,7 +74,7 @@ export const resolvers: Resolvers<IContextType> = {
   },
   Document: {
     chinese: (parent, args, context, _info) => parent.chinese,
-    english: (parent, args, context, _info) => parent.english,
+    english: (parent, args, context, _info) => parent.english ?? null,
     id: (parent, args, context, _info) => parent.id as string, // TODO get a better type generation lib - this one just makes id fields optional for some reason (maybe coz PK, maybe coz serial)
     sentences: ({ id }, args, { repo }, _info) =>
       repo.getSentences(id as string),
@@ -89,14 +93,18 @@ export const resolvers: Resolvers<IContextType> = {
         newDue,
         newLearning
       );
+
+      let updated: Promise<student_word>;
       // Update student_word and create student_word_listen/read
-      // TODO continue here
       if (newLearning === LearningState.Learned) {
+        updated = repo.learnWord(USER_ID, hanzi, newDue, newLearning);
       } else {
+        // just update student_word
+        updated = repo.updateStudentWord(USER_ID, hanzi, newDue, newLearning);
       }
       return {
         success: true,
-        studentWord: {} as any,
+        studentWord: updated,
       };
     },
   },
@@ -130,10 +138,9 @@ export const resolvers: Resolvers<IContextType> = {
     // TODO add document_word or whatever this query is relying on to source control
 
     newWords: async (_, { dayStartUTC }, { repo }) => {
-      const userId = `1`; // TODO get this from ctx or whatever
       // TODO optimization can I run these queries in parallel plz
       const wordsLearnedAlreadyToday = await repo.getCountWordsAlreadyLearnedToday(
-        userId,
+        USER_ID,
         dayStartUTC
       );
       console.log(wordsLearnedAlreadyToday);
@@ -142,7 +149,7 @@ export const resolvers: Resolvers<IContextType> = {
 
       let words: student_word[];
       if (wordsRemaining > 0) {
-        words = await repo.getNewWords(userId, wordsRemaining);
+        words = await repo.getNewWords(USER_ID, wordsRemaining);
       } else {
         words = [];
       }
@@ -168,5 +175,25 @@ export const resolvers: Resolvers<IContextType> = {
       };
     },
     dailyNewWordsGoal: () => WORDS_PER_DAY,
+    wordPronunciation: async (_, { hanzi }) => {
+      // TODO add logic for when go over forvo api limit. OR when there is a forvo miss (ie use azure)
+      const apiKey = process.env['FORVO_API_KEY'];
+      console.log(apiKey);
+      try {
+        const res = await axios.get<ForvoApiResponse>(
+          encodeURI(
+            `https://apifree.forvo.com/key/${apiKey}/format/json/action/standard-pronunciation/word/${hanzi}/language/zh`
+          )
+        );
+
+        return {
+          hanzi,
+          url: res?.data?.items?.[0]?.pathogg ?? res?.data?.items?.[0]?.pathmp3,
+        };
+      } catch (e) {
+        console.log(e);
+        return { hanzi };
+      }
+    },
   },
 };

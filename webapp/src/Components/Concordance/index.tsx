@@ -24,10 +24,10 @@ import { Maybe } from 'graphql/jsutils/Maybe';
 // in aligned view, as a mouse over? or an accordion? https://material-ui.com/components/accordion/
 // TODO rename concordance container
 
-type ConcordanceDocument = ResultOf<
+type ConcordanceDocumentObject = ResultOf<
   typeof ConcordanceDocument
 >['concordanceDocs'][number];
-type ConcordanceWord = ConcordanceDocument['sentences'][number]['words'][number];
+type ConcordanceWord = ConcordanceDocumentObject['sentences'][number]['words'][number];
 
 export interface ParsedDocument {
   before: ConcordanceWord[];
@@ -38,7 +38,10 @@ export interface ParsedDocument {
 
 // TODO consider making this whole thing a type returned from the gql server
 // rather than doing this data manipulation at the frontend...
-function parseDocument(doc: ConcordanceDocument, word: string): ParsedDocument {
+function parseDocument(
+  doc: ConcordanceDocumentObject,
+  word: string
+): ParsedDocument {
   const words: ConcordanceWord[] = doc.sentences.reduce<ConcordanceWord[]>(
     (acc, cur) => {
       acc.push(...cur.words);

@@ -103,6 +103,11 @@ export const typeDefs = gql`
     orphans: [Word!]!
   }
 
+  type Pronunciation {
+    hanzi: String!
+    url: String
+  }
+
   enum StudyType {
     READ
     LISTEN
@@ -120,8 +125,8 @@ export const typeDefs = gql`
 
   type Query {
     # returns the set of new words to learn today.
+    # currently hardcoded to 10.
     newWords(
-      # currently hardcoded to 10.
       # the start of the users local day, converted into a UTC time in ISO format
       # used to calculate how many words they already learned today, if any
       dayStartUTC: String!
@@ -135,6 +140,7 @@ export const typeDefs = gql`
     document(id: String!): Document!
     concordanceDocs(word: String!): [Document!]!
     studentWord(hanzi: String!): StudentWord!
+    wordPronunciation(hanzi: String!): Pronunciation!
   }
 
   interface MutationResponse {

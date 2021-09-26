@@ -5,6 +5,7 @@ import {
   StudentWordForLearningQueryVariables,
   TypedTypePolicies,
   Word,
+  WordPronunciationQueryVariables,
 } from './schema/generated';
 
 export type DocumentIdList = Array<Document['id']>;
@@ -80,6 +81,15 @@ const typePolicies: TypedTypePolicies = {
           });
         },
       },
+      wordPronunciation: {
+        read(_, { args, toReference }) {
+          const vars = args as WordPronunciationQueryVariables;
+          return toReference({
+            __typename: 'Pronunciation',
+            hanzi: vars.hanzi,
+          });
+        },
+      },
       studentWord: {
         read(_, { args, toReference }) {
           const vars = args as StudentWordForLearningQueryVariables;
@@ -146,6 +156,9 @@ const typePolicies: TypedTypePolicies = {
     keyFields: ['hanzi', 'studyType'],
   },
   StudentWord: {
+    keyFields: ['hanzi'],
+  },
+  Pronunciation: {
     keyFields: ['hanzi'],
   },
   Word: {

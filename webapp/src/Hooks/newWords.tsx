@@ -1,8 +1,6 @@
-import { ReactiveVar, useReactiveVar } from '@apollo/client';
-import { InMemoryCache, InMemoryCacheConfig, makeVar } from '@apollo/client';
+import { useReactiveVar } from '@apollo/client';
 import { ResultOf } from '@graphql-typed-document-node/core';
 import { client } from '..';
-import { cache, WordHanziList } from '../cache';
 import {
   learnedNewWordsVar,
   haveFetchedNewWordsToLearnVar,
