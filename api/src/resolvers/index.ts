@@ -13,7 +13,7 @@ import { ForvoApiResponse } from '../utils/forvo';
 
 const USER_ID = `1`; // TODO get this from ctx or whatever
 
-const WORDS_PER_DAY = 10;
+const WORDS_PER_DAY = 20;
 export const resolvers: Resolvers<IContextType> = {
   MutationResponse: {
     __resolveType(MutationResponse) {

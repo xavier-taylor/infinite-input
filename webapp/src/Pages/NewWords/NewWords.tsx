@@ -1,5 +1,5 @@
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
-import { Help, MenuBook, RecordVoiceOver } from '@mui/icons-material';
+import { Bolt, Help, MenuBook, RecordVoiceOver } from '@mui/icons-material';
 import {
   Typography,
   CardActions,
@@ -200,6 +200,9 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
                   )) && (
                   <WordPronunciation wordHanzi={wordHanzi}></WordPronunciation>
                 )}
+                <IconButton>
+                  <Bolt></Bolt>
+                </IconButton>
                 <IconButton onClick={() => null} size="large">
                   <MenuBook color="action"></MenuBook>
                 </IconButton>
