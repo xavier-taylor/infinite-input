@@ -25,6 +25,7 @@ import { MenuListItem } from './MenuListItem';
 import { useDocuments } from '../Hooks/documents';
 import { StudyType } from '../schema/generated';
 import { useWords } from '../Hooks/words';
+import { Home } from '@mui/icons-material';
 
 // Fake data waiting on real integration
 const FAKE_NEW_WORDS = 10;
@@ -107,6 +108,12 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
       <Divider />
       <div>
         <List>
+          <ListItem onClick={() => history.push('/')} button>
+            <ListItemIcon>
+              <Home color="warning" />
+            </ListItemIcon>
+            <ListItemText primary={'Home'} />
+          </ListItem>
           <MenuListItem
             avatarColor={theme.palette.success.main}
             onClick={() => history.push('/word/new')}

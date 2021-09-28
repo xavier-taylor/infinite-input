@@ -201,6 +201,7 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
                   <WordPronunciation wordHanzi={wordHanzi}></WordPronunciation>
                 )}
                 <IconButton>
+                  {/* TODO - remember what this was here, remove it if not needed... */}
                   <Bolt></Bolt>
                 </IconButton>
                 <IconButton onClick={() => null} size="large">

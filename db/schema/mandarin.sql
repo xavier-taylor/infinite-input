@@ -172,6 +172,7 @@ CREATE TABLE mandarin.sentence
     document_index int NOT NULL, -- the index of the sentence in its document, starting at 0. ie, 'ABC. DEF.' The sentence 'ABC' has document_index 0
     chinese text NOT NULL,
     sentiment text NOT NULL, -- http://a1-www.is.tokushima-u.ac.jp/member/ren/Ren-CECps1.0/Ren-CECps1.0.html
+    -- https://stanfordnlp.github.io/stanza/sentiment.html
     PRIMARY KEY (id)
 );
 CREATE TABLE mandarin.named_entity

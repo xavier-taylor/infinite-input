@@ -374,6 +374,14 @@ WHERE NOT EXISTS (
     });
     return updatedStudentWord;
   }
+  async getSentencesByDocumentId(
+    document_id: string
+  ): Promise<Array<sentence>> {
+    return this.knex('sentence')
+      .select<sentence[]>('*')
+      .where({ document_id })
+      .orderBy([{ column: 'document_index' }]);
+  }
 }
 
 /*

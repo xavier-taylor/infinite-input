@@ -5,6 +5,15 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import { WordPronunciationDocument } from '../../schema/generated';
 
+// CONTINUE HERE
+// TODO refactor this component to just use the azure audio via express.
+// that means getting rid of the pronuncation type from graphql, not needed anymore.
+// Consider using the web Audio api (rather than the html audio tag)
+// Ideally, we would not download the audio (hit the api) until
+// a user clicks, OR in the case of autoplay variant, we ourselves trigger
+// (ie on a 'not yet learned' or 'meaning' card).
+// Then after that, we dont call the api again - we use the same audio in memory.
+
 const WordPronunciation: React.FC<{ wordHanzi: string }> = ({ wordHanzi }) => {
   console.log('Render of WordPronduncation: ', wordHanzi);
   const [audio, setAudio] = useState<HTMLAudioElement | null>();

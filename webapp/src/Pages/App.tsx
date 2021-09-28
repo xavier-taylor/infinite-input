@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CssBaseline } from '@mui/material';
+import { CssBaseline, IconButton } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import Header from '../Components/Header';
 import MenuDrawer from '../Components/MenuDrawer';
@@ -28,6 +28,7 @@ import {
 import { StudyContainer } from './Study/StudyContainer';
 import { NewWordsContainer } from './NewWords/NewWordsContainer';
 import { DateTime } from 'luxon';
+import { RecordVoiceOver } from '@mui/icons-material';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -130,7 +131,6 @@ Warning: Cannot update a component (`StudyContainer`) while rendering a differen
       );
     }
   }, [listeningRV.data, haveFetchedListening]);
-
   return (
     <Router>
       <div className={classes.root}>
@@ -145,7 +145,25 @@ Warning: Cannot update a component (`StudyContainer`) while rendering a differen
           <div className={classes.appBarSpacer} />
           <Switch>
             <Route exact path="/">
-              <div>some kind of home page</div>
+              <div>
+                {/* TODO remove this and replace with a proper home page - but leave for now - this works! */}
+                some kind of home page - testing button!
+                <IconButton
+                  onClick={() => {
+                    const documentId = '447';
+                    const newAudio = new Audio(
+                      `http://localhost:4001/api/tts/document/${documentId}.oga`
+                    );
+                    console.log('in onclick');
+                    newAudio.addEventListener('canplaythrough', (event) => {
+                      console.log('in event listener');
+                      newAudio.play();
+                    });
+                  }}
+                >
+                  <RecordVoiceOver color="action" />
+                </IconButton>
+              </div>
             </Route>
             <Route path="/word/new">
               <NewWordsContainer />

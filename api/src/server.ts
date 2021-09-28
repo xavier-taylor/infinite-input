@@ -53,8 +53,9 @@ server.listen().then(({ url }) => {
 });
 
 // Express app for serving audio
+
 const app = express();
-const port = 3000;
+const port = 4001;
 const azureKey = process.env['AZURE_KEY'];
 app.get('/api/tts/word/:word.oga', async (req, res) => {
   const word = req.params.word;
@@ -76,9 +77,7 @@ app.get('/api/tts/word/:word.oga', async (req, res) => {
     <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis"
        xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="zh-CN">
     <voice name="zh-CN-XiaoxiaoNeural">
-        <mstts:express-as style="sad" styledegree="2">
             ${word}
-        </mstts:express-as>
     </voice>
     </speak>
     `,
@@ -95,57 +94,52 @@ app.get('/api/tts/word/:word.oga', async (req, res) => {
     }
   );
 });
-// Below was using the REST api.
-// console.log(word);
-// try {
-//   const authResp = await axios({
-//     method: 'POST',
-//     url:
-//       'https://australiaeast.api.cognitive.microsoft.com/sts/v1.0/issueToken?=',
-//     headers: {
-//       'Ocp-Apim-Subscription-Key': azureKey,
-//     },
-//   });
-//   const auth = authResp.data;
 
-//   const xml = `
-//   <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis"
-//      xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="zh-CN">
-//   <voice name="zh-CN-XiaoxiaoNeural">
-//       <mstts:express-as style="sad" styledegree="2">
-//           ${word}
-//       </mstts:express-as>
-//   </voice>
-//   </speak>
-//   `;
+app.get('/api/tts/document/:documentId.oga', async (req, res) => {
+  const documentId = req.params.documentId;
+  const subscriptionKey = azureKey;
+  const serviceRegion = 'australiaeast';
 
-//   const wordResp = await axios({
-//     method: 'POST',
-//     url:
-//       'https://australiaeast.tts.speech.microsoft.com/cognitiveservices/v1',
-//     headers: {
-//       Authorization: `Bearer ${auth}`,
-//       'Content-Type': 'application/ssml+xml',
-//       'X-Microsoft-OutputFormat': 'ogg-24khz-16bit-mono-opus',
-//       // 'X-Microsoft-OutputFormat': ' audio-24khz-160kbitrate-mono-mp3',
-//       'User-Agent': 'xavier', // TODO what is this meant to be?
-//     },
-//     data: xml,
-//   });
-//   console.log(wordResp.status);
-//   fs.writeFileSync('test.oga', wordResp.data);
-//   // console.log(wordResp.data);
-//   // // Just guessing this content type based on the content-type of the response
-//   // // the above API call gives.
-//   res.set('Content-Type', 'audio/ogg; codecs=opus; rate=24000');
-//   // console.log(typeof wordResp.data);
-//   // const buffer = Buffer.from(wordResp.data);
+  const speechConfig = sdk.SpeechConfig.fromSubscription(
+    subscriptionKey as string,
+    serviceRegion
+  );
 
-//   res.send(wordResp.data);
-// } catch (e) {
-//   console.log(e);
-// }
-// };
+  speechConfig.speechSynthesisOutputFormat =
+    SpeechSynthesisOutputFormat.Ogg24Khz16BitMonoOpus;
+
+  const synthesizer = new sdk.SpeechSynthesizer(speechConfig);
+  const knex = Knex(knexConfig); // TODO work out how to safely use this instance within one express request lifecyle.
+  const repo = new PostgresqlRepo(knex);
+  // TODO parametize with sentiment when score is 0 or 2.
+  const sentences = await repo.getSentencesByDocumentId(documentId);
+
+  synthesizer.speakSsmlAsync(
+    `
+    <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis"
+       xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="zh-CN">
+    <voice name="zh-CN-XiaoxiaoNeural">
+      ${sentences.map(
+        (s) => `
+              <s>${s.chinese}</s>
+      `
+      )}
+    </voice>
+    </speak>
+    `,
+    (resp) => {
+      const audio = resp.audioData;
+
+      console.log(audio);
+
+      synthesizer.close();
+
+      const buffer = Buffer.from(audio);
+      res.set('Content-Type', 'audio/ogg; codecs=opus; rate=24000');
+      res.send(buffer);
+    }
+  );
+});
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
