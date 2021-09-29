@@ -103,11 +103,6 @@ export const typeDefs = gql`
     orphans: [Word!]!
   }
 
-  type Pronunciation {
-    hanzi: String!
-    url: String
-  }
-
   enum StudyType {
     READ
     LISTEN
@@ -140,7 +135,6 @@ export const typeDefs = gql`
     document(id: String!): Document!
     concordanceDocs(word: String!): [Document!]!
     studentWord(hanzi: String!): StudentWord!
-    wordPronunciation(hanzi: String!): Pronunciation!
   }
 
   interface MutationResponse {

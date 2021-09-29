@@ -5,7 +5,6 @@ import {
   StudentWordForLearningQueryVariables,
   TypedTypePolicies,
   Word,
-  WordPronunciationQueryVariables,
 } from './schema/generated';
 
 export type DocumentIdList = Array<Document['id']>;
@@ -78,15 +77,6 @@ const typePolicies: TypedTypePolicies = {
           return toReference({
             __typename: 'Document',
             id: vars.id,
-          });
-        },
-      },
-      wordPronunciation: {
-        read(_, { args, toReference }) {
-          const vars = args as WordPronunciationQueryVariables;
-          return toReference({
-            __typename: 'Pronunciation',
-            hanzi: vars.hanzi,
           });
         },
       },

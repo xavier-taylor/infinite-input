@@ -24,13 +24,13 @@ import {
   LearningState,
   NewWordStudyDocument,
   StudentWordForLearningDocument,
-  WordPronunciationDocument,
 } from '../../schema/generated';
 import { useState } from 'react';
 import { DateTime } from 'luxon';
 import { useEffect } from 'react';
-import WordPronunciation from './WordPronunciation';
+import AutoPlayAudio from '../../Components/Audio/AutoPlayAudio';
 import { BLANK_SPACE } from '../../Components/Layout/Constants';
+import DefaultAudio from '../../Components/Audio/DefaultAudio';
 
 type NonLearnedStates = Exclude<LearningState, LearningState.Learned>;
 interface NewProperties {
@@ -178,7 +178,7 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
             disableTypography
             title={
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="h5" display="inline">
+                <Typography variant="body1" display="inline">
                   {friendlyLS(mode).title}
                 </Typography>
                 <Tooltip
@@ -197,13 +197,15 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
                 {(studyState === 'check' ||
                   [LearningState.NotYetLearned, LearningState.Meaning].includes(
                     mode
-                  )) && (
-                  <WordPronunciation wordHanzi={wordHanzi}></WordPronunciation>
-                )}
-                <IconButton>
-                  {/* TODO - remember what this was here, remove it if not needed... */}
-                  <Bolt></Bolt>
-                </IconButton>
+                  )) &&
+                  ([
+                    LearningState.NotYetLearned,
+                    LearningState.Meaning,
+                  ].includes(mode) ? (
+                    <AutoPlayAudio identifier={wordHanzi} type="word" />
+                  ) : (
+                    <DefaultAudio identifier={wordHanzi} type="word" />
+                  ))}
                 <IconButton onClick={() => null} size="large">
                   <MenuBook color="action"></MenuBook>
                 </IconButton>
@@ -269,6 +271,8 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
           overflowX: 'auto',
           overflowY: 'hidden',
           whiteSpace: 'nowrap',
+          display: 'flex',
+          justifyContent: 'center',
         }}
       >
         {data.studentWord.word.ccceDefinitions.map((def, i) => (

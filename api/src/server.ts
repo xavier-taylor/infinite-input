@@ -129,13 +129,14 @@ app.get('/api/tts/document/:documentId.oga', async (req, res) => {
     `,
     (resp) => {
       const audio = resp.audioData;
-
-      console.log(audio);
+      console.log('about to send audio from azure');
 
       synthesizer.close();
 
       const buffer = Buffer.from(audio);
       res.set('Content-Type', 'audio/ogg; codecs=opus; rate=24000');
+      // This didn't have the effect I wanted it to TODO - get this to be cached if possible.
+      res.set('Cache-Control', 'public, max-age=604800, immutable');
       res.send(buffer);
     }
   );

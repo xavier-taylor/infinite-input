@@ -110,7 +110,7 @@ const MenuDrawer: React.FC<DrawerProps> = (props) => {
         <List>
           <ListItem onClick={() => history.push('/')} button>
             <ListItemIcon>
-              <Home color="warning" />
+              <Home color="error" />
             </ListItemIcon>
             <ListItemText primary={'Home'} />
           </ListItem>
