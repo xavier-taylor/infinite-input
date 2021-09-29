@@ -98,12 +98,6 @@ export type NewWordsResponse = {
   haveEnoughUnlockedWords: Scalars['Boolean'];
 };
 
-export type Pronunciation = {
-  __typename?: 'Pronunciation';
-  hanzi: Scalars['String'];
-  url?: Maybe<Scalars['String']>;
-};
-
 export type Query = {
   __typename?: 'Query';
   concordanceDocs: Array<Document>;
@@ -114,7 +108,6 @@ export type Query = {
   newWords: NewWordsResponse;
   sentenceWord?: Maybe<SentenceWord>;
   studentWord: StudentWord;
-  wordPronunciation: Pronunciation;
   words: Array<Word>;
 };
 
@@ -152,11 +145,6 @@ export type QuerySentenceWordArgs = {
 
 
 export type QueryStudentWordArgs = {
-  hanzi: Scalars['String'];
-};
-
-
-export type QueryWordPronunciationArgs = {
   hanzi: Scalars['String'];
 };
 
@@ -530,12 +518,7 @@ export type NewWordsResponseFieldPolicy = {
 	wordsLearnedToday?: FieldPolicy<any> | FieldReadFunction<any>,
 	haveEnoughUnlockedWords?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type PronunciationKeySpecifier = ('hanzi' | 'url' | PronunciationKeySpecifier)[];
-export type PronunciationFieldPolicy = {
-	hanzi?: FieldPolicy<any> | FieldReadFunction<any>,
-	url?: FieldPolicy<any> | FieldReadFunction<any>
-};
-export type QueryKeySpecifier = ('concordanceDocs' | 'dailyNewWordsGoal' | 'document' | 'due' | 'moreNewWords' | 'newWords' | 'sentenceWord' | 'studentWord' | 'wordPronunciation' | 'words' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('concordanceDocs' | 'dailyNewWordsGoal' | 'document' | 'due' | 'moreNewWords' | 'newWords' | 'sentenceWord' | 'studentWord' | 'words' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	concordanceDocs?: FieldPolicy<any> | FieldReadFunction<any>,
 	dailyNewWordsGoal?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -545,7 +528,6 @@ export type QueryFieldPolicy = {
 	newWords?: FieldPolicy<any> | FieldReadFunction<any>,
 	sentenceWord?: FieldPolicy<any> | FieldReadFunction<any>,
 	studentWord?: FieldPolicy<any> | FieldReadFunction<any>,
-	wordPronunciation?: FieldPolicy<any> | FieldReadFunction<any>,
 	words?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type SentenceKeySpecifier = ('id' | 'words' | 'chinese' | SentenceKeySpecifier)[];
@@ -639,10 +621,6 @@ export type TypedTypePolicies = TypePolicies & {
 	NewWordsResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | NewWordsResponseKeySpecifier | (() => undefined | NewWordsResponseKeySpecifier),
 		fields?: NewWordsResponseFieldPolicy,
-	},
-	Pronunciation?: Omit<TypePolicy, "fields" | "keyFields"> & {
-		keyFields?: false | PronunciationKeySpecifier | (() => undefined | PronunciationKeySpecifier),
-		fields?: PronunciationFieldPolicy,
 	},
 	Query?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | QueryKeySpecifier | (() => undefined | QueryKeySpecifier),

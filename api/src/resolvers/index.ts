@@ -175,25 +175,5 @@ export const resolvers: Resolvers<IContextType> = {
       };
     },
     dailyNewWordsGoal: () => WORDS_PER_DAY,
-    wordPronunciation: async (_, { hanzi }) => {
-      // TODO add logic for when go over forvo api limit. OR when there is a forvo miss (ie use azure)
-      const apiKey = process.env['FORVO_API_KEY'];
-      console.log(apiKey);
-      try {
-        const res = await axios.get<ForvoApiResponse>(
-          encodeURI(
-            `https://apifree.forvo.com/key/${apiKey}/format/json/action/standard-pronunciation/word/${hanzi}/language/zh`
-          )
-        );
-
-        return {
-          hanzi,
-          url: res?.data?.items?.[0]?.pathogg ?? res?.data?.items?.[0]?.pathmp3,
-        };
-      } catch (e) {
-        console.log(e);
-        return { hanzi };
-      }
-    },
   },
 };
