@@ -135,6 +135,8 @@ export const typeDefs = gql`
     document(id: String!): Document!
     concordanceDocs(word: String!): [Document!]!
     studentWord(hanzi: String!): StudentWord!
+    knownWords: [String!]!
+    todaysDueWords(dayStartUTC: String!): [String!]!
   }
 
   interface MutationResponse {

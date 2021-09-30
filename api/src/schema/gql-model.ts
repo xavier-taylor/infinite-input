@@ -106,10 +106,12 @@ export type Query = {
   dailyNewWordsGoal: Scalars['Int'];
   document: Document;
   due: Due;
+  knownWords: Array<Scalars['String']>;
   moreNewWords: NewWordsResponse;
   newWords: NewWordsResponse;
   sentenceWord?: Maybe<SentenceWord>;
   studentWord: StudentWord;
+  todaysDueWords: Array<Scalars['String']>;
   words: Array<Word>;
 };
 
@@ -148,6 +150,11 @@ export type QuerySentenceWordArgs = {
 
 export type QueryStudentWordArgs = {
   hanzi: Scalars['String'];
+};
+
+
+export type QueryTodaysDueWordsArgs = {
+  dayStartUTC: Scalars['String'];
 };
 
 
@@ -408,10 +415,12 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   dailyNewWordsGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   document?: Resolver<ResolversTypes['Document'], ParentType, ContextType, RequireFields<QueryDocumentArgs, 'id'>>;
   due?: Resolver<ResolversTypes['Due'], ParentType, ContextType, RequireFields<QueryDueArgs, 'studyType'>>;
+  knownWords?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   moreNewWords?: Resolver<ResolversTypes['NewWordsResponse'], ParentType, ContextType, RequireFields<QueryMoreNewWordsArgs, 'dayStartUTC' | 'count'>>;
   newWords?: Resolver<ResolversTypes['NewWordsResponse'], ParentType, ContextType, RequireFields<QueryNewWordsArgs, 'dayStartUTC'>>;
   sentenceWord?: Resolver<Maybe<ResolversTypes['SentenceWord']>, ParentType, ContextType, RequireFields<QuerySentenceWordArgs, 'sentenceId' | 'stanzaId'>>;
   studentWord?: Resolver<ResolversTypes['StudentWord'], ParentType, ContextType, RequireFields<QueryStudentWordArgs, 'hanzi'>>;
+  todaysDueWords?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, RequireFields<QueryTodaysDueWordsArgs, 'dayStartUTC'>>;
   words?: Resolver<Array<ResolversTypes['Word']>, ParentType, ContextType, RequireFields<QueryWordsArgs, 'words'>>;
 };
 

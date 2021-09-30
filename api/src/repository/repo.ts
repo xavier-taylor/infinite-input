@@ -382,6 +382,30 @@ WHERE NOT EXISTS (
       .where({ document_id })
       .orderBy([{ column: 'document_index' }]);
   }
+  // returns the union of words due for listening and due for reading today
+  async getDueWords(userId: string, dayStartUTC: string) {
+    const dayStart = DateTime.fromISO(dayStartUTC);
+    const tomorrow = dayStart.plus({ days: 1 });
+    const listenP = this.knex('student_word_listen')
+      .select<student_word_listen[]>('*')
+      .where({ student_id: userId })
+      .where('due', '<', tomorrow.toUTC().toISO());
+    const readP = this.knex('student_word_listen')
+      .select<student_word_read[]>('*')
+      .where({ student_id: userId })
+      .where('due', '<', tomorrow.toUTC().toISO());
+    const [listen, read] = await Promise.all([listenP, readP]);
+    return Array.from(new Set([...listen, ...read])).map((t) => t.word_hanzi);
+  }
+
+  async getLearnedWords(userId: string) {
+    return (
+      await this.knex('student_word')
+        .select<student_word[]>('*')
+        .where({ learning: 'learned' })
+        .where({ student_id: userId })
+    ).map((w) => w.word_hanzi);
+  }
 }
 
 /*

@@ -10,6 +10,7 @@ import { learning_state, student_word } from '../repository/sql-model';
 import { toGQLLearningStateEnum } from '../utils/typeConversions';
 import axios from 'axios';
 import { ForvoApiResponse } from '../utils/forvo';
+import { PostgresqlRepo } from '../repository/repo';
 
 const USER_ID = `1`; // TODO get this from ctx or whatever
 
@@ -119,6 +120,8 @@ export const resolvers: Resolvers<IContextType> = {
       // TODO actually get a set of documents to cover as many
       // due words as possible, then return the rest of the due words as
       // orphans
+      // TODO - does the frontend need to send in dayStartUTC like newWords()?
+      // how else do we know which words are 'due'?
       const orphans =
         studyType === StudyType.Read
           ? await repo.getWords(['我', '她'])
@@ -138,27 +141,7 @@ export const resolvers: Resolvers<IContextType> = {
     // TODO add document_word or whatever this query is relying on to source control
 
     newWords: async (_, { dayStartUTC }, { repo }) => {
-      // TODO optimization can I run these queries in parallel plz
-      const wordsLearnedAlreadyToday = await repo.getCountWordsAlreadyLearnedToday(
-        USER_ID,
-        dayStartUTC
-      );
-      console.log(wordsLearnedAlreadyToday);
-
-      const wordsRemaining = WORDS_PER_DAY - wordsLearnedAlreadyToday;
-
-      let words: student_word[];
-      if (wordsRemaining > 0) {
-        words = await repo.getNewWords(USER_ID, wordsRemaining);
-      } else {
-        words = [];
-      }
-
-      return {
-        wordsLearnedToday: wordsLearnedAlreadyToday,
-        haveEnoughUnlockedWords: !(words.length < wordsRemaining),
-        words,
-      };
+      return newWords(repo, dayStartUTC);
     },
     moreNewWords: async (_, { dayStartUTC, count }, { repo }) => {
       const userId = `1`; // TODO get this from ctx or whatever
@@ -175,5 +158,40 @@ export const resolvers: Resolvers<IContextType> = {
       };
     },
     dailyNewWordsGoal: () => WORDS_PER_DAY,
+    todaysDueWords: async (_, { dayStartUTC }, { repo }) => {
+      // TODO verify that getDueWords uses the logic we will use
+      // to determine which words are due today
+      const { words } = await newWords(repo, dayStartUTC);
+      const dueWords = await repo.getDueWords(USER_ID, dayStartUTC);
+      return Array.from(
+        new Set([...words.map((w) => w.word_hanzi), ...dueWords])
+      );
+    },
+    knownWords: (_, __, { repo }) => {
+      return repo.getLearnedWords(USER_ID);
+    },
   },
 };
+
+async function newWords(repo: PostgresqlRepo, dayStartUTC: string) {
+  // TODO optimization can I run these queries in parallel plz
+  const wordsLearnedAlreadyToday = await repo.getCountWordsAlreadyLearnedToday(
+    USER_ID,
+    dayStartUTC
+  );
+
+  const wordsRemaining = WORDS_PER_DAY - wordsLearnedAlreadyToday;
+
+  let words: student_word[];
+  if (wordsRemaining > 0) {
+    words = await repo.getNewWords(USER_ID, wordsRemaining);
+  } else {
+    words = [];
+  }
+
+  return {
+    wordsLearnedToday: wordsLearnedAlreadyToday,
+    haveEnoughUnlockedWords: !(words.length < wordsRemaining),
+    words,
+  };
+}
