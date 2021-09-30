@@ -1,14 +1,19 @@
 import { RecordVoiceOver } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
+import { IconButton, IconButtonProps } from '@mui/material';
 import { useCallback } from 'react';
 import { useEffect } from 'react';
 import { useState } from 'react';
+
+type IconButtonSizes = IconButtonProps['size'];
 
 // This audio component isn't autoplay - and it doesn't load until you click it.
 const DefaultAudio: React.FC<{
   identifier: string;
   type: 'word' | 'document';
-}> = ({ identifier, type }) => {
+  invisible?: boolean;
+  size?: IconButtonSizes;
+  // ...other so that the button plays well in a button group - https://stackoverflow.com/questions/57962146/button-components-inside-buttongroup
+}> = ({ identifier, type, invisible, size, ...other }) => {
   // audio starts null
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   // audio gets set to null on new identifier
@@ -29,6 +34,7 @@ const DefaultAudio: React.FC<{
 
   return (
     <IconButton
+      sx={{ visibility: invisible ? 'hidden' : 'visible' }}
       onClick={() => {
         if (audio) {
           audio.play();
@@ -36,7 +42,8 @@ const DefaultAudio: React.FC<{
           getAndPlay();
         }
       }}
-      size="large"
+      size={size ?? 'large'}
+      {...other}
     >
       <RecordVoiceOver color="action" />
     </IconButton>

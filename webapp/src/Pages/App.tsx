@@ -167,6 +167,9 @@ Warning: Cannot update a component (`StudyContainer`) while rendering a differen
                 react-wordcloud handles updating D3 transitions when words, size and options prop change. The following example demonstrates this behavior.
                 - ie could have an endless loop updating the size/options to keep it buzzing around
 
+                I say just use a d3 wordcloud library with minimal/no animation.
+                Then as a programming exercise of my own (later one) build a word sphere library.
+
                 https://www.cssscript.com/animated-sphere-tag-cloud/ - this is what I really want
                 
                  -------------------------------------
@@ -188,9 +191,7 @@ Warning: Cannot update a component (`StudyContainer`) while rendering a differen
                     const newAudio = new Audio(
                       `http://localhost:4001/api/tts/document/${documentId}.oga`
                     );
-                    console.log('in onclick');
                     newAudio.addEventListener('canplaythrough', (event) => {
-                      console.log('in event listener');
                       newAudio.play();
                     });
                   }}

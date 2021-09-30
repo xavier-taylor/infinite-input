@@ -11,13 +11,9 @@ import {
   useMediaQuery,
   CardActions,
   IconButton,
+  CardHeader,
 } from '@mui/material';
-import {
-  ThumbDown,
-  ThumbUp,
-  MenuBook,
-  RecordVoiceOver,
-} from '@mui/icons-material';
+import { MenuBook, RecordVoiceOver, Done, Close } from '@mui/icons-material';
 import Concordance from '../../Components/Concordance';
 import {
   Document,
@@ -38,8 +34,11 @@ import {
   DefinitionCard,
   DefinitionCardHeader,
   DefinitionCardContent,
+  DefinitionCardHeaderFlexBox,
 } from '../../Components/Layout/Common';
 import { BLANK_SPACE } from '../../Components/Layout/Constants';
+import DefaultAudio from '../../Components/Audio/DefaultAudio';
+import AutoPlayAudio from '../../Components/Audio/AutoPlayAudio';
 
 // TODO https://material-ui.com/guides/minimizing-bundle-size/ do that stuff
 
@@ -241,6 +240,20 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
     >
       <GridRow item>
         <RowCard elevation={2}>
+          <CardHeader
+            sx={{ pb: 0, pt: 0 }}
+            action={
+              mode === StudyType.Listen ? (
+                <AutoPlayAudio identifier={documentId} type="document" />
+              ) : (
+                <DefaultAudio
+                  invisible={studyState === 'study'}
+                  identifier={documentId}
+                  type="document"
+                />
+              )
+            }
+          />
           <Typography
             className={classes.sentenceHanzi}
             variant="body1"
@@ -355,53 +368,50 @@ const Study: React.FC<StudyProps> = ({ mode, documentId, isLast, next }) => {
                   classes.recentCard
               )}
             >
-              {/* TODO make cardheader fixed (ie doesnt move when scrolling thru card contents - might be as simple as setting overflow behaviour on card contents...) */}
-              <DefinitionCardHeader
-                // TODO make it typography
-                title={
-                  <Typography variant="h6" lang="zh">
-                    {word.word.hanzi}
-                  </Typography>
-                }
-                action={
-                  <ButtonGroup>
-                    <IconButton
-                      onClick={() => setConcordanceWord(word.word.hanzi)}
-                      size="large"
-                    >
-                      <MenuBook color="action"></MenuBook>
-                    </IconButton>
-                    <IconButton size="large">
-                      <RecordVoiceOver color="action" />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => markForgot(word, mode, true)}
-                      size="large"
-                    >
-                      <ThumbDown
-                        style={{
-                          color: forgot(mode, word)
-                            ? theme.palette.error.main
-                            : theme.palette.action.active,
-                        }}
-                      />
-                    </IconButton>
-                    <IconButton
-                      // disabled={!forgot(mode, word)}
-                      onClick={() => markForgot(word, mode, false)}
-                      size="large"
-                    >
-                      <ThumbUp
-                        style={{
-                          color: forgot(mode, word)
-                            ? theme.palette.action.active
-                            : theme.palette.success.main,
-                        }}
-                      />
-                    </IconButton>
-                  </ButtonGroup>
-                }
-              />
+              <DefinitionCardHeaderFlexBox>
+                {/* marginRight sorcery: https://stackoverflow.com/questions/23621650/how-to-justify-a-single-flexbox-item-override-justify-content https://www.w3.org/TR/css-flexbox-1/#auto-margins */}
+                <Typography variant="h6" lang="zh" sx={{ marginRight: 'auto' }}>
+                  {word.word.hanzi}
+                </Typography>
+                <ButtonGroup>
+                  <IconButton
+                    onClick={() => setConcordanceWord(word.word.hanzi)}
+                    size="small"
+                  >
+                    <MenuBook color="action"></MenuBook>
+                  </IconButton>
+                  <DefaultAudio
+                    size="small"
+                    identifier={word.word.hanzi}
+                    type="word"
+                  />
+                  <IconButton
+                    onClick={() => markForgot(word, mode, true)}
+                    size="small"
+                  >
+                    <Close
+                      style={{
+                        color: forgot(mode, word)
+                          ? theme.palette.error.main
+                          : theme.palette.action.active,
+                      }}
+                    />
+                  </IconButton>
+                  <IconButton
+                    // disabled={!forgot(mode, word)}
+                    onClick={() => markForgot(word, mode, false)}
+                    size="small"
+                  >
+                    <Done
+                      style={{
+                        color: forgot(mode, word)
+                          ? theme.palette.action.active
+                          : theme.palette.success.main,
+                      }}
+                    />
+                  </IconButton>
+                </ButtonGroup>
+              </DefinitionCardHeaderFlexBox>
               <DefinitionCardContent>
                 {word.word.ccceDefinitions.map((def, i) => {
                   return (

@@ -6,7 +6,7 @@ import { useState } from 'react';
 const AutoPlayAudio: React.FC<{
   identifier: string;
   type: 'word' | 'document';
-}> = ({ identifier, type }) => {
+}> = ({ identifier, type, ...other }) => {
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -22,6 +22,7 @@ const AutoPlayAudio: React.FC<{
 
   return (
     <IconButton
+      {...other}
       onClick={() => {
         if (audio) {
           audio.play();

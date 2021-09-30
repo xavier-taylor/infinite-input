@@ -85,8 +85,21 @@ export const DefinitionCard = styled(Card)(({ theme }) => ({
   height: '100%',
 }));
 
+/* TODO make cardheaders (both types) fixed (ie doesnt move when scrolling thru card contents - might be as simple as setting overflow behaviour on card contents...) */
 export const DefinitionCardHeader = styled(CardHeader)(({ theme }) => ({
   whiteSpace: 'nowrap',
+  padding: theme.spacing(1),
+  paddingBottom: '0px',
+  [`.${cardHeaderClasses.action}`]: {
+    padding: theme.spacing(0.5),
+  },
+}));
+
+// Inspired by the DefinitionCardHeader, but outgrew the CardHeader constraints
+export const DefinitionCardHeaderFlexBox = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'flex-end', // sx={{ marginRight: 'auto' }} on first item to make it stick to the left lol
+  flexWrap: 'wrap',
   padding: theme.spacing(1),
   paddingBottom: '0px',
   [`.${cardHeaderClasses.action}`]: {
