@@ -165,6 +165,9 @@ const NewWords: React.FC<Props> = ({ wordHanzi, next }) => {
   else if (error) return <div>{JSON.stringify(error)}</div>;
   else if (!data) return <div>no data?</div>;
   const mode = data.studentWord.learning as NonLearnedStates; // we don't return learned states
+  // TODO rethink all these 'gridContains - they dont really need to be
+  // direction column... the rows can just be width 12 lol - this pattern is just a
+  // leftover from when I didnt know mui
   return (
     <GridContainer
       container

@@ -5,12 +5,17 @@ import {
   styled,
   cardHeaderClasses,
   CardContent,
+  Box,
 } from '@mui/material';
 
 // TODO improve this, get rid of reliance on hardcode 64px (which is height of appbar ONLY IN SOME SITUATIONS)
 // the minus should instead come from theme.mixins.toolbar/ from the height of the appbar
 //position: 'relative', NOTE there might be a way to do this using position rather than the hacky height thing above...
 export const GridContainer = styled(Grid)({
+  height: 'calc(100% - 64px)',
+});
+
+export const PageBox = styled(Box)({
   height: 'calc(100% - 64px)',
 });
 

@@ -30,6 +30,7 @@ import { NewWordsContainer } from './NewWords/NewWordsContainer';
 import { DateTime } from 'luxon';
 import { RecordVoiceOver } from '@mui/icons-material';
 import Home from './Home';
+import Browse from './Browse/Browse';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -164,7 +165,7 @@ Warning: Cannot update a component (`StudyContainer`) while rendering a differen
               <div>listen orphan words</div>
             </Route>
             <Route path="/browse">
-              <div>browse and control words (ie whether locked )</div>
+              <Browse />
             </Route>
             <Route path="/settings/appearance">
               <div>Appearance settings</div>

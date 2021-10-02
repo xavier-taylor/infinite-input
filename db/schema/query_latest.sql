@@ -1,6 +1,7 @@
 SET search_path TO mandarin;
 
 
+
 with candidates as ( 
 SELECT 
 	chinese,id, english, n_non_punct 
@@ -40,11 +41,6 @@ due as (SELECT word_hanzi FROM student_word_read WHERE student_id = 1 AND due <=
 -- exists a word that is due today
 select 
 	id, chinese, english, count(distinct(sentence_word.word_hanzi)), array_agg(distinct(sentence_word.word_hanzi)) as due, 
-	-- I think there is whitespace, a newline i think, at the end. data problem TODO tidy. so have to do this regexp replace
-	
-	-- actually cancel that. the problem (lol) is that length is of course returning the number of characters in the string, not the number of words lol.
-	-- so fraction due is hopelessly wrong. need a better query! (one that has a count of how many words are in the sentence!!!)
-	-- the column n_non_punct can be 0 so need to handle that
 	(case when n_non_punct =0 then 0 else 
 	cast(count(distinct(sentence_word.word_hanzi)) as float)/cast(n_non_punct as float) 
 	end) as fraction_due,
@@ -68,8 +64,5 @@ order by
 -- took 6.5-7 secs after btree index creation
 -- with hash index also seemed to take 6.5 seconds
 
---
+-- query currently takes 8 seconds
 
-
--- TODO - try version of query that is just a join that starts from
--- ie from student_word_read join sentence word join document (something like that)

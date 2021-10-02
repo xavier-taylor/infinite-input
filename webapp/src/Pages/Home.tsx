@@ -1,7 +1,8 @@
 import { useQuery } from '@apollo/client';
-import { Card, CardActions, CardContent } from '@mui/material';
+import { Card, CardActions, CardContent, Grid } from '@mui/material';
 import { DateTime } from 'luxon';
 import { DueWordsDocument, KnownWordsDocument } from '../schema/generated';
+import { GridContainer } from '../Components/Layout/Common';
 
 // TODO visualize this data somehow
 const Home: React.FC<{}> = () => {
@@ -16,20 +17,17 @@ const Home: React.FC<{}> = () => {
       fetchPolicy: 'network-only',
     }
   );
+
+  if (loading) return <div></div>;
+  if (error) return <div></div>;
+  if (!data) return <div></div>;
+
   return (
-    <Card>
-      <CardContent>
-        <div>
-          <span>known</span>
-          <span>{data?.knownWords.join(',')}</span>
-        </div>
-        <div>
-          <span>due</span>
-          <span>{dataDue?.todaysDueWords.join(',')}</span>
-        </div>
-      </CardContent>
-      <CardActions>some actions</CardActions>
-    </Card>
+    <GridContainer>
+      <Grid item>
+        <div lang="zh"></div>
+      </Grid>
+    </GridContainer>
   );
 };
 
@@ -62,7 +60,7 @@ export default Home;
                 https://www.cssscript.com/animated-sphere-tag-cloud/ - this is what I really want
                 
                  -------------------------------------
-                 |  wordcloud here    | onclick get
+                 |  words here    | onclick get
                  |                    |  definition
                  |                    | etc here
                  |                    |
@@ -73,4 +71,15 @@ export default Home;
                  actually dont show 'count due' or 'cound known' as numbers
                  it is confusing vs the number of documents due.
                  Just have button
-                 */
+
+
+                 The wordclouds dont work for known words - far too many. 
+                 Frankly not useful anyway, even if 'cute'.
+                 also hard to do responsively. Think of something else.
+
+                 simplest possible is a big blog of text (maybe vertically),
+                 with each word a different colour.
+
+                //  Can I make the words big enough to fill the space (but not infintiately small)
+
+                    */
