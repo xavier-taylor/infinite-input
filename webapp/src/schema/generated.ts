@@ -13,6 +13,12 @@ export type Scalars = {
   Float: number;
 };
 
+export type BrowseStudentWord = {
+  __typename?: 'BrowseStudentWord';
+  studentWord?: Maybe<StudentWord>;
+  studentWordState: StudentWordState;
+};
+
 export type CcceDefinition = {
   __typename?: 'CCCEDefinition';
   id: Scalars['String'];
@@ -56,8 +62,14 @@ export enum LearningState {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  toggleStudentWordLock?: Maybe<ToggleStudentWordLockResponse>;
   newWordStudy: NewWordStudyResponse;
   documentStudy: DocumentStudyResponse;
+};
+
+
+export type MutationToggleStudentWordLockArgs = {
+  hanzi: Scalars['String'];
 };
 
 
@@ -100,6 +112,7 @@ export type NewWordsResponse = {
 
 export type Query = {
   __typename?: 'Query';
+  browseWord: BrowseStudentWord;
   concordanceDocs: Array<Document>;
   dailyNewWordsGoal: Scalars['Int'];
   document: Document;
@@ -111,6 +124,11 @@ export type Query = {
   studentWord: StudentWord;
   todaysDueWords: Array<Scalars['String']>;
   words: Array<Word>;
+};
+
+
+export type QueryBrowseWordArgs = {
+  word: Scalars['String'];
 };
 
 
@@ -196,6 +214,12 @@ export type StudentWord = {
   due?: Maybe<Scalars['String']>;
 };
 
+export enum StudentWordState {
+  AlreadyExists = 'already_exists',
+  DoesntExistYet = 'doesnt_exist_yet',
+  NoSuchWord = 'no_such_word'
+}
+
 export type StudyState = {
   __typename?: 'StudyState';
   hanzi: Scalars['String'];
@@ -214,6 +238,12 @@ export enum StudyType {
   Read = 'READ',
   Listen = 'LISTEN'
 }
+
+export type ToggleStudentWordLockResponse = MutationResponse & {
+  __typename?: 'ToggleStudentWordLockResponse';
+  success: Scalars['Boolean'];
+  studentWord: StudentWord;
+};
 
 export type Word = {
   __typename?: 'Word';
@@ -309,6 +339,19 @@ export type StudentWordForLearningFragment = (
   ) }
 );
 
+export type StudentWordForBrowsingFragment = (
+  { __typename?: 'StudentWord' }
+  & Pick<StudentWord, 'hanzi' | 'learning' | 'due' | 'position' | 'locked'>
+  & { word: (
+    { __typename?: 'Word' }
+    & Pick<Word, 'hanzi'>
+    & { ccceDefinitions: Array<(
+      { __typename?: 'CCCEDefinition' }
+      & Pick<CcceDefinition, 'id' | 'simplified' | 'traditional' | 'pinyin' | 'definitions'>
+    )> }
+  ) }
+);
+
 export type EntireDocumentFragment = (
   { __typename?: 'Document' }
   & Pick<Document, 'id' | 'english' | 'chinese'>
@@ -364,6 +407,23 @@ export type NewWordStudyMutation = (
       & StudentWordForLearningFragment
     ) }
   ) }
+);
+
+export type ToggleSwLockMutationVariables = Exact<{
+  hanzi: Scalars['String'];
+}>;
+
+
+export type ToggleSwLockMutation = (
+  { __typename?: 'Mutation' }
+  & { toggleStudentWordLock?: Maybe<(
+    { __typename?: 'ToggleStudentWordLockResponse' }
+    & Pick<ToggleStudentWordLockResponse, 'success'>
+    & { studentWord: (
+      { __typename?: 'StudentWord' }
+      & StudentWordForBrowsingFragment
+    ) }
+  )> }
 );
 
 export type NewWordsQueryVariables = Exact<{
@@ -479,7 +539,25 @@ export type KnownWordsQuery = (
   & Pick<Query, 'knownWords'>
 );
 
+export type BrowseWordQueryVariables = Exact<{
+  word: Scalars['String'];
+}>;
+
+
+export type BrowseWordQuery = (
+  { __typename?: 'Query' }
+  & { browseWord: (
+    { __typename?: 'BrowseStudentWord' }
+    & Pick<BrowseStudentWord, 'studentWordState'>
+    & { studentWord?: Maybe<(
+      { __typename?: 'StudentWord' }
+      & StudentWordForBrowsingFragment
+    )> }
+  ) }
+);
+
 export const StudentWordForLearningFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"StudentWordForLearning"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"StudentWord"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hanzi"}},{"kind":"Field","name":{"kind":"Name","value":"learning"}},{"kind":"Field","name":{"kind":"Name","value":"due"}},{"kind":"Field","name":{"kind":"Name","value":"word"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hanzi"}},{"kind":"Field","name":{"kind":"Name","value":"ccceDefinitions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"simplified"}},{"kind":"Field","name":{"kind":"Name","value":"traditional"}},{"kind":"Field","name":{"kind":"Name","value":"pinyin"}},{"kind":"Field","name":{"kind":"Name","value":"definitions"}}]}}]}}]}}]} as unknown as DocumentNode<StudentWordForLearningFragment, unknown>;
+export const StudentWordForBrowsingFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"StudentWordForBrowsing"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"StudentWord"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hanzi"}},{"kind":"Field","name":{"kind":"Name","value":"learning"}},{"kind":"Field","name":{"kind":"Name","value":"due"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"locked"}},{"kind":"Field","name":{"kind":"Name","value":"word"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hanzi"}},{"kind":"Field","name":{"kind":"Name","value":"ccceDefinitions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"simplified"}},{"kind":"Field","name":{"kind":"Name","value":"traditional"}},{"kind":"Field","name":{"kind":"Name","value":"pinyin"}},{"kind":"Field","name":{"kind":"Name","value":"definitions"}}]}}]}}]}}]} as unknown as DocumentNode<StudentWordForBrowsingFragment, unknown>;
 export const EntireDocumentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"EntireDocument"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Document"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"english"}},{"kind":"Field","name":{"kind":"Name","value":"chinese"}},{"kind":"Field","name":{"kind":"Name","value":"sentences"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"chinese"}},{"kind":"Field","name":{"kind":"Name","value":"words"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sentenceId"}},{"kind":"Field","name":{"kind":"Name","value":"stanzaId"}},{"kind":"Field","name":{"kind":"Name","value":"lastClicked"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"client"}}]},{"kind":"Field","name":{"kind":"Name","value":"forgotLISTEN"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"client"}}]},{"kind":"Field","name":{"kind":"Name","value":"forgotREAD"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"client"}}]},{"kind":"Field","name":{"kind":"Name","value":"wordHanzi"}},{"kind":"Field","name":{"kind":"Name","value":"lemma"}},{"kind":"Field","name":{"kind":"Name","value":"partOfSpeech"}},{"kind":"Field","name":{"kind":"Name","value":"universalPartOfSpeech"}},{"kind":"Field","name":{"kind":"Name","value":"due"}},{"kind":"Field","name":{"kind":"Name","value":"namedEntity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"chinese"}},{"kind":"Field","name":{"kind":"Name","value":"entityType"}},{"kind":"Field","name":{"kind":"Name","value":"start"}},{"kind":"Field","name":{"kind":"Name","value":"end"}}]}},{"kind":"Field","name":{"kind":"Name","value":"word"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hanzi"}},{"kind":"Field","name":{"kind":"Name","value":"hskWord2010"}},{"kind":"Field","name":{"kind":"Name","value":"hskChar2010"}},{"kind":"Field","name":{"kind":"Name","value":"ccceDefinitions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"simplified"}},{"kind":"Field","name":{"kind":"Name","value":"traditional"}},{"kind":"Field","name":{"kind":"Name","value":"pinyin"}},{"kind":"Field","name":{"kind":"Name","value":"definitions"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<EntireDocumentFragment, unknown>;
 export const ForgottenWordsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ForgottenWords"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"documentId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"includeListen"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}},"defaultValue":{"kind":"BooleanValue","value":false}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"includeRead"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}},"defaultValue":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"document"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"documentId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sentences"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"words"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"forgotLISTEN"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"include"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"if"},"value":{"kind":"Variable","name":{"kind":"Name","value":"includeListen"}}}]}]},{"kind":"Field","name":{"kind":"Name","value":"forgotREAD"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"include"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"if"},"value":{"kind":"Variable","name":{"kind":"Name","value":"includeRead"}}}]}]},{"kind":"Field","name":{"kind":"Name","value":"wordHanzi"}}]}}]}}]}}]}}]} as unknown as DocumentNode<ForgottenWordsQuery, ForgottenWordsQueryVariables>;
 export const ForgotSentenceWordDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ForgotSentenceWord"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sentenceId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"stanzaId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"includeRead"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}},"defaultValue":{"kind":"BooleanValue","value":false}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"includeListen"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}},"defaultValue":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sentenceWord"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sentenceId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sentenceId"}}},{"kind":"Argument","name":{"kind":"Name","value":"stanzaId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"stanzaId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stanzaId"}},{"kind":"Field","name":{"kind":"Name","value":"sentenceId"}},{"kind":"Field","name":{"kind":"Name","value":"forgotLISTEN"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"include"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"if"},"value":{"kind":"Variable","name":{"kind":"Name","value":"includeListen"}}}]}]},{"kind":"Field","name":{"kind":"Name","value":"forgotREAD"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"include"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"if"},"value":{"kind":"Variable","name":{"kind":"Name","value":"includeRead"}}}]}]}]}}]}}]} as unknown as DocumentNode<ForgotSentenceWordQuery, ForgotSentenceWordQueryVariables>;
@@ -487,6 +565,7 @@ export const StudentWordDocument = {"kind":"Document","definitions":[{"kind":"Op
 export const StudentWordForLearningDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"StudentWordForLearning"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"hanzi"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"studentWord"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"hanzi"},"value":{"kind":"Variable","name":{"kind":"Name","value":"hanzi"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hanzi"}},{"kind":"Field","name":{"kind":"Name","value":"learning"}},{"kind":"Field","name":{"kind":"Name","value":"due"}},{"kind":"Field","name":{"kind":"Name","value":"word"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hanzi"}},{"kind":"Field","name":{"kind":"Name","value":"ccceDefinitions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"simplified"}},{"kind":"Field","name":{"kind":"Name","value":"traditional"}},{"kind":"Field","name":{"kind":"Name","value":"pinyin"}},{"kind":"Field","name":{"kind":"Name","value":"definitions"}}]}}]}}]}}]}}]} as unknown as DocumentNode<StudentWordForLearningQuery, StudentWordForLearningQueryVariables>;
 export const DocumentStudyDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DocumentStudy"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"studyType"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"StudyType"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"payload"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"DocumentStudyPayload"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"documentStudy"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"studyType"},"value":{"kind":"Variable","name":{"kind":"Name","value":"studyType"}}},{"kind":"Argument","name":{"kind":"Name","value":"payload"},"value":{"kind":"Variable","name":{"kind":"Name","value":"payload"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}}]}}]}}]} as unknown as DocumentNode<DocumentStudyMutation, DocumentStudyMutationVariables>;
 export const NewWordStudyDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"NewWordStudy"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"hanzi"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"newDue"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"newLearning"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"LearningState"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"newWordStudy"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"hanzi"},"value":{"kind":"Variable","name":{"kind":"Name","value":"hanzi"}}},{"kind":"Argument","name":{"kind":"Name","value":"newDue"},"value":{"kind":"Variable","name":{"kind":"Name","value":"newDue"}}},{"kind":"Argument","name":{"kind":"Name","value":"newLearning"},"value":{"kind":"Variable","name":{"kind":"Name","value":"newLearning"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"studentWord"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"StudentWordForLearning"}}]}}]}}]}},...StudentWordForLearningFragmentDoc.definitions]} as unknown as DocumentNode<NewWordStudyMutation, NewWordStudyMutationVariables>;
+export const ToggleSwLockDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ToggleSWLock"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"hanzi"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"toggleStudentWordLock"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"hanzi"},"value":{"kind":"Variable","name":{"kind":"Name","value":"hanzi"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"studentWord"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"StudentWordForBrowsing"}}]}}]}}]}},...StudentWordForBrowsingFragmentDoc.definitions]} as unknown as DocumentNode<ToggleSwLockMutation, ToggleSwLockMutationVariables>;
 export const NewWordsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"NewWords"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"dayStartUTC"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"newWords"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"dayStartUTC"},"value":{"kind":"Variable","name":{"kind":"Name","value":"dayStartUTC"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"wordsLearnedToday"}},{"kind":"Field","name":{"kind":"Name","value":"haveEnoughUnlockedWords"}},{"kind":"Field","name":{"kind":"Name","value":"words"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"StudentWordForLearning"}}]}}]}}]}},...StudentWordForLearningFragmentDoc.definitions]} as unknown as DocumentNode<NewWordsQuery, NewWordsQueryVariables>;
 export const MoreNewWordsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"MoreNewWords"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"dayStartUTC"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"count"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"moreNewWords"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"dayStartUTC"},"value":{"kind":"Variable","name":{"kind":"Name","value":"dayStartUTC"}}},{"kind":"Argument","name":{"kind":"Name","value":"count"},"value":{"kind":"Variable","name":{"kind":"Name","value":"count"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"wordsLearnedToday"}},{"kind":"Field","name":{"kind":"Name","value":"haveEnoughUnlockedWords"}},{"kind":"Field","name":{"kind":"Name","value":"words"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hanzi"}},{"kind":"Field","name":{"kind":"Name","value":"learning"}},{"kind":"Field","name":{"kind":"Name","value":"due"}},{"kind":"Field","name":{"kind":"Name","value":"word"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hanzi"}},{"kind":"Field","name":{"kind":"Name","value":"ccceDefinitions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"simplified"}},{"kind":"Field","name":{"kind":"Name","value":"traditional"}},{"kind":"Field","name":{"kind":"Name","value":"pinyin"}},{"kind":"Field","name":{"kind":"Name","value":"definitions"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<MoreNewWordsQuery, MoreNewWordsQueryVariables>;
 export const ConcordanceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Concordance"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"word"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"concordanceDocs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"word"},"value":{"kind":"Variable","name":{"kind":"Name","value":"word"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"english"}},{"kind":"Field","name":{"kind":"Name","value":"sentences"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"words"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"lastClicked"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"client"}}]},{"kind":"Field","name":{"kind":"Name","value":"sentenceId"}},{"kind":"Field","name":{"kind":"Name","value":"stanzaId"}},{"kind":"Field","name":{"kind":"Name","value":"wordHanzi"}},{"kind":"Field","name":{"kind":"Name","value":"partOfSpeech"}},{"kind":"Field","name":{"kind":"Name","value":"universalPartOfSpeech"}}]}}]}}]}}]}}]} as unknown as DocumentNode<ConcordanceQuery, ConcordanceQueryVariables>;
@@ -494,6 +573,12 @@ export const DueDocument = {"kind":"Document","definitions":[{"kind":"OperationD
 export const DocumentByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DocumentById"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"document"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"EntireDocument"}}]}}]}},...EntireDocumentFragmentDoc.definitions]} as unknown as DocumentNode<DocumentByIdQuery, DocumentByIdQueryVariables>;
 export const DueWordsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DueWords"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"dayStartUTC"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"todaysDueWords"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"dayStartUTC"},"value":{"kind":"Variable","name":{"kind":"Name","value":"dayStartUTC"}}}]}]}}]} as unknown as DocumentNode<DueWordsQuery, DueWordsQueryVariables>;
 export const KnownWordsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"KnownWords"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"knownWords"}}]}}]} as unknown as DocumentNode<KnownWordsQuery, KnownWordsQueryVariables>;
+export const BrowseWordDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"BrowseWord"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"word"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"browseWord"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"word"},"value":{"kind":"Variable","name":{"kind":"Name","value":"word"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"studentWordState"}},{"kind":"Field","name":{"kind":"Name","value":"studentWord"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"StudentWordForBrowsing"}}]}}]}}]}},...StudentWordForBrowsingFragmentDoc.definitions]} as unknown as DocumentNode<BrowseWordQuery, BrowseWordQueryVariables>;
+export type BrowseStudentWordKeySpecifier = ('studentWord' | 'studentWordState' | BrowseStudentWordKeySpecifier)[];
+export type BrowseStudentWordFieldPolicy = {
+	studentWord?: FieldPolicy<any> | FieldReadFunction<any>,
+	studentWordState?: FieldPolicy<any> | FieldReadFunction<any>
+};
 export type CCCEDefinitionKeySpecifier = ('id' | 'simplified' | 'traditional' | 'pinyin' | 'definitions' | CCCEDefinitionKeySpecifier)[];
 export type CCCEDefinitionFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -518,8 +603,9 @@ export type DueFieldPolicy = {
 	documents?: FieldPolicy<any> | FieldReadFunction<any>,
 	orphans?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('newWordStudy' | 'documentStudy' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('toggleStudentWordLock' | 'newWordStudy' | 'documentStudy' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
+	toggleStudentWordLock?: FieldPolicy<any> | FieldReadFunction<any>,
 	newWordStudy?: FieldPolicy<any> | FieldReadFunction<any>,
 	documentStudy?: FieldPolicy<any> | FieldReadFunction<any>
 };
@@ -545,8 +631,9 @@ export type NewWordsResponseFieldPolicy = {
 	wordsLearnedToday?: FieldPolicy<any> | FieldReadFunction<any>,
 	haveEnoughUnlockedWords?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('concordanceDocs' | 'dailyNewWordsGoal' | 'document' | 'due' | 'knownWords' | 'moreNewWords' | 'newWords' | 'sentenceWord' | 'studentWord' | 'todaysDueWords' | 'words' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('browseWord' | 'concordanceDocs' | 'dailyNewWordsGoal' | 'document' | 'due' | 'knownWords' | 'moreNewWords' | 'newWords' | 'sentenceWord' | 'studentWord' | 'todaysDueWords' | 'words' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
+	browseWord?: FieldPolicy<any> | FieldReadFunction<any>,
 	concordanceDocs?: FieldPolicy<any> | FieldReadFunction<any>,
 	dailyNewWordsGoal?: FieldPolicy<any> | FieldReadFunction<any>,
 	document?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -605,6 +692,11 @@ export type StudyStateFieldPolicy = {
 	word?: FieldPolicy<any> | FieldReadFunction<any>,
 	studyType?: FieldPolicy<any> | FieldReadFunction<any>
 };
+export type ToggleStudentWordLockResponseKeySpecifier = ('success' | 'studentWord' | ToggleStudentWordLockResponseKeySpecifier)[];
+export type ToggleStudentWordLockResponseFieldPolicy = {
+	success?: FieldPolicy<any> | FieldReadFunction<any>,
+	studentWord?: FieldPolicy<any> | FieldReadFunction<any>
+};
 export type WordKeySpecifier = ('ccceDefinitions' | 'forgotLISTEN' | 'forgotREAD' | 'hanzi' | 'hskChar2010' | 'hskWord2010' | WordKeySpecifier)[];
 export type WordFieldPolicy = {
 	ccceDefinitions?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -615,6 +707,10 @@ export type WordFieldPolicy = {
 	hskWord2010?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type TypedTypePolicies = TypePolicies & {
+	BrowseStudentWord?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | BrowseStudentWordKeySpecifier | (() => undefined | BrowseStudentWordKeySpecifier),
+		fields?: BrowseStudentWordFieldPolicy,
+	},
 	CCCEDefinition?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | CCCEDefinitionKeySpecifier | (() => undefined | CCCEDefinitionKeySpecifier),
 		fields?: CCCEDefinitionFieldPolicy,
@@ -670,6 +766,10 @@ export type TypedTypePolicies = TypePolicies & {
 	StudyState?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | StudyStateKeySpecifier | (() => undefined | StudyStateKeySpecifier),
 		fields?: StudyStateFieldPolicy,
+	},
+	ToggleStudentWordLockResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | ToggleStudentWordLockResponseKeySpecifier | (() => undefined | ToggleStudentWordLockResponseKeySpecifier),
+		fields?: ToggleStudentWordLockResponseFieldPolicy,
 	},
 	Word?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | WordKeySpecifier | (() => undefined | WordKeySpecifier),

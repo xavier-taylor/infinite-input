@@ -26,16 +26,7 @@ declare module '@mui/styles/defaultTheme' {
 const theme = createTheme({
   components: {
     MuiCssBaseline: {
-      // TODO swap approach - this results in a laggy UI
-      // instead just have a ChineseText styled component version of Typography or something like that
-      styleOverrides: `
-      .MuiTypography-root:lang(zh) {
-         font-family: 'Noto Serif SC', serif;
-      }
-       :lang(zh) {
-         font-family: 'Noto Serif SC', serif;
-       }
-     `,
+      styleOverrides: ``,
     },
   },
 });

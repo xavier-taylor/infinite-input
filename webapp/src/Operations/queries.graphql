@@ -70,6 +70,15 @@ query KnownWords {
   knownWords
 }
 
+query BrowseWord($word: String!) {
+  browseWord(word: $word) {
+    studentWordState
+    studentWord {
+      ...StudentWordForBrowsing
+    }
+  }
+}
+
 # TODO! make 'so and so read this document' or 'so and so read this word' idempotent operations, so that if the user undos in the front end,
 # we aren't reacording a bunch of spurious study/read/listen events at the backend.
 # Think tho - do we need to do this? it adds complexity

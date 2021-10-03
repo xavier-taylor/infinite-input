@@ -4,6 +4,7 @@ import {
   LearningState,
   NewWordStudyResponse,
   Resolvers,
+  StudentWordState,
   StudyType,
 } from '../schema/gql-model';
 import { learning_state, student_word } from '../repository/sql-model';
@@ -11,6 +12,7 @@ import { toGQLLearningStateEnum } from '../utils/typeConversions';
 import axios from 'axios';
 import { ForvoApiResponse } from '../utils/forvo';
 import { PostgresqlRepo } from '../repository/repo';
+import { MAX_GRAPHQL_INT } from '../utils/number';
 
 const USER_ID = `1`; // TODO get this from ctx or whatever
 
@@ -81,6 +83,10 @@ export const resolvers: Resolvers<IContextType> = {
       repo.getSentences(id as string),
   },
   Mutation: {
+    toggleStudentWordLock: (_, { hanzi }, { repo }) => {
+      const sw = repo.toggleStudentWordLock(USER_ID, hanzi);
+      return { studentWord: sw, success: true };
+    },
     documentStudy: (_, { payload, studyType }) => {
       console.log('in the mutation resolver for documentStudy');
       console.log(payload);
@@ -169,6 +175,32 @@ export const resolvers: Resolvers<IContextType> = {
     },
     knownWords: (_, __, { repo }) => {
       return repo.getLearnedWords(USER_ID);
+    },
+    // NOTE THIS CURRENTLY ONLY WORKS FOR SIMPLIFIED!!! TODO make it work for trad too
+    browseWord: async (_, { word }, { repo }) => {
+      const studentWord = await repo.getStudentWordIfExists(USER_ID, word);
+      if (studentWord) {
+        return {
+          studentWord,
+          studentWordState: StudentWordState.AlreadyExists,
+        };
+      } else {
+        const dictDefinitions = await repo.getCCCE(word);
+        if (dictDefinitions.length > 0) {
+          return {
+            studentWordState: StudentWordState.DoesntExistYet,
+            studentWord: {
+              word_hanzi: word,
+              student_id: USER_ID,
+              locked: true,
+              learning: learning_state.not_yet_learned,
+              position: MAX_GRAPHQL_INT,
+            },
+          };
+        } else {
+          return { studentWordState: StudentWordState.NoSuchWord };
+        }
+      }
     },
   },
 };

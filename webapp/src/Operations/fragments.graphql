@@ -14,6 +14,24 @@ fragment StudentWordForLearning on StudentWord {
   }
 }
 
+fragment StudentWordForBrowsing on StudentWord {
+  hanzi
+  learning
+  due
+  position
+  locked
+  word {
+    hanzi
+    ccceDefinitions {
+      id
+      simplified
+      traditional
+      pinyin
+      definitions
+    }
+  }
+}
+
 fragment EntireDocument on Document {
   id
   english

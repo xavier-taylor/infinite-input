@@ -66,7 +66,7 @@ CREATE TABLE mandarin.student_word
 (
     student_id bigint REFERENCES mandarin.student (id),
     word_hanzi text REFERENCES mandarin.word (hanzi),
-    locked boolean not null,
+    locked boolean not null, -- we could control sw_listen and sw_read with this locked, just need to add a join.
     date_last_unlocked timestamp with time zone, -- not used for now, could be useful to sort by these in browser
     date_learned timestamp with time zone, -- the time learning was set to learned, in UTC absolute time
     learning mandarin.learning_state not null,
@@ -87,10 +87,6 @@ CREATE TABLE mandarin.student_word
         CHECK ((date_learned is not null)OR (learning != 'learned'::mandarin.learning_state)),
     CONSTRAINT if_unlocked_then_date_last_unlocked_is_not_null 
         CHECK ( ( locked) OR (date_last_unlocked IS NOT NULL) ) ,
-   -- This last constraint just formalizes my decision to make it so that you cant lock a word once it moves into the learned
-   -- state. The only reason for this is I CBF supporting that yet.
-    CONSTRAINT if_learned_then_not_locked 
-        CHECK (NOT (( locked) AND (learning ='learned'::mandarin.learning_state)) ) ;
     PRIMARY KEY (student_id, word_hanzi)
 );
 

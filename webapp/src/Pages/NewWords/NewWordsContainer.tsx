@@ -9,6 +9,9 @@ interface Props {}
 export const NewWordsContainer: React.FC<Props> = () => {
   const { nextNewWord, isLast, current, loading, finished } = useNewWords();
 
+  // Fetching *more new words if your daily words are done
+  //
+
   return loading ? (
     <LinearProgress></LinearProgress>
   ) : finished ? (

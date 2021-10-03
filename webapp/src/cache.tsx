@@ -45,25 +45,6 @@ export const learnedNewWordsVar = makeVar<WordHanziList>([]);
 // It doesnt( yet?) represent subsequent above and beyond new words.
 export const haveFetchedNewWordsToLearnVar = makeVar<boolean>(false);
 
-/**
- *
- * once finished the basic new word flow
- *
- * NEXT UP
- * build basic browse UI that does this
- * 1. you can search for a word
- * 2. returns that word and any subwords and characters in a sort of table like ui with checkboxes (TODO, design this on paper first)
- * 3. Initially, you can just a) unlock or lock the word (with position being automatically set - custom setting of position is a future TODO)
- *
- * NEXT UP
- * 1. set up the SRS stuff for student_word_read/listen (for both when studying documents and studying orphan/lapsed words)
- *
- * ??? whats next?
- *
- *
- *
- */
-
 const typePolicies: TypedTypePolicies = {
   Query: {
     fields: {

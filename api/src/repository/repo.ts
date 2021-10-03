@@ -9,6 +9,7 @@ import {
 import {
   cc_cedict,
   document,
+  learning_state,
   sentence,
   sentence_word,
   student_word,
@@ -44,7 +45,8 @@ import { toSQLLearningStateEnum } from '../utils/typeConversions';
 
 // TODO explore more TS support
 export class PostgresqlRepo {
-  private ccceLoader: DataLoader<unknown, any, unknown>;
+  // just having a go with this types, not sure if correct
+  private ccceLoader: DataLoader<string, cc_cedict[], unknown>;
   private wordLoader: DataLoader<unknown, any, unknown>;
   private sentenceWordLoader: DataLoader<unknown, any, unknown>;
   private sentenceLoader: DataLoader<unknown, any, unknown>;
@@ -96,7 +98,7 @@ export class PostgresqlRepo {
     hanzis: Readonly<string[]>
   ): Promise<Array<cc_cedict[]>> {
     // because each chineseword can have multiple cc_cedict entrys, the return value is an array of arrays
-    // can either have the sequel query return a flat list of cc_cedict boiz, and map them myself?
+    // can either have the SQL query return a flat list of cc_cedict boiz, and map them myself?
     // or could have the sql query return it in [[cc_cedict]]. even better if it could return
     // a map?
 
@@ -191,6 +193,7 @@ export class PostgresqlRepo {
   // TODO in future - do a big beautiful join myself, or use a lib like monster join
   // see if that is 'faster' than using resolvers at each level as I have here
   // NOTE - that is an optimization. don't do until mvp is usable!
+  // TODO - this query must join with sentence_word to check if words are locked
   async getDueDocuments(
     type: StudyType,
     studentId: string = '1'
@@ -405,6 +408,61 @@ WHERE NOT EXISTS (
         .where({ learning: 'learned' })
         .where({ student_id: userId })
     ).map((w) => w.word_hanzi);
+  }
+
+  async getStudentWordIfExists(
+    userId: string,
+    word: string
+  ): Promise<student_word | undefined> {
+    return this.knex<student_word>('student_word')
+      .select('*')
+      .where('student_id', '=', userId)
+      .where('word_hanzi', '=', word)
+      .first();
+  }
+  // TODO change inconsistnent use of word and hanzi throughout app
+  async toggleStudentWordLock(
+    userId: string,
+    hanzi: string
+  ): Promise<student_word> {
+    // TODO 1) is there a sql injection risk 2) an I make this neater
+    const raw = `   
+      ( student_id, 
+        word_hanzi, 
+        locked, 
+        date_last_unlocked,
+        learning, 
+        position,
+        tags
+        )
+VALUES 
+      ( ?,
+        ?,
+        false, 
+        ?, 
+        'not_yet_learned'::learning_state, 
+        0,
+        '{}'::text[]
+       )
+ON CONFLICT (student_id, word_hanzi) DO UPDATE
+SET locked = not student_word.locked
+RETURNING 
+        student_id,
+        word_hanzi,
+        locked,
+        date_last_unlocked,
+        date_learned,
+        learning,
+        due,
+        position,
+        tags;
+`;
+
+    const now = DateTime.now();
+    const student_word = (await this.knex('student_word').insert(
+      this.knex.raw(raw, [userId, hanzi, now.toUTC().toJSDate()])
+    )) as any;
+    return student_word.rows[0] as any; // forgive me christ jesus
   }
 }
 

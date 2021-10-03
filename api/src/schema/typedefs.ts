@@ -33,6 +33,17 @@ export const typeDefs = gql`
     studyType: StudyType!
   }
 
+  enum StudentWordState {
+    already_exists
+    doesnt_exist_yet
+    no_such_word
+  }
+
+  type BrowseStudentWord {
+    studentWord: StudentWord
+    studentWordState: StudentWordState!
+  }
+
   enum LearningState {
     not_yet_learned
     meaning
@@ -42,6 +53,7 @@ export const typeDefs = gql`
   }
 
   # this type represents student_word
+  # we can sometimes return a 'fake' one of these that doesnt represent in the db yet, but will *if* the student writes it
   type StudentWord {
     hanzi: String!
     locked: Boolean!
@@ -58,7 +70,10 @@ export const typeDefs = gql`
     hanzi: String!
     hskWord2010: Int!
     hskChar2010: Int!
-    ccceDefinitions: [CCCEDefinition!]! # possible that some words lack definition - in that case, we just get an empty array here.
+    ccceDefinitions: [CCCEDefinition!]!
+    # possible that some words lack definition - in that case, we just get an empty array here.
+    # actually, for now, if a word lacks a ccceDefinition, we will not allow the student to study it.
+    # hence, we will only ever have 'Words' floating around that have non empty cceDefinitions arrays
   }
 
   type SentenceWord {
@@ -137,6 +152,8 @@ export const typeDefs = gql`
     studentWord(hanzi: String!): StudentWord!
     knownWords: [String!]!
     todaysDueWords(dayStartUTC: String!): [String!]!
+
+    browseWord(word: String!): BrowseStudentWord!
   }
 
   interface MutationResponse {
@@ -155,12 +172,20 @@ export const typeDefs = gql`
     studentWord: StudentWord!
   }
 
+  type ToggleStudentWordLockResponse implements MutationResponse {
+    success: Boolean!
+    studentWord: StudentWord!
+  }
+
   input DocumentStudyPayload {
     documentId: String!
     forgottenWordsHanzi: [String!]! # TODO add remembered words hanzi
   }
 
   type Mutation {
+    # For now, we will automatically put newly unlocked words at position 0.
+    # more advanced positioning control and logic is a post mvp todo
+    toggleStudentWordLock(hanzi: String!): ToggleStudentWordLockResponse
     newWordStudy(
       hanzi: String! # The hanzi from the StudentWord
       # UTC timezoned ISO string for when now due

@@ -15,6 +15,12 @@ export type Scalars = {
   Float: number;
 };
 
+export type BrowseStudentWord = {
+  __typename?: 'BrowseStudentWord';
+  studentWord?: Maybe<StudentWord>;
+  studentWordState: StudentWordState;
+};
+
 export type CcceDefinition = {
   __typename?: 'CCCEDefinition';
   id: Scalars['String'];
@@ -58,8 +64,14 @@ export enum LearningState {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  toggleStudentWordLock?: Maybe<ToggleStudentWordLockResponse>;
   newWordStudy: NewWordStudyResponse;
   documentStudy: DocumentStudyResponse;
+};
+
+
+export type MutationToggleStudentWordLockArgs = {
+  hanzi: Scalars['String'];
 };
 
 
@@ -102,6 +114,7 @@ export type NewWordsResponse = {
 
 export type Query = {
   __typename?: 'Query';
+  browseWord: BrowseStudentWord;
   concordanceDocs: Array<Document>;
   dailyNewWordsGoal: Scalars['Int'];
   document: Document;
@@ -113,6 +126,11 @@ export type Query = {
   studentWord: StudentWord;
   todaysDueWords: Array<Scalars['String']>;
   words: Array<Word>;
+};
+
+
+export type QueryBrowseWordArgs = {
+  word: Scalars['String'];
 };
 
 
@@ -198,6 +216,12 @@ export type StudentWord = {
   due?: Maybe<Scalars['String']>;
 };
 
+export enum StudentWordState {
+  AlreadyExists = 'already_exists',
+  DoesntExistYet = 'doesnt_exist_yet',
+  NoSuchWord = 'no_such_word'
+}
+
 export type StudyState = {
   __typename?: 'StudyState';
   hanzi: Scalars['String'];
@@ -216,6 +240,12 @@ export enum StudyType {
   Read = 'READ',
   Listen = 'LISTEN'
 }
+
+export type ToggleStudentWordLockResponse = MutationResponse & {
+  __typename?: 'ToggleStudentWordLockResponse';
+  success: Scalars['Boolean'];
+  studentWord: StudentWord;
+};
 
 export type Word = {
   __typename?: 'Word';
@@ -305,6 +335,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  BrowseStudentWord: ResolverTypeWrapper<Omit<BrowseStudentWord, 'studentWord'> & { studentWord?: Maybe<ResolversTypes['StudentWord']> }>;
   CCCEDefinition: ResolverTypeWrapper<cc_cedict>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Document: ResolverTypeWrapper<document>;
@@ -314,7 +345,7 @@ export type ResolversTypes = {
   Due: ResolverTypeWrapper<Omit<Due, 'documents' | 'orphans'> & { documents: Array<ResolversTypes['Document']>, orphans: Array<ResolversTypes['Word']> }>;
   LearningState: LearningState;
   Mutation: ResolverTypeWrapper<{}>;
-  MutationResponse: ResolversTypes['DocumentStudyResponse'] | ResolversTypes['NewWordStudyResponse'];
+  MutationResponse: ResolversTypes['DocumentStudyResponse'] | ResolversTypes['NewWordStudyResponse'] | ResolversTypes['ToggleStudentWordLockResponse'];
   NamedEntity: ResolverTypeWrapper<NamedEntity>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   NewWordStudyResponse: ResolverTypeWrapper<Omit<NewWordStudyResponse, 'studentWord'> & { studentWord: ResolversTypes['StudentWord'] }>;
@@ -323,13 +354,16 @@ export type ResolversTypes = {
   Sentence: ResolverTypeWrapper<sentence>;
   SentenceWord: ResolverTypeWrapper<sentence_word>;
   StudentWord: ResolverTypeWrapper<student_word>;
+  StudentWordState: StudentWordState;
   StudyState: ResolverTypeWrapper<Omit<StudyState, 'word'> & { word: ResolversTypes['Word'] }>;
   StudyType: StudyType;
+  ToggleStudentWordLockResponse: ResolverTypeWrapper<Omit<ToggleStudentWordLockResponse, 'studentWord'> & { studentWord: ResolversTypes['StudentWord'] }>;
   Word: ResolverTypeWrapper<word>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  BrowseStudentWord: Omit<BrowseStudentWord, 'studentWord'> & { studentWord?: Maybe<ResolversParentTypes['StudentWord']> };
   CCCEDefinition: cc_cedict;
   String: Scalars['String'];
   Document: document;
@@ -338,7 +372,7 @@ export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'];
   Due: Omit<Due, 'documents' | 'orphans'> & { documents: Array<ResolversParentTypes['Document']>, orphans: Array<ResolversParentTypes['Word']> };
   Mutation: {};
-  MutationResponse: ResolversParentTypes['DocumentStudyResponse'] | ResolversParentTypes['NewWordStudyResponse'];
+  MutationResponse: ResolversParentTypes['DocumentStudyResponse'] | ResolversParentTypes['NewWordStudyResponse'] | ResolversParentTypes['ToggleStudentWordLockResponse'];
   NamedEntity: NamedEntity;
   Int: Scalars['Int'];
   NewWordStudyResponse: Omit<NewWordStudyResponse, 'studentWord'> & { studentWord: ResolversParentTypes['StudentWord'] };
@@ -348,7 +382,14 @@ export type ResolversParentTypes = {
   SentenceWord: sentence_word;
   StudentWord: student_word;
   StudyState: Omit<StudyState, 'word'> & { word: ResolversParentTypes['Word'] };
+  ToggleStudentWordLockResponse: Omit<ToggleStudentWordLockResponse, 'studentWord'> & { studentWord: ResolversParentTypes['StudentWord'] };
   Word: word;
+};
+
+export type BrowseStudentWordResolvers<ContextType = any, ParentType extends ResolversParentTypes['BrowseStudentWord'] = ResolversParentTypes['BrowseStudentWord']> = {
+  studentWord?: Resolver<Maybe<ResolversTypes['StudentWord']>, ParentType, ContextType>;
+  studentWordState?: Resolver<ResolversTypes['StudentWordState'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type CcceDefinitionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CCCEDefinition'] = ResolversParentTypes['CCCEDefinition']> = {
@@ -380,12 +421,13 @@ export type DueResolvers<ContextType = any, ParentType extends ResolversParentTy
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  toggleStudentWordLock?: Resolver<Maybe<ResolversTypes['ToggleStudentWordLockResponse']>, ParentType, ContextType, RequireFields<MutationToggleStudentWordLockArgs, 'hanzi'>>;
   newWordStudy?: Resolver<ResolversTypes['NewWordStudyResponse'], ParentType, ContextType, RequireFields<MutationNewWordStudyArgs, 'hanzi' | 'newDue' | 'newLearning'>>;
   documentStudy?: Resolver<ResolversTypes['DocumentStudyResponse'], ParentType, ContextType, RequireFields<MutationDocumentStudyArgs, 'studyType' | 'payload'>>;
 };
 
 export type MutationResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['MutationResponse'] = ResolversParentTypes['MutationResponse']> = {
-  __resolveType: TypeResolveFn<'DocumentStudyResponse' | 'NewWordStudyResponse', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'DocumentStudyResponse' | 'NewWordStudyResponse' | 'ToggleStudentWordLockResponse', ParentType, ContextType>;
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
 };
 
@@ -411,6 +453,7 @@ export type NewWordsResponseResolvers<ContextType = any, ParentType extends Reso
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  browseWord?: Resolver<ResolversTypes['BrowseStudentWord'], ParentType, ContextType, RequireFields<QueryBrowseWordArgs, 'word'>>;
   concordanceDocs?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryConcordanceDocsArgs, 'word'>>;
   dailyNewWordsGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   document?: Resolver<ResolversTypes['Document'], ParentType, ContextType, RequireFields<QueryDocumentArgs, 'id'>>;
@@ -474,6 +517,12 @@ export type StudyStateResolvers<ContextType = any, ParentType extends ResolversP
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type ToggleStudentWordLockResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['ToggleStudentWordLockResponse'] = ResolversParentTypes['ToggleStudentWordLockResponse']> = {
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  studentWord?: Resolver<ResolversTypes['StudentWord'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type WordResolvers<ContextType = any, ParentType extends ResolversParentTypes['Word'] = ResolversParentTypes['Word']> = {
   ccceDefinitions?: Resolver<Array<ResolversTypes['CCCEDefinition']>, ParentType, ContextType>;
   forgotLISTEN?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
@@ -485,6 +534,7 @@ export type WordResolvers<ContextType = any, ParentType extends ResolversParentT
 };
 
 export type Resolvers<ContextType = any> = {
+  BrowseStudentWord?: BrowseStudentWordResolvers<ContextType>;
   CCCEDefinition?: CcceDefinitionResolvers<ContextType>;
   Document?: DocumentResolvers<ContextType>;
   DocumentStudyResponse?: DocumentStudyResponseResolvers<ContextType>;
@@ -499,6 +549,7 @@ export type Resolvers<ContextType = any> = {
   SentenceWord?: SentenceWordResolvers<ContextType>;
   StudentWord?: StudentWordResolvers<ContextType>;
   StudyState?: StudyStateResolvers<ContextType>;
+  ToggleStudentWordLockResponse?: ToggleStudentWordLockResponseResolvers<ContextType>;
   Word?: WordResolvers<ContextType>;
 };
 

@@ -26,3 +26,12 @@ mutation NewWordStudy(
     }
   }
 }
+
+mutation ToggleSWLock($hanzi: String!) {
+  toggleStudentWordLock(hanzi: $hanzi) {
+    success
+    studentWord {
+      ...StudentWordForBrowsing
+    }
+  }
+}
