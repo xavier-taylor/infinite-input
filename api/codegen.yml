@@ -14,6 +14,7 @@ generates:
         Word: ../repository/sql-model#word
         CCCEDefinition: ../repository/sql-model#cc_cedict
         StudentWord: ../repository/sql-model#student_word
+        StudentWordStudy: ../repository/manual-model#student_word_study
     plugins:
       - 'typescript'
       - 'typescript-resolvers'

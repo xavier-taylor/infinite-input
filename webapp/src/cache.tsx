@@ -123,13 +123,10 @@ const typePolicies: TypedTypePolicies = {
     },
   },
   // Note - if you specify a keyFields, you need to include it in any query (apollo requirement) https://github.com/apollographql/apollo-client/issues/5711
-  StudyState: {
+  StudentWordStudy: {
     keyFields: ['hanzi', 'studyType'],
   },
   StudentWord: {
-    keyFields: ['hanzi'],
-  },
-  Pronunciation: {
     keyFields: ['hanzi'],
   },
   Word: {

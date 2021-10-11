@@ -1,5 +1,6 @@
 import { GraphQLResolveInfo } from 'graphql';
 import { document, sentence, sentence_word, word, cc_cedict, student_word } from '../repository/sql-model';
+import { student_word_study } from '../repository/manual-model';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
@@ -51,7 +52,7 @@ export type DocumentStudyResponse = MutationResponse & {
 export type Due = {
   __typename?: 'Due';
   documents: Array<Document>;
-  orphans: Array<Word>;
+  orphans: Array<StudentWordStudy>;
 };
 
 export enum LearningState {
@@ -222,16 +223,10 @@ export enum StudentWordState {
   NoSuchWord = 'no_such_word'
 }
 
-export type StudyState = {
-  __typename?: 'StudyState';
+export type StudentWordStudy = {
+  __typename?: 'StudentWordStudy';
   hanzi: Scalars['String'];
-  f1: Scalars['Int'];
-  f2: Scalars['Int'];
   due: Scalars['String'];
-  previous: Scalars['String'];
-  understood: Array<Scalars['Boolean']>;
-  understoodCount: Scalars['Int'];
-  underStoodDistinct: Scalars['Int'];
   word: Word;
   studyType: StudyType;
 };
@@ -342,7 +337,7 @@ export type ResolversTypes = {
   DocumentStudyPayload: DocumentStudyPayload;
   DocumentStudyResponse: ResolverTypeWrapper<DocumentStudyResponse>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
-  Due: ResolverTypeWrapper<Omit<Due, 'documents' | 'orphans'> & { documents: Array<ResolversTypes['Document']>, orphans: Array<ResolversTypes['Word']> }>;
+  Due: ResolverTypeWrapper<Omit<Due, 'documents' | 'orphans'> & { documents: Array<ResolversTypes['Document']>, orphans: Array<ResolversTypes['StudentWordStudy']> }>;
   LearningState: LearningState;
   Mutation: ResolverTypeWrapper<{}>;
   MutationResponse: ResolversTypes['DocumentStudyResponse'] | ResolversTypes['NewWordStudyResponse'] | ResolversTypes['ToggleStudentWordLockResponse'];
@@ -355,7 +350,7 @@ export type ResolversTypes = {
   SentenceWord: ResolverTypeWrapper<sentence_word>;
   StudentWord: ResolverTypeWrapper<student_word>;
   StudentWordState: StudentWordState;
-  StudyState: ResolverTypeWrapper<Omit<StudyState, 'word'> & { word: ResolversTypes['Word'] }>;
+  StudentWordStudy: ResolverTypeWrapper<student_word_study>;
   StudyType: StudyType;
   ToggleStudentWordLockResponse: ResolverTypeWrapper<Omit<ToggleStudentWordLockResponse, 'studentWord'> & { studentWord: ResolversTypes['StudentWord'] }>;
   Word: ResolverTypeWrapper<word>;
@@ -370,7 +365,7 @@ export type ResolversParentTypes = {
   DocumentStudyPayload: DocumentStudyPayload;
   DocumentStudyResponse: DocumentStudyResponse;
   Boolean: Scalars['Boolean'];
-  Due: Omit<Due, 'documents' | 'orphans'> & { documents: Array<ResolversParentTypes['Document']>, orphans: Array<ResolversParentTypes['Word']> };
+  Due: Omit<Due, 'documents' | 'orphans'> & { documents: Array<ResolversParentTypes['Document']>, orphans: Array<ResolversParentTypes['StudentWordStudy']> };
   Mutation: {};
   MutationResponse: ResolversParentTypes['DocumentStudyResponse'] | ResolversParentTypes['NewWordStudyResponse'] | ResolversParentTypes['ToggleStudentWordLockResponse'];
   NamedEntity: NamedEntity;
@@ -381,7 +376,7 @@ export type ResolversParentTypes = {
   Sentence: sentence;
   SentenceWord: sentence_word;
   StudentWord: student_word;
-  StudyState: Omit<StudyState, 'word'> & { word: ResolversParentTypes['Word'] };
+  StudentWordStudy: student_word_study;
   ToggleStudentWordLockResponse: Omit<ToggleStudentWordLockResponse, 'studentWord'> & { studentWord: ResolversParentTypes['StudentWord'] };
   Word: word;
 };
@@ -416,7 +411,7 @@ export type DocumentStudyResponseResolvers<ContextType = any, ParentType extends
 
 export type DueResolvers<ContextType = any, ParentType extends ResolversParentTypes['Due'] = ResolversParentTypes['Due']> = {
   documents?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType>;
-  orphans?: Resolver<Array<ResolversTypes['Word']>, ParentType, ContextType>;
+  orphans?: Resolver<Array<ResolversTypes['StudentWordStudy']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -503,15 +498,9 @@ export type StudentWordResolvers<ContextType = any, ParentType extends Resolvers
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type StudyStateResolvers<ContextType = any, ParentType extends ResolversParentTypes['StudyState'] = ResolversParentTypes['StudyState']> = {
+export type StudentWordStudyResolvers<ContextType = any, ParentType extends ResolversParentTypes['StudentWordStudy'] = ResolversParentTypes['StudentWordStudy']> = {
   hanzi?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  f1?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  f2?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   due?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  previous?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  understood?: Resolver<Array<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  understoodCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  underStoodDistinct?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   word?: Resolver<ResolversTypes['Word'], ParentType, ContextType>;
   studyType?: Resolver<ResolversTypes['StudyType'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -548,7 +537,7 @@ export type Resolvers<ContextType = any> = {
   Sentence?: SentenceResolvers<ContextType>;
   SentenceWord?: SentenceWordResolvers<ContextType>;
   StudentWord?: StudentWordResolvers<ContextType>;
-  StudyState?: StudyStateResolvers<ContextType>;
+  StudentWordStudy?: StudentWordStudyResolvers<ContextType>;
   ToggleStudentWordLockResponse?: ToggleStudentWordLockResponseResolvers<ContextType>;
   Word?: WordResolvers<ContextType>;
 };

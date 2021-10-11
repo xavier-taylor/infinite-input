@@ -9,7 +9,7 @@ import {
 import React from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
-import { OptionalTooltip } from './OptionalTooltip';
+import { OptionalTooltip } from '../Utils/OptionalTooltip';
 
 const useStyles = makeStyles((theme) => ({
   avatar: {

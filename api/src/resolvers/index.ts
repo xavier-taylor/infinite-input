@@ -1,9 +1,11 @@
 import { IContextType } from '../server';
 import {
   DocumentStudyResponse,
+  Due,
   LearningState,
   NewWordStudyResponse,
   Resolvers,
+  ResolversTypes,
   StudentWordState,
   StudyType,
 } from '../schema/gql-model';
@@ -28,6 +30,12 @@ export const resolvers: Resolvers<IContextType> = {
         return 'DocumentStudyResponse';
       }
     },
+  },
+  StudentWordStudy: {
+    hanzi: ({ word_hanzi }) => word_hanzi,
+    due: ({ due }) => due?.toISOString(),
+    studyType: ({ studyType }) => studyType,
+    word: ({ word_hanzi }, __, { repo }) => repo.getWord(word_hanzi),
   },
   StudentWord: {
     hanzi: ({ word_hanzi }) => word_hanzi,
@@ -128,14 +136,21 @@ export const resolvers: Resolvers<IContextType> = {
       // orphans
       // TODO - does the frontend need to send in dayStartUTC like newWords()?
       // how else do we know which words are 'due'?
-      const orphans =
-        studyType === StudyType.Read
-          ? await repo.getWords(['我', '她'])
-          : await repo.getWords(['熟悉', '热心', '看起来']);
+
+      // future TODO - is there a *quick* get orphans query
+      // that can be run so we don't need to look through the entire result set to figure out what the orphans are?
+      // NOTE that is a *future* today, because afaikt the current result set is likely to be smallish anyhow
+
+      // TODO - the getDueDocuments query must return an object which also
+      // has todays orphans - only by running the expensive getDueDocuments cna we
+      // know what the orphans are.
+
+      // we then map those to orphanRV, adding studyType from here.
       const documents =
         studyType === StudyType.Read
           ? await repo.getDueDocuments(studyType)
           : (await repo.getDueDocuments(studyType)).slice(1);
+      const orphanRV: Due['orphans'] = [{}];
       return {
         documents,
         orphans,

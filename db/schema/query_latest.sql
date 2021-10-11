@@ -40,29 +40,33 @@ WHERE
 due as (SELECT word_hanzi FROM student_word_read WHERE student_id = 1 AND due <= CURRENT_DATE)
 -- exists a word that is due today
 select 
-	id, chinese, english, count(distinct(sentence_word.word_hanzi)), array_agg(distinct(sentence_word.word_hanzi)) as due, 
-	(case when n_non_punct =0 then 0 else 
-	cast(count(distinct(sentence_word.word_hanzi)) as float)/cast(n_non_punct as float) 
-	end) as fraction_due,
-	
-	
+	id, chinese, english, count(distinct(due.word_hanzi)) as count_due, 
+	array_agg(distinct(due.word_hanzi)) as due, 
+	(
+		case when 
+			n_non_punct =0 
+		then 
+			0 
+		else 
+			cast(count(distinct(due.word_hanzi)) as float)/cast(n_non_punct as float) 
+		end
+	) as fraction_due,	
 	n_non_punct as sentence_len
 from 
 	candidates 
 JOIN 
 	sentence_word on candidates.id = sentence_word.document_id
-JOIN 
+ JOIN 
 	due on sentence_word.word_hanzi = due.word_hanzi 
 group by 
 	id, chinese, english, n_non_punct 
 order by 
 	--id
-	count(distinct(sentence_word.word_hanzi)) desc, fraction_due desc
+	count_due desc, fraction_due desc
 ;
 
--- took 11.5 secs before index creation
--- took 6.5-7 secs after btree index creation
--- with hash index also seemed to take 6.5 seconds
+
 
 -- query currently takes 8 seconds
 
+-- with hash index also seemed to take 6.5 seconds - worth seeing if the hash index is better in the end.

@@ -18,13 +18,13 @@ import SearchIcon from '@mui/icons-material/Search';
 import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
 import KeyboardIcon from '@mui/icons-material/Keyboard';
 import BrushIcon from '@mui/icons-material/Brush';
-import { DrawerState } from '../Pages/App';
+import { DrawerState } from '../../Pages/App';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useHistory } from 'react-router-dom';
 import { MenuListItem } from './MenuListItem';
-import { useDocuments } from '../Hooks/documents';
-import { StudyType } from '../schema/generated';
-import { useWords } from '../Hooks/words';
+import { useDocuments } from '../../Hooks/documents';
+import { StudyType } from '../../schema/generated';
+import { useWords } from '../../Hooks/words';
 import { Home } from '@mui/icons-material';
 
 // Fake data waiting on real integration

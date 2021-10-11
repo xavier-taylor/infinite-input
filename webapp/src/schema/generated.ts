@@ -49,7 +49,7 @@ export type DocumentStudyResponse = MutationResponse & {
 export type Due = {
   __typename?: 'Due';
   documents: Array<Document>;
-  orphans: Array<Word>;
+  orphans: Array<StudentWordStudy>;
 };
 
 export enum LearningState {
@@ -220,16 +220,10 @@ export enum StudentWordState {
   NoSuchWord = 'no_such_word'
 }
 
-export type StudyState = {
-  __typename?: 'StudyState';
+export type StudentWordStudy = {
+  __typename?: 'StudentWordStudy';
   hanzi: Scalars['String'];
-  f1: Scalars['Int'];
-  f2: Scalars['Int'];
   due: Scalars['String'];
-  previous: Scalars['String'];
-  understood: Array<Scalars['Boolean']>;
-  understoodCount: Scalars['Int'];
-  underStoodDistinct: Scalars['Int'];
   word: Word;
   studyType: StudyType;
 };
@@ -502,8 +496,8 @@ export type DueQuery = (
       { __typename?: 'Document' }
       & EntireDocumentFragment
     )>, orphans: Array<(
-      { __typename?: 'Word' }
-      & Pick<Word, 'hanzi'>
+      { __typename?: 'StudentWordStudy' }
+      & Pick<StudentWordStudy, 'hanzi'>
     )> }
   ) }
 );
@@ -679,16 +673,10 @@ export type StudentWordFieldPolicy = {
 	word?: FieldPolicy<any> | FieldReadFunction<any>,
 	due?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type StudyStateKeySpecifier = ('hanzi' | 'f1' | 'f2' | 'due' | 'previous' | 'understood' | 'understoodCount' | 'underStoodDistinct' | 'word' | 'studyType' | StudyStateKeySpecifier)[];
-export type StudyStateFieldPolicy = {
+export type StudentWordStudyKeySpecifier = ('hanzi' | 'due' | 'word' | 'studyType' | StudentWordStudyKeySpecifier)[];
+export type StudentWordStudyFieldPolicy = {
 	hanzi?: FieldPolicy<any> | FieldReadFunction<any>,
-	f1?: FieldPolicy<any> | FieldReadFunction<any>,
-	f2?: FieldPolicy<any> | FieldReadFunction<any>,
 	due?: FieldPolicy<any> | FieldReadFunction<any>,
-	previous?: FieldPolicy<any> | FieldReadFunction<any>,
-	understood?: FieldPolicy<any> | FieldReadFunction<any>,
-	understoodCount?: FieldPolicy<any> | FieldReadFunction<any>,
-	underStoodDistinct?: FieldPolicy<any> | FieldReadFunction<any>,
 	word?: FieldPolicy<any> | FieldReadFunction<any>,
 	studyType?: FieldPolicy<any> | FieldReadFunction<any>
 };
@@ -763,9 +751,9 @@ export type TypedTypePolicies = TypePolicies & {
 		keyFields?: false | StudentWordKeySpecifier | (() => undefined | StudentWordKeySpecifier),
 		fields?: StudentWordFieldPolicy,
 	},
-	StudyState?: Omit<TypePolicy, "fields" | "keyFields"> & {
-		keyFields?: false | StudyStateKeySpecifier | (() => undefined | StudyStateKeySpecifier),
-		fields?: StudyStateFieldPolicy,
+	StudentWordStudy?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | StudentWordStudyKeySpecifier | (() => undefined | StudentWordStudyKeySpecifier),
+		fields?: StudentWordStudyFieldPolicy,
 	},
 	ToggleStudentWordLockResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | ToggleStudentWordLockResponseKeySpecifier | (() => undefined | ToggleStudentWordLockResponseKeySpecifier),

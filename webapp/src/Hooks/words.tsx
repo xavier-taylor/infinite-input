@@ -20,6 +20,9 @@ import { StudyType } from '../schema/generated';
 // Probably will have to use a 'due' field on the word (local cache?) with a date time, anki style
 // There might be something to learn from newWords.
 
+// wordsToStudy (is wordsToReadVar and wordsToListenVar will contain the union
+// of orphans and words we got wrong during this session);
+
 export const useWords = (mode: StudyType) => {
   let haveFetchedDueVar: ReactiveVar<boolean>;
   let wordsToStudyVar: ReactiveVar<WordHanziList>;
@@ -43,9 +46,13 @@ export const useWords = (mode: StudyType) => {
     }
   };
 
+  const toStudyLength = useReactiveVar(wordsToStudyVar).length;
   return {
-    next: nextWord,
+    nextWord: nextWord,
+    isLast: useReactiveVar(haveFetchedDueVar) && toStudyLength === 1,
+    current: useReactiveVar(wordsToStudyVar)[0],
+    loading: !useReactiveVar(haveFetchedDueVar),
+    finished: haveFetchedDueVar() && toStudyLength === 0,
     countRemaining: useReactiveVar(wordsToStudyVar).length,
-    haveFetchedDueVar,
   };
 };

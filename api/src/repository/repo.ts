@@ -194,24 +194,22 @@ export class PostgresqlRepo {
   // see if that is 'faster' than using resolvers at each level as I have here
   // NOTE - that is an optimization. don't do until mvp is usable!
   // TODO - this query must join with sentence_word to check if words are locked
-  async getDueDocuments(
-    type: StudyType,
-    studentId: string = '1'
-  ): Promise<document[]> {
-    // return this.knex
-    //   .select(
-    //     'document.chinese',
-    //     'document.id',
-    //     'document.english',
-    //     this.knex.raw('count(document.id)')
-    //   )
-    //   .from('document')
-    //   .join('sentence', 'document.id', '=', 'sentence.document_id')
-    //   .groupBy('document.chinese', 'document.id', 'document.english')
-    //   .having(this.knex.raw('count(document.id)'), '>', '1')
-    //   .limit(1);
+  // TODO see if this query matches my current best query in pgadmin - the one below is potentially old
+  // TODO workout the specific 'due' logic we want, and apply in in both dues (sad that I am replicating logic, can I improve that?)
+  async getDue(type: StudyType, studentId: string = '1'): Promise<document[]> {
+    const vars = {
+      student_word:
+        type === StudyType.Read ? 'student_word_read' : 'student_word_listen',
+      studentId,
+    };
+    // this is reused below
+    const dueWords = await this.knex
+      .select<student_word_read[] | student_word_listen[]>('word_hanzi')
+      .from(vars.student_word)
+      .where('student_id', '=', vars.studentId)
+      .where('due', '<=', 'CURRENT_DATE'); // TODO get actual due logic done
 
-    // based on complete_query.sql, just for testing/mucking around purposes
+    const dueWordsSet = new Set(dueWords.map((d) => d.word_hanzi));
     const candidates = `
 SELECT 
 	chinese,id, english, sub_corpus_title, corpus_title
@@ -231,28 +229,35 @@ WHERE NOT EXISTS (
 		student_word_read.word_hanzi IS null AND sentence_word.document_id = document.id AND sentence_word.universal_part_of_speech NOT IN ('PUNCT', 'NUM')
 )`;
     const cVars = {
-      student_word:
-        type === StudyType.Read ? 'student_word_read' : 'student_word_listen',
-      studentId,
+      ...vars,
     };
+
     const due = `SELECT word_hanzi FROM :student_word: WHERE student_id = :studentId AND due <= CURRENT_DATE`;
-    const dVars = { ...cVars }; // its the same, for now
+    const dVars = { ...vars }; // its the same, for now
     // TODO implement propery sorting/aggregation etc ie use of count() and distinct()
-    return this.knex
+    const docs = (await this.knex
       .with('candidates', this.knex.raw(candidates, cVars))
       .with('due', this.knex.raw(due, dVars))
       .select('id', 'sub_corpus_title', 'corpus_title', 'english', 'chinese')
       .from('candidates')
       .join('sentence_word', 'candidates.id', '=', 'sentence_word.document_id')
       .join('due', 'sentence_word.word_hanzi', '=', 'due.word_hanzi')
-      .groupBy('id', 'chinese', 'english', 'sub_corpus_title', 'corpus_title')
-      .limit(2); // TODO make this query real!
+      .groupBy(
+        'id',
+        'chinese',
+        'english',
+        'sub_corpus_title',
+        'corpus_title'
+      )) as document[];
+
+    // TODO continue here per the steps in the notion
   }
   // This is an undata loaded/ unbatched. just for testing.
   async getWords(words: string[]) {
     return this.knex.select<word[]>('*').from('word').whereIn('hanzi', words);
   }
   // I am using this for concordance - TODO - make a toggleable version that only returns docs where you know all the words, or even just sortable by whether you know al lthe words
+  // ^ a better idea is adding hsk tags to documents, so can return documents for the concordance sorted by hsk level
   async getDocuments(options: { including: string[] }): Promise<document[]> {
     return this.knex('document')
       .join('sentence_word', 'document.id', '=', 'sentence_word.document_id')

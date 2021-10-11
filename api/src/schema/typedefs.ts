@@ -18,17 +18,10 @@ export const typeDefs = gql`
     definitions: [String!]!
   }
 
-  # this represents student_word_listen and student_word_read TODO better name - we are using the word 'studyState elsewhere for something else...
-  # we aren't currently using this... should probably delete it.
-  type StudyState {
+  # this represents student_word_listen and student_word_read
+  type StudentWordStudy {
     hanzi: String!
-    f1: Int!
-    f2: Int!
-    due: String! # TODO is there a date type I can easily use that wont break my tooling?
-    previous: String!
-    understood: [Boolean!]!
-    understoodCount: Int!
-    underStoodDistinct: Int!
+    due: String! # this should be UTC due timestamp
     word: Word!
     studyType: StudyType!
   }
@@ -115,7 +108,7 @@ export const typeDefs = gql`
   # TODO return this from documentsDue
   type Due {
     documents: [Document!]!
-    orphans: [Word!]!
+    orphans: [StudentWordStudy!]!
   }
 
   enum StudyType {

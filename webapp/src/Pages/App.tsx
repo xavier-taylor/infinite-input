@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { CssBaseline, IconButton } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import Header from '../Components/Header';
-import MenuDrawer from '../Components/MenuDrawer';
+import MenuDrawer from '../Components/Menu/MenuDrawer';
 
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import {
@@ -25,7 +25,7 @@ import {
   wordsToListenVar,
   wordsToReadVar,
 } from '../cache';
-import { StudyContainer } from './Study/StudyContainer';
+import { SentencesContainer } from './Sentences/SentencesContainer';
 import { NewWordsContainer } from './NewWords/NewWordsContainer';
 import { DateTime } from 'luxon';
 import { RecordVoiceOver } from '@mui/icons-material';
@@ -153,7 +153,7 @@ Warning: Cannot update a component (`StudyContainer`) while rendering a differen
               <NewWordsContainer />
             </Route>
             <Route path="/read/sentence">
-              <StudyContainer mode={StudyType.Read} />
+              <SentencesContainer mode={StudyType.Read} />
             </Route>
             <Route path="/read/word">
               <div>read orphan words</div>
