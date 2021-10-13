@@ -110,7 +110,7 @@ CREATE TABLE mandarin.student_word_listen
     -- understood boolean[] CONSTRAINT ten_elements CHECK (cardinality(understood) < 11) NOT NULL,
     -- understood_count int NOT NULL,
     -- understood_distinct_documents_count int NOT NULL, -- increment this only when a new student_document_listen is created for this word
-
+    -- TODO add constraint that interval is gte 1
     FOREIGN KEY (student_id, word_hanzi) REFERENCES mandarin.student_word (student_id, word_hanzi),
     PRIMARY KEY (student_id, word_hanzi)
 );

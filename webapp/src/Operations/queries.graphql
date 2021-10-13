@@ -52,6 +52,17 @@ query Due($studyType: StudyType!, $dayStartUTC: String!) {
     }
     orphans {
       hanzi
+      due
+      word {
+        hanzi
+        ccceDefinitions {
+          simplified
+          traditional
+          pinyin
+          definitions
+        }
+      }
+      studyType
     }
   }
 }

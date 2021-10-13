@@ -1,0 +1,32 @@
+This file is a place to centralize notes about the SRS algorithm.
+
+Basic algorithm:
+read/listen cards have due (timestamp) and interval(double, represents days).
+
+Your current value of due was arrived at by adding the current interval to the previous due.
+
+Consider a read card, c. It has a due timestamp d. It was just studied at timestamp s.
+Its current interval value is i.
+
+We calculate a new interval value like this:
+
+new_interval = i + .5*i*((i-(d-s))/i)
+note that d-s is expressed as a real number of days, ie 1.5 or -3.4 etc
+new_due = s + new_interval days
+
+Basic structure:
+
+1) Learning a new word (student_word)
+2) Studying a word you have learned (student_word_listen, student_word_read)
+    When you finish 1), new student_word_listen/read rows get created with
+        * interval set to 1
+        * newDue set to start of the following day, ie 00:00 in getNewProperties()
+            and learnWord()
+    So consider the first time we 'study' a word in listen/read mode.
+    If we learned the word on 5 nov, we would then have studied it for the first time 
+    on 6 nov. Assuming we got it right, we now calculate a new interval, which will be a little more
+    than 1.5. So we will next see that word on the 8th of november.
+
+    Note that our concept of 'due' for read/listen cards is ' if the student is studing on 
+    the nth of the month in their timeszone, any card that has a due value before 00:00 of the 
+    n+1th in their timezone is 'due'.

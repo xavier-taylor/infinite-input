@@ -48,7 +48,7 @@ import { getStartOfTomorrow } from '../utils/datetime';
 // TODO - consider removing knex and just use pg.
 
 // TODO explore more TS support
-type sortedDocument = Pick<document, 'chinese' | 'english' | 'id'> & {
+export type sortedDocument = Pick<document, 'chinese' | 'english' | 'id'> & {
   count_due: number;
   distinct_due_words: string[];
   fraction_due: number;
@@ -60,6 +60,7 @@ export class PostgresqlRepo {
   private wordLoader: DataLoader<unknown, any, unknown>;
   private sentenceWordLoader: DataLoader<unknown, any, unknown>;
   private sentenceLoader: DataLoader<unknown, any, unknown>;
+  private documentLoader: DataLoader<unknown, any, unknown>;
 
   constructor(private knex: Knex) {
     this.ccceLoader = new DataLoader(
@@ -97,6 +98,9 @@ export class PostgresqlRepo {
       {
         batchScheduleFn: (callback) => setTimeout(callback, 10),
       } */
+    );
+    this.documentLoader = new DataLoader((keys: Readonly<string[]>) =>
+      this.batchGetDocument.bind(this)(keys)
     );
   }
 
@@ -180,6 +184,21 @@ export class PostgresqlRepo {
     }, {} as Record<string, sentence[]>);
     return documentIds.map((h) => map[h] ?? []);
   }
+  private async batchGetDocument(
+    documentIds: Readonly<string[]>
+  ): Promise<Array<document>> {
+    const documents = await this.knex
+      .select<document[]>('*')
+      .from('document')
+      .whereIn('id', documentIds);
+    const map: Record<string, document> = documents.reduce((acc, cur) => {
+      acc[cur.id!] = cur;
+      return acc;
+    }, {} as Record<string, document>);
+    return documentIds.map(
+      (d) => map[d] ?? new Error(` couldn't find document with id ${d}`)
+    );
+  }
 
   // prior to data loader we were doing seperate calls for each, including
   // for the same word over and over
@@ -208,7 +227,7 @@ export class PostgresqlRepo {
     type: StudyType,
     dayStartUTC: string,
     studentId: string = '1'
-  ): Promise<{ documents: sortedDocument[]; orphans: student_word_study[] }> {
+  ): Promise<{ documents: document[]; orphans: student_word_study[] }> {
     const vars = {
       student_word:
         type === StudyType.Read ? 'student_word_read' : 'student_word_listen',
@@ -217,11 +236,16 @@ export class PostgresqlRepo {
     };
     // this is reused below - can I reuse this result set there?
     const dueWords = await this.knex
-      .select<student_word_read[] | student_word_listen[]>('word_hanzi')
+      .select<student_word_read[] | student_word_listen[]>('*')
       .from(vars.student_word)
       .where('student_id', '=', vars.studentId)
       .where('due', '<', vars.tomorrow);
-    const dueWordsSet = new Set(dueWords.map((d) => d.word_hanzi));
+    const dueWordsMap = dueWords.reduce((acc, cur) => {
+      acc.set(cur.word_hanzi, cur.interval);
+      return acc;
+    }, new Map<string, number>());
+
+    new Set(dueWords.map((d) => d.word_hanzi));
 
     const candidates = `
 SELECT 
@@ -273,14 +297,98 @@ WHERE NOT EXISTS (
         { column: 'count_due', order: 'desc' },
         { column: 'fraction_due', order: 'desc' },
       ])) as sortedDocument[];
-    return { documents: docs, orphans: [] };
+
+    const selectionResults = this.selectDocuments(docs, dueWordsMap);
+    const orphans = dueWords
+      .filter(({ word_hanzi }) => selectionResults.orphans.has(word_hanzi))
+      .map((o) => ({ ...o, studyType: type }));
+    // There is an inefficiency here - if looking to speed up this query, just return full documents earlier in the process
+    const documents = await this.getDocumentsById(
+      selectionResults.documents.map((d) => d.id!)
+    );
+    return { documents: documents, orphans };
 
     // TODO continue here per the steps in the notion
   }
+  /**
+   *  !! This method mutates the props that are passed into it.
+   *  !! if we realize we need them to remain unmutated, first deep clone them here
+   * For words with an interval of 1, return up to 3 documents (and at least 1)
+   * For words with other intervals, return 1 document
+   * For any word where we couldnt find 1/3 documents per the above, return that word as an orphan
+   * @param docs precondition: sorted by count_due desc, fraction_due desc
+   * @param dueWords
+   */
+  selectDocuments(
+    docs: sortedDocument[],
+    dueWords: Map<string, number> // a map of due words with their intervals
+  ): { documents: sortedDocument[]; orphans: Set<string> } {
+    let orphansMightExist = false;
+    const chosenDocuments = [];
+    const includedWords = new Map<string, number>(); // a map from due words to the number of times they have been included in our chosenDocuments set
+    while (dueWords.size > 0 && !orphansMightExist && docs.length > 0) {
+      // take the 'best' document
+      const best = docs.shift()!;
+      if (best.distinct_due_words.length === 0) {
+        // we mutate this array as we go, see below
+        orphansMightExist = true; // orphans exist, unless it was some word with interval 1 that we are still looking for 2nd/3rd documents for
+        break;
+      }
+      chosenDocuments.push(best);
+
+      for (let word of best.distinct_due_words) {
+        // keep track of how many times we have included each due word
+        const wordCount = includedWords.get(word);
+        if (wordCount !== undefined) {
+          includedWords.set(word, wordCount + 1);
+        } else {
+          includedWords.set(word, 1);
+        }
+        // & remove them from dueWords once we have enough of them
+        const intervalForWord = dueWords.get(word);
+        if (intervalForWord !== undefined) {
+          const desiredAmount = intervalForWord === 1 ? 3 : 1; // we want words to appear 3 times if they have interval of 1, which means they are new or recently lapsed words
+          const newWordCount = includedWords.get(word)!;
+          if (newWordCount >= desiredAmount) {
+            dueWords.delete(word);
+          }
+        } // if it is undefined, we already removed it from dueWords because we have enough of it
+      }
+
+      for (let doc of docs) {
+        doc.distinct_due_words = doc.distinct_due_words.filter((w) =>
+          dueWords.has(w)
+        );
+      }
+      // sort by the number of distinct due words which we are still looking for. if a draw, conserve the original sort logic
+      docs.sort((a, b) => {
+        if (b.distinct_due_words === a.distinct_due_words) {
+          if (b.count_due === a.count_due) {
+            return b.fraction_due - a.fraction_due;
+          } else {
+            return b.count_due - a.count_due;
+          }
+        } else {
+          return b.distinct_due_words.length - a.distinct_due_words.length;
+        }
+      });
+    }
+    const potentialOrphans = Array.from(dueWords.keys());
+    return {
+      documents: chosenDocuments,
+      orphans: new Set(potentialOrphans.filter((o) => !includedWords.has(o))),
+    };
+  }
+
   // This is an undata loaded/ unbatched. just for testing.
   async getWords(words: string[]) {
     return this.knex.select<word[]>('*').from('word').whereIn('hanzi', words);
   }
+
+  async getDocumentsById(ids: string[]): Promise<document[]> {
+    return this.batchGetDocument(ids);
+  }
+
   // I am using this for concordance - TODO - make a toggleable version that only returns docs where you know all the words, or even just sortable by whether you know al lthe words
   // ^ a better idea is adding hsk tags to documents, so can return documents for the concordance sorted by hsk level
   async getDocuments(options: { including: string[] }): Promise<document[]> {

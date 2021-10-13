@@ -128,32 +128,11 @@ export const resolvers: Resolvers<IContextType> = {
     },
   },
   Query: {
-    // just to demonstrate if the dataloader on the definition is working
-    // TODO consider deleting this words query unless there is a conceivable use for it?
     words: (_parent, { words }, { repo }, _info) => repo.getWords(words),
-    // TODO - the query from the front end does *not* pass in the user id!
-    // that would be abusable. instead, here at the backend we have some kind of auth thingo whichi gives
-    // use the user id
     due: async (_parent, { studyType, dayStartUTC }, { repo }, _info) => {
-      // TODO actually get a set of documents to cover as many
-      // due words as possible, then return the rest of the due words as
-      // orphans
-      // TODO - does the frontend need to send in dayStartUTC like newWords()?
-      // how else do we know which words are 'due'?
-
-      // future TODO - is there a *quick* get orphans query
-      // that can be run so we don't need to look through the entire result set to figure out what the orphans are?
-      // NOTE that is a *future* today, because afaikt the current result set is likely to be smallish anyhow
-
-      // TODO - the getDueDocuments query must return an object which also
-      // has todays orphans - only by running the expensive getDueDocuments cna we
-      // know what the orphans are.
-
-      // we then map those to orphanRV, adding studyType from here.
       const due = await repo.getDue(studyType, dayStartUTC, USER_ID);
-      // const orphanRV: Due['orphans'] = [{}];
       return {
-        documents: (due.documents as unknown) as document[], // can only safely do this because I know downstream resolvers dont need all document keys
+        documents: due.documents,
         orphans: due.orphans,
       };
     },

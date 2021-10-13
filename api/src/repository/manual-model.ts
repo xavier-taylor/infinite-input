@@ -1,5 +1,5 @@
 import { StudyType } from '../schema/gql-model';
-import { student_word_read, student_word_listen } from './sql-model';
+import { student_word_read, student_word_listen, document } from './sql-model';
 
 // This is to allow us to have a common gql type for two different tables.
 // frankly its proably an argument against having those two tables
