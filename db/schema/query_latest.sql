@@ -9,24 +9,13 @@ FROM
 	document 
 WHERE
 	
-/*	exists ( -- exists at least one word that is due (with this, the 'candidates' query gets all the docs we need in 7.4 seconds)
-	SELECT 
-		1
-	FROM
-		sentence_word
-	JOIN
-		student_word_read
-	ON
-		student_word_read.student_id = 1 AND student_word_read.word_hanzi = sentence_word.word_hanzi AND due <= CURRENT_DATE
-	WHERE
-		sentence_word.document_id = document.id 
-) and*/ NOT EXISTS ( -- doesn't exist a word I don't know
+ NOT EXISTS ( -- doesn't exist a word I don't know
 
 	SELECT 
 		1
 	FROM
 		sentence_word
-	LEFT JOIN
+	LEFT OUTER JOIN
 		student_word_read
 	ON
 		student_word_read.student_id = 1 AND student_word_read.word_hanzi = sentence_word.word_hanzi
@@ -41,7 +30,7 @@ due as (SELECT word_hanzi FROM student_word_read WHERE student_id = 1 AND due <=
 -- exists a word that is due today
 select 
 	id, chinese, english, count(distinct(due.word_hanzi)) as count_due, 
-	array_agg(distinct(due.word_hanzi)) as due, 
+	array_agg(distinct(due.word_hanzi)) as distinct_due_words, 
 	(
 		case when 
 			n_non_punct =0 
@@ -58,11 +47,12 @@ JOIN
 	sentence_word on candidates.id = sentence_word.document_id
  JOIN 
 	due on sentence_word.word_hanzi = due.word_hanzi 
+where n_non_punct > 1
 group by 
 	id, chinese, english, n_non_punct 
 order by 
 	--id
-	count_due desc, fraction_due desc
+	count_due desc, fraction_due desc,
 ;
 
 

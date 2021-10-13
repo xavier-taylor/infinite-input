@@ -45,8 +45,8 @@ query Concordance($word: String!) {
     }
   }
 }
-query Due($studyType: StudyType!) {
-  due(studyType: $studyType) {
+query Due($studyType: StudyType!, $dayStartUTC: String!) {
+  due(studyType: $studyType, dayStartUTC: $dayStartUTC) {
     documents {
       ...EntireDocument
     }

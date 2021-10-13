@@ -31,6 +31,7 @@ import { DateTime } from 'luxon';
 import { RecordVoiceOver } from '@mui/icons-material';
 import Home from './Home';
 import Browse from './Browse/Browse';
+import { getDayStartUTC } from '../Utils/datetime';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -78,7 +79,7 @@ const App: React.FC = () => {
     haveFetchedNewWordsToLearnVar
   );
   const newWordsRV = useQuery(NewWordsDocument, {
-    variables: { dayStartUTC: DateTime.now().startOf('day').toUTC().toISO() },
+    variables: { dayStartUTC: getDayStartUTC() },
     skip: haveFetchedNewWordsToLearn,
   });
   useEffect(() => {
@@ -93,7 +94,7 @@ const App: React.FC = () => {
   // Fetch due reading
   const haveFetchedReading = useReactiveVar(haveFetchedReadingDueVar);
   const readingRV = useQuery(DueDocument, {
-    variables: { studyType: StudyType.Read },
+    variables: { studyType: StudyType.Read, dayStartUTC: getDayStartUTC() },
     skip: haveFetchedReading,
   });
 
@@ -118,7 +119,7 @@ Warning: Cannot update a component (`StudyContainer`) while rendering a differen
   // Fetch due listening
   const haveFetchedListening = useReactiveVar(haveFetchedListeningDueVar);
   const listeningRV = useQuery(DueDocument, {
-    variables: { studyType: StudyType.Listen },
+    variables: { studyType: StudyType.Listen, dayStartUTC: getDayStartUTC() },
     skip: haveFetchedListening || !haveFetchedReading,
   });
   useEffect(() => {

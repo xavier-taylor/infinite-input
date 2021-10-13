@@ -9,7 +9,11 @@ import {
   StudentWordState,
   StudyType,
 } from '../schema/gql-model';
-import { learning_state, student_word } from '../repository/sql-model';
+import {
+  document,
+  learning_state,
+  student_word,
+} from '../repository/sql-model';
 import { toGQLLearningStateEnum } from '../utils/typeConversions';
 import axios from 'axios';
 import { ForvoApiResponse } from '../utils/forvo';
@@ -130,7 +134,7 @@ export const resolvers: Resolvers<IContextType> = {
     // TODO - the query from the front end does *not* pass in the user id!
     // that would be abusable. instead, here at the backend we have some kind of auth thingo whichi gives
     // use the user id
-    due: async (_parent, { studyType }, { repo }, _info) => {
+    due: async (_parent, { studyType, dayStartUTC }, { repo }, _info) => {
       // TODO actually get a set of documents to cover as many
       // due words as possible, then return the rest of the due words as
       // orphans
@@ -146,14 +150,11 @@ export const resolvers: Resolvers<IContextType> = {
       // know what the orphans are.
 
       // we then map those to orphanRV, adding studyType from here.
-      const documents =
-        studyType === StudyType.Read
-          ? await repo.getDueDocuments(studyType)
-          : (await repo.getDueDocuments(studyType)).slice(1);
-      const orphanRV: Due['orphans'] = [{}];
+      const due = await repo.getDue(studyType, dayStartUTC, USER_ID);
+      // const orphanRV: Due['orphans'] = [{}];
       return {
-        documents,
-        orphans,
+        documents: (due.documents as unknown) as document[], // can only safely do this because I know downstream resolvers dont need all document keys
+        orphans: due.orphans,
       };
     },
     document: (_parent, { id }, { repo }, _info) => repo.documentById(id),

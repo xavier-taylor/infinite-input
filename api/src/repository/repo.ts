@@ -26,6 +26,8 @@ import {
   toGraphQLInteger,
 } from '../utils/number';
 import { toSQLLearningStateEnum } from '../utils/typeConversions';
+import { student_word_study } from './manual-model';
+import { getStartOfTomorrow } from '../utils/datetime';
 
 // IMPORTANT - cannot reuse dataloader instances across requests.
 // so cannot use datasource instance across requests.
@@ -43,7 +45,15 @@ import { toSQLLearningStateEnum } from '../utils/typeConversions';
 // https://github.com/cvburgess/SQLDataSource/issues/42
 // actually, apparently you can use dataloader on top of this library.
 
+// TODO - consider removing knex and just use pg.
+
 // TODO explore more TS support
+type sortedDocument = Pick<document, 'chinese' | 'english' | 'id'> & {
+  count_due: number;
+  distinct_due_words: string[];
+  fraction_due: number;
+  sentence_len: number;
+};
 export class PostgresqlRepo {
   // just having a go with this types, not sure if correct
   private ccceLoader: DataLoader<string, cc_cedict[], unknown>;
@@ -190,65 +200,80 @@ export class PostgresqlRepo {
     // TODO make this sorted (at sql level or here at js by sentence id)
     return this.sentenceLoader.load(documentId);
   }
-  // TODO in future - do a big beautiful join myself, or use a lib like monster join
-  // see if that is 'faster' than using resolvers at each level as I have here
-  // NOTE - that is an optimization. don't do until mvp is usable!
   // TODO - this query must join with sentence_word to check if words are locked
   // TODO see if this query matches my current best query in pgadmin - the one below is potentially old
+  // TODO time this query - if knex is making it slow do it raw
   // TODO workout the specific 'due' logic we want, and apply in in both dues (sad that I am replicating logic, can I improve that?)
-  async getDue(type: StudyType, studentId: string = '1'): Promise<document[]> {
+  async getDue(
+    type: StudyType,
+    dayStartUTC: string,
+    studentId: string = '1'
+  ): Promise<{ documents: sortedDocument[]; orphans: student_word_study[] }> {
     const vars = {
       student_word:
         type === StudyType.Read ? 'student_word_read' : 'student_word_listen',
       studentId,
+      tomorrow: getStartOfTomorrow(dayStartUTC),
     };
-    // this is reused below
+    // this is reused below - can I reuse this result set there?
     const dueWords = await this.knex
       .select<student_word_read[] | student_word_listen[]>('word_hanzi')
       .from(vars.student_word)
       .where('student_id', '=', vars.studentId)
-      .where('due', '<=', 'CURRENT_DATE'); // TODO get actual due logic done
-
+      .where('due', '<', vars.tomorrow);
     const dueWordsSet = new Set(dueWords.map((d) => d.word_hanzi));
+
     const candidates = `
 SELECT 
-	chinese,id, english, sub_corpus_title, corpus_title
+	chinese, id, english, n_non_punct 
 FROM
 	document 
--- doesn't exist a word I don't know
 WHERE NOT EXISTS (
 	SELECT 
 		1
 	FROM
 		sentence_word
 	LEFT JOIN
-		student_word_read
+		:student_word:
 	ON
-		student_word_read.student_id = 1 AND student_word_read.word_hanzi = sentence_word.word_hanzi
+		:student_word:.student_id = :studentId AND :student_word:.word_hanzi = sentence_word.word_hanzi
 	WHERE
-		student_word_read.word_hanzi IS null AND sentence_word.document_id = document.id AND sentence_word.universal_part_of_speech NOT IN ('PUNCT', 'NUM')
+		:student_word:.word_hanzi IS null AND sentence_word.document_id = document.id 
+  AND 
+    sentence_word.universal_part_of_speech NOT IN ('PUNCT', 'NUM')
 )`;
-    const cVars = {
-      ...vars,
-    };
 
-    const due = `SELECT word_hanzi FROM :student_word: WHERE student_id = :studentId AND due <= CURRENT_DATE`;
-    const dVars = { ...vars }; // its the same, for now
-    // TODO implement propery sorting/aggregation etc ie use of count() and distinct()
+    const due = `SELECT word_hanzi FROM :student_word: WHERE student_id = :studentId AND due < :tomorrow`;
+
     const docs = (await this.knex
-      .with('candidates', this.knex.raw(candidates, cVars))
-      .with('due', this.knex.raw(due, dVars))
-      .select('id', 'sub_corpus_title', 'corpus_title', 'english', 'chinese')
+      .with('candidates', this.knex.raw(candidates, vars))
+      .with('due', this.knex.raw(due, vars))
+      .select(
+        this.knex.raw(`
+        id, chinese, english, count(distinct(due.word_hanzi)) as count_due, 
+	array_agg(distinct(due.word_hanzi)) as distinct_due_words, 
+	(
+		case when 
+			n_non_punct =0 
+		then 
+			0 
+		else 
+			cast(count(distinct(due.word_hanzi)) as float)/cast(n_non_punct as float) 
+		end
+	) as fraction_due,	
+	n_non_punct as sentence_len
+        `)
+      )
+      .where('n_non_punct', '>', 1)
       .from('candidates')
       .join('sentence_word', 'candidates.id', '=', 'sentence_word.document_id')
       .join('due', 'sentence_word.word_hanzi', '=', 'due.word_hanzi')
-      .groupBy(
-        'id',
-        'chinese',
-        'english',
-        'sub_corpus_title',
-        'corpus_title'
-      )) as document[];
+      .groupBy('id', 'chinese', 'english', 'n_non_punct')
+      .orderBy([
+        { column: 'count_due', order: 'desc' },
+        { column: 'fraction_due', order: 'desc' },
+      ])) as sortedDocument[];
+    return { documents: docs, orphans: [] };
 
     // TODO continue here per the steps in the notion
   }
@@ -322,13 +347,11 @@ WHERE NOT EXISTS (
     userId: string,
     dayStartUTC: string
   ): Promise<number> {
-    const dayStart = DateTime.fromISO(dayStartUTC);
-    const tomorrow = dayStart.plus({ days: 1 });
     const res = await this.knex('student_word')
       .count('*')
       .where({ student_id: userId })
       .where('date_learned', '>=', dayStartUTC)
-      .where('date_learned', '<', tomorrow.toUTC().toISO());
+      .where('date_learned', '<', getStartOfTomorrow(dayStartUTC));
     const count = res[0]['count'];
     return toGraphQLInteger(count);
   }
@@ -392,16 +415,15 @@ WHERE NOT EXISTS (
   }
   // returns the union of words due for listening and due for reading today
   async getDueWords(userId: string, dayStartUTC: string) {
-    const dayStart = DateTime.fromISO(dayStartUTC);
-    const tomorrow = dayStart.plus({ days: 1 });
+    const tomorrow = getStartOfTomorrow(dayStartUTC);
     const listenP = this.knex('student_word_listen')
       .select<student_word_listen[]>('*')
       .where({ student_id: userId })
-      .where('due', '<', tomorrow.toUTC().toISO());
+      .where('due', '<', tomorrow);
     const readP = this.knex('student_word_listen')
       .select<student_word_read[]>('*')
       .where({ student_id: userId })
-      .where('due', '<', tomorrow.toUTC().toISO());
+      .where('due', '<', tomorrow);
     const [listen, read] = await Promise.all([listenP, readP]);
     return Array.from(new Set([...listen, ...read])).map((t) => t.word_hanzi);
   }

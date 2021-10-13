@@ -147,6 +147,7 @@ export type QueryDocumentArgs = {
 
 export type QueryDueArgs = {
   studyType: StudyType;
+  dayStartUTC: Scalars['String'];
 };
 
 
@@ -452,7 +453,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   concordanceDocs?: Resolver<Array<ResolversTypes['Document']>, ParentType, ContextType, RequireFields<QueryConcordanceDocsArgs, 'word'>>;
   dailyNewWordsGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   document?: Resolver<ResolversTypes['Document'], ParentType, ContextType, RequireFields<QueryDocumentArgs, 'id'>>;
-  due?: Resolver<ResolversTypes['Due'], ParentType, ContextType, RequireFields<QueryDueArgs, 'studyType'>>;
+  due?: Resolver<ResolversTypes['Due'], ParentType, ContextType, RequireFields<QueryDueArgs, 'studyType' | 'dayStartUTC'>>;
   knownWords?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   moreNewWords?: Resolver<ResolversTypes['NewWordsResponse'], ParentType, ContextType, RequireFields<QueryMoreNewWordsArgs, 'dayStartUTC' | 'count'>>;
   newWords?: Resolver<ResolversTypes['NewWordsResponse'], ParentType, ContextType, RequireFields<QueryNewWordsArgs, 'dayStartUTC'>>;
