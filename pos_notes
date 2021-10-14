@@ -1,0 +1,25 @@
+There is a pos 'PUNCT' which is applied to words that are punctuation. Likewise there is 'NUM' for numbers.
+
+We use this pos value for some front end logic in Sentences.tsx - ie not letting punctuation get clicked on.
+
+When choosing 'candidate' documents to study, we consider a document a candidate if all its words, other than PUNCT or NUM words,
+are already known to us. So we can get documents with punctuation or numbers that we dont 'know' - not an issue for punctuation, potentially
+a minor issue when it comes to numbers.
+
+In the document study view (Sentences.tsx) we need to filter punctuation out from the 'underStoodWordsHanzi' and 'forgottenWordsHanzi' arrays.
+
+What to do about numbers? This is a problem I hadn't thought about yet. The issue is that there is obviously an infinite set of 'number' words,
+and one of these 'number' words can make it to our front end despite a) that number not existing in our dictionary and/or b)
+the user doesn't yet 'know' that number. 
+
+On the one hand, we do want to be able to revise simple number characaters ie 千万 一 etc. We want to be able to say 'I forgot 一, show it to me again'
+on hte other hand, if the app throws up some large number made up of a bunch of hanzi, or worse, an english number, which a) wont exist in the dictionary
+and b) the user wont have in their known words, we
+    1) dont want such a number going into the 'words' review queue, even if the user marks it as 'didnt know'
+    2) dont want to tell the backend about that number.
+
+
+Decision - change the documents query! It shall no longer use 'sentence_word.universal_part_of_speech NOT IN ('PUNCT', 'NUM')'
+instead, it shall use sentence_word.universal_part_of_speech != 'PUNCT'.
+
+Downside - we dont be able to read sentences with arbitrary long numbers in them. Upside - the apps logic will be simpler.

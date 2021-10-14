@@ -88,12 +88,10 @@ describe('unit tests for repo methods', () => {
           },
         ].map((d) => d.id)
       );
-      expect(Array.from(orphans)).toEqual(['I']);
+      expect(orphans).toEqual(['I']);
     });
 
-    // TODO write test about the logic for words with interval of 1
-
-    it('doesnt return a word as an orphan if the interval was 1 (therefor we wanted 3), but we only had 2/1 of that word availabile', () => {
+    it('when interval is 1, we want the word 3 times. If we dont have enough documents to see the word 3 times, we see it 3 times in total via orphans', () => {
       const repo = new PostgresqlRepo((null as unknown) as Knex);
 
       const docs: sortedDocument[] = [
@@ -121,7 +119,19 @@ describe('unit tests for repo methods', () => {
         return acc;
       }, new Map<string, number>());
       const { documents, orphans } = repo.selectDocuments(docs, dueWords);
-      expect(Array.from(orphans)).toEqual(['I']);
+      expect(orphans).toEqual(['A', 'B', 'C', 'C', 'I', 'I', 'I']);
+    });
+    it('only orphans with interval of 1 are returned (up to) 3 times - others just once', () => {
+      const repo = new PostgresqlRepo((null as unknown) as Knex);
+
+      const docs: sortedDocument[] = [];
+      const dueWords = ['A'].reduce((acc, cur) => {
+        acc.set(cur, 1);
+        return acc;
+      }, new Map<string, number>());
+      dueWords.set('B', 2);
+      const { documents, orphans } = repo.selectDocuments(docs, dueWords);
+      expect(orphans).toEqual(['A', 'A', 'A', 'B']);
     });
   });
 });

@@ -1,6 +1,6 @@
 # TODO check that all of these are just queries of the cache
 
-query ForgottenWords(
+query DocumentWords(
   $documentId: String!
   $includeListen: Boolean = false
   $includeRead: Boolean = false
@@ -11,6 +11,7 @@ query ForgottenWords(
         forgotLISTEN @include(if: $includeListen)
         forgotREAD @include(if: $includeRead)
         wordHanzi
+        universalPartOfSpeech
       }
     }
   }

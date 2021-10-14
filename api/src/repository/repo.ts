@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { shuffle } from 'lodash';
 import {
   Document,
   LearningState,
@@ -264,7 +265,7 @@ WHERE NOT EXISTS (
 	WHERE
 		:student_word:.word_hanzi IS null AND sentence_word.document_id = document.id 
   AND 
-    sentence_word.universal_part_of_speech NOT IN ('PUNCT', 'NUM')
+    sentence_word.universal_part_of_speech != 'PUNCT'
 )`;
 
     const due = `SELECT word_hanzi FROM :student_word: WHERE student_id = :studentId AND due < :tomorrow`;
@@ -299,16 +300,23 @@ WHERE NOT EXISTS (
       ])) as sortedDocument[];
 
     const selectionResults = this.selectDocuments(docs, dueWordsMap);
-    const orphans = dueWords
-      .filter(({ word_hanzi }) => selectionResults.orphans.has(word_hanzi))
-      .map((o) => ({ ...o, studyType: type }));
+    const wordToDBRow: Map<string, typeof dueWords[number]> = dueWords.reduce(
+      (acc, cur) => {
+        acc.set(cur.word_hanzi, cur);
+        return acc;
+      },
+      new Map<string, typeof dueWords[number]>()
+    );
+    const orphans = selectionResults.orphans.map((o) => ({
+      ...wordToDBRow.get(o)!,
+      studyType: type,
+    }));
+
     // There is an inefficiency here - if looking to speed up this query, just return full documents earlier in the process
     const documents = await this.getDocumentsById(
       selectionResults.documents.map((d) => d.id!)
     );
-    return { documents: documents, orphans };
-
-    // TODO continue here per the steps in the notion
+    return { documents: shuffle(documents), orphans: shuffle(orphans) };
   }
   /**
    *  !! This method mutates the props that are passed into it.
@@ -322,7 +330,10 @@ WHERE NOT EXISTS (
   selectDocuments(
     docs: sortedDocument[],
     dueWords: Map<string, number> // a map of due words with their intervals
-  ): { documents: sortedDocument[]; orphans: Set<string> } {
+  ): { documents: sortedDocument[]; orphans: Array<string> } {
+    function getDesiredAmount(intervalForWord: number) {
+      return intervalForWord === 1 ? 3 : 1; // we want words to appear 3 times if they have interval of 1, which means they are new or recently lapsed words
+    }
     let orphansMightExist = false;
     const chosenDocuments = [];
     const includedWords = new Map<string, number>(); // a map from due words to the number of times they have been included in our chosenDocuments set
@@ -347,7 +358,7 @@ WHERE NOT EXISTS (
         // & remove them from dueWords once we have enough of them
         const intervalForWord = dueWords.get(word);
         if (intervalForWord !== undefined) {
-          const desiredAmount = intervalForWord === 1 ? 3 : 1; // we want words to appear 3 times if they have interval of 1, which means they are new or recently lapsed words
+          const desiredAmount = getDesiredAmount(intervalForWord);
           const newWordCount = includedWords.get(word)!;
           if (newWordCount >= desiredAmount) {
             dueWords.delete(word);
@@ -373,10 +384,20 @@ WHERE NOT EXISTS (
         }
       });
     }
-    const potentialOrphans = Array.from(dueWords.keys());
+
+    let unshuffledOrphans: string[] = [];
+    for (const [word, interval] of dueWords) {
+      const desiredAmount = getDesiredAmount(interval);
+      const includedTimes = includedWords.get(word) ?? 0;
+      const difference = desiredAmount - includedTimes;
+      for (let i = 0; i < difference; i++) {
+        unshuffledOrphans.push(word);
+      }
+    }
+
     return {
       documents: chosenDocuments,
-      orphans: new Set(potentialOrphans.filter((o) => !includedWords.has(o))),
+      orphans: unshuffledOrphans,
     };
   }
 

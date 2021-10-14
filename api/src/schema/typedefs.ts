@@ -172,7 +172,8 @@ export const typeDefs = gql`
 
   input DocumentStudyPayload {
     documentId: String!
-    forgottenWordsHanzi: [String!]! # TODO add remembered words hanzi
+    underStoodWordsHanzi: [String!]!
+    forgottenWordsHanzi: [String!]!
   }
 
   type Mutation {

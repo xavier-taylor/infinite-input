@@ -111,12 +111,19 @@ describe('the logic for the SRS algorithm', () => {
     expect(newInterval).toBeLessThan(2);
     // console.log('$', newInterval);
   });
-  // it('returns something when you studied late last night but then early this morning', () => {
-  //   const now = DateTime.now();
-  //   const lastNight = now.minus({ days: 1 }).set({ hour: 23 });
-  //   const thisMorning = now.set({ hour: 8 });
-  //   const { newInterval, newDueDate } = srs(1, DateTime.now(), studyDate);
-  //   expect(newInterval).toBeCloseTo(75);
-  //   expect(newDueDate.day).toEqual(studyDate.plus({ days: 75 }).day);
-  // });
+  it('When interval is 1 (new or lapsed card), we get 3 sentences/orphans for that word. The final due date after the 3 studies should be 2 calendar days later', () => {
+    // this is all assuming we study before midnight. all bets are off if after midnight!
+    const due = DateTime.now().startOf('day');
+    const now = DateTime.now().set({ hour: 23, minute: 57, second: 59 });
+    const plus1 = now.plus({ minutes: 1 });
+    const plus2 = plus1.plus({ minutes: 1 });
+    const { newInterval: nI1, newDueDate: nD1 } = srs(1, due, now);
+    const { newInterval: nI2, newDueDate: nD2 } = srs(nI1, nD1, plus1);
+    const { newInterval: nI3, newDueDate: nD3 } = srs(nI2, nD2, plus2);
+    expect(nI1).toBeLessThan(2);
+    expect(nI2).toBeLessThan(2);
+    expect(nI3).toBeLessThan(2);
+    expect(nD3.diff(plus2, 'days').days).toBeLessThan(2);
+    expect(nD3.diff(now, 'days').days).toBeGreaterThan(1);
+  });
 });

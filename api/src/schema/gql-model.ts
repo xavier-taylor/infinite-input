@@ -41,6 +41,7 @@ export type Document = {
 
 export type DocumentStudyPayload = {
   documentId: Scalars['String'];
+  underStoodWordsHanzi: Array<Scalars['String']>;
   forgottenWordsHanzi: Array<Scalars['String']>;
 };
 

@@ -20,7 +20,7 @@ WHERE
 	ON
 		student_word_read.student_id = 1 AND student_word_read.word_hanzi = sentence_word.word_hanzi
 	WHERE
-		student_word_read.word_hanzi IS null AND sentence_word.document_id = document.id AND sentence_word.universal_part_of_speech NOT IN ('PUNCT', 'NUM')
+		student_word_read.word_hanzi IS null AND sentence_word.document_id = document.id AND sentence_word.universal_part_of_speech != 'PUNCT'
 )
  
 
@@ -52,8 +52,7 @@ group by
 	id, chinese, english, n_non_punct 
 order by 
 	--id
-	count_due desc, fraction_due desc,
-;
+	count_due desc, fraction_due desc;
 
 
 

@@ -19,8 +19,9 @@ import {
   Document,
   DocumentByIdDocument,
   DocumentStudyDocument,
+  DocumentStudyPayload,
+  DocumentWordsDocument,
   ForgotSentenceWordDocument,
-  ForgottenWordsDocument,
   SentenceWord,
   StudyType,
 } from '../../schema/generated';
@@ -175,7 +176,6 @@ const Sentences: React.FC<StudyProps> = ({
     forgot: boolean
   ) {
     // TODO think perhaps of a neater solution than the computed 'forgotMode'
-    console.log('about to mark forgot');
     const forgotData: Pick<SentenceWord, 'forgotLISTEN' | 'forgotREAD'> =
       mode === StudyType.Listen
         ? { forgotLISTEN: forgot }
@@ -204,6 +204,9 @@ const Sentences: React.FC<StudyProps> = ({
     mode: StudyType,
     studyState: studyStates
   ) {
+    if (sentenceWord.universalPartOfSpeech === 'PUNCT') {
+      return;
+    }
     const { sentenceId, stanzaId } = sentenceWord;
     if (studyState === 'study') {
       markForgot(sentenceWord, mode, true);
@@ -272,7 +275,13 @@ const Sentences: React.FC<StudyProps> = ({
                 // when doing so extact that common logic from the filter on puncutation (use same constant at least)
                 // TODO make it typography
                 <span
-                  style={{ cursor: 'pointer' }}
+                  style={{
+                    cursor: `${
+                      w.universalPartOfSpeech !== 'PUNCT'
+                        ? 'pointer'
+                        : 'default'
+                    }`,
+                  }}
                   onClick={() => handleWordClick(w, mode, studyState)}
                   key={`${w.wordHanzi}-${w.stanzaId}-${w.sentenceId}`}
                 >
@@ -305,44 +314,46 @@ const Sentences: React.FC<StudyProps> = ({
                 onClick={async () => {
                   if (studyState === 'check') {
                     setConcordanceWord(undefined);
-                    // TODO see if I can get typedDocumentnodes for these cache queries?
-                    // TODO can I tweak this query so that it only returns documents which are marked as forgotten?
-                    const forgotten = client.readQuery({
-                      query: ForgottenWordsDocument,
+                    // This query grabs all the words for the document
+                    // I assume documentWords could only be null if this documentId didn't exist (hence the ! operator)
+                    // If the cache is missing data for any of the query's fields, readQuery returns null. It does not attempt to fetch data from your GraphQL server.
+                    const documentWords = client.readQuery({
+                      query: DocumentWordsDocument,
                       variables: {
                         documentId,
                         includeListen: mode === StudyType.Listen,
                         includeRead: mode === StudyType.Read,
                       },
-                    });
-                    // I assume forgotten could only be null if this documentId didn't exist
-                    /// If the cache is missing data for any of the query's fields, readQuery returns null. It does not attempt to fetch data from your GraphQL server.
-                    let forgottenHanzi: string[];
-                    if (forgotten) {
-                      forgottenHanzi = forgotten.document.sentences.reduce<
-                        string[]
-                      >((acc, cur) => {
-                        const forgottenWord = cur.words
-                          .filter((w) => {
-                            if (mode === StudyType.Listen) {
-                              return !!w.forgotLISTEN;
-                            } else {
-                              return !!w.forgotREAD;
-                            }
-                          })
-                          .map((w) => w.wordHanzi);
-                        return [...acc, ...forgottenWord];
-                      }, []);
-                    } else {
-                      forgottenHanzi = [];
+                    })!;
+                    const forgottenHanziSet = new Set<string>();
+                    const allHanziSet = new Set<string>();
+                    // collect all the forgotten words in this document
+                    for (let sentence of documentWords.document.sentences) {
+                      for (let word of sentence.words) {
+                        if (word.universalPartOfSpeech !== 'PUNCT') {
+                          allHanziSet.add(word.wordHanzi);
+                        }
+                        if (
+                          mode === StudyType.Listen
+                            ? word.forgotLISTEN
+                            : word.forgotREAD
+                        ) {
+                          forgottenHanziSet.add(word.wordHanzi);
+                        }
+                      }
                     }
-
+                    const forgottenWordsHanzi = Array.from(forgottenHanziSet); // this wont contain PUNCT because PUNCT cannot be clicked on/interacted with
+                    const underStoodWordsHanzi = Array.from(allHanziSet).filter(
+                      (w) => !forgottenHanziSet.has(w)
+                    );
+                    // TODO check rv
                     /* const _rv  =*/ await studyDocument({
                       variables: {
                         studyType: mode,
                         payload: {
                           documentId,
-                          forgottenWordsHanzi: forgottenHanzi,
+                          underStoodWordsHanzi,
+                          forgottenWordsHanzi,
                         },
                       },
                     });

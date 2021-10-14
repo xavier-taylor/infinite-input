@@ -25,7 +25,8 @@ Basic structure:
     So consider the first time we 'study' a word in listen/read mode.
     If we learned the word on 5 nov, we would then have studied it for the first time 
     on 6 nov. Assuming we got it right, we now calculate a new interval, which will be a little more
-    than 1.5. So we will next see that word on the 8th of november.
+    than 1.5(in fact, we will see the card 3 times, and set new interval three times, see srs.spec.ts). 
+    The final new interval should be between 1.5 and 2. So we will next see that word on the 8th of november.
 
     Note that our concept of 'due' for read/listen cards is ' if the student is studing on 
     the nth of the month in their timeszone, any card that has a due value before 00:00 of the 
