@@ -13,21 +13,26 @@ We calculate a new interval value like this:
 new_interval = i + .5*i*((i-(d-s))/i)
 note that d-s is expressed as a real number of days, ie 1.5 or -3.4 etc
 new_due = s + new_interval days
+The basic intuition of that formula is that when you study a word on the day it is due,
+the next interval is 1.5 times the previous one.
 
 Basic structure:
 
-1) Learning a new word (student_word)
-2) Studying a word you have learned (student_word_listen, student_word_read)
+1) Learning a new word (student_word) [day 0]
+2) Studying a word you have learned (student_word_listen, student_word_read) [day 1] onwards
     When you finish 1), new student_word_listen/read rows get created with
         * interval set to 1
-        * newDue set to start of the following day, ie 00:00 in getNewProperties()
+        * newDue set to start of the following day [day 1], ie 00:00 in getNewProperties()
             and learnWord()
-    So consider the first time we 'study' a word in listen/read mode.
-    If we learned the word on 5 nov, we would then have studied it for the first time 
-    on 6 nov. Assuming we got it right, we now calculate a new interval, which will be a little more
-    than 1.5(in fact, we will see the card 3 times, and set new interval three times, see srs.spec.ts). 
-    The final new interval should be between 1.5 and 2. So we will next see that word on the 8th of november.
+3) When a student_word_listen/read is due on a particular day, we try to find a document containing that word.
+    * If we cannot find a document, the student is assigned that word to study as a single word 'orphan'
+4) When we get a word wrong (either in a document or as an orphan) we set the 'state' on the associated 
+    student_word_listen/read to 'forgot'. It then must progress to 'recovering' before returning to 'normal'
+    * typically, once you get a word wrong is appears in the 'words' study for the remainder of your session that day,
+        as it progresses through 'recovering' back into 'normal'.
+        But, if you stopped studying with an incomplete session, ie, you finished a day with words in states 'forgot'/'recovering'
+        those words would be returned to you in the 'oprhans' array the next day.
+5) due query with an interval of 1. When grabbing the set of documents and orphans to study, any due word with
+    an interval of 1 will be, if possible, returned in at least 3 documents. This is because we either learned it for the first time yesterday,
+    or it moved from recovering to normal yesterday.
 
-    Note that our concept of 'due' for read/listen cards is ' if the student is studing on 
-    the nth of the month in their timeszone, any card that has a due value before 00:00 of the 
-    n+1th in their timezone is 'due'.
