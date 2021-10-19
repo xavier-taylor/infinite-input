@@ -48,10 +48,19 @@ student_word_listen/read state:
     * on correct, move to recovering, interval = 1, due 5 mins from now
 * recovering
     * on incorrect, move to forgot, interval = 1, new due in 1 min 
-    * on correct, due tomorrow at 00:00, interval = 1
+    * on correct, due 1 day from now, interval = 1
 
 Each time a word is studied in either document or as a single word, SQL and apollo client cache are updated according to the above.
-Each time a word is studied in eitehr document or as a single word, we update the words list (ie the list of orphans+ words we forgot, currently in a reactive var).
+Each time a word is studied in either document or as a single word, we update the words list (ie the list of orphans+ words we forgot, currently in a reactive var).
     Any word that moves from recovering to normal is removed from the words list.
     The words list is sorted: [forgot or recovering words whose due is <= now, sorted by due], normal cards, [forgot or recovering words whose due is > now (but less than tomorrow)]
     Any word that is in state normal is removed from the words list upon being studied
+
+Note: a word in states recovering/forgot (and in the words list) could be studied via a document. Per the above logic, the word's state, due and interval should be updated,
+    and the word shall be removed from words if it moves from recovering to normal via this document study.
+Note: A word could be left in state forgot/recovering if a study session is not completed. In this case, we should return it the next day as an 'orphan', not in a document.
+    Why? we want to get it into the 'normal' state again, which is only guaranteed to happen via the word study flow, not via document study flow.
+    It may of course be incidentally picked up inside a document, but I want to explicitly:
+        1) not search for documents containing that word (but of course use them, so limit due subquery but not candidates)
+        2) include words in this state in the (now incorrectly named) orphans array. As part of this, rename orphans array OR return two distinct arrays, orphans and nonNormals
+    
