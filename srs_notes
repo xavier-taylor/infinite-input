@@ -34,5 +34,24 @@ Basic structure:
         those words would be returned to you in the 'oprhans' array the next day.
 5) due query with an interval of 1. When grabbing the set of documents and orphans to study, any due word with
     an interval of 1 will be, if possible, returned in at least 3 documents. This is because we either learned it for the first time yesterday,
-    or it moved from recovering to normal yesterday.
+    or it moved from recovering to normal yesterday. However, as an orphan, just return it once - we trust the normal->forgot->recovering-> normal flow to
+    get us enough reps of orphans.
 
+student_word_listen/read state:
+
+* normal
+    * start here
+    * on correct, stay in normal, normal srs
+    * on incorrect, move to forgot, interval = 1 and due = 1 min from now
+* forgot
+    * on incorrect, stay here, interval = 1, new due in 1 min
+    * on correct, move to recovering, interval = 1, due 5 mins from now
+* recovering
+    * on incorrect, move to forgot, interval = 1, new due in 1 min 
+    * on correct, due tomorrow at 00:00, interval = 1
+
+Each time a word is studied in either document or as a single word, SQL and apollo client cache are updated according to the above.
+Each time a word is studied in eitehr document or as a single word, we update the words list (ie the list of orphans+ words we forgot, currently in a reactive var).
+    Any word that moves from recovering to normal is removed from the words list.
+    The words list is sorted: [forgot or recovering words whose due is <= now, sorted by due], normal cards, [forgot or recovering words whose due is > now (but less than tomorrow)]
+    Any word that is in state normal is removed from the words list upon being studied

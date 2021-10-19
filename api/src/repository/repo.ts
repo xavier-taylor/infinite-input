@@ -323,7 +323,7 @@ WHERE NOT EXISTS (
    *  !! if we realize we need them to remain unmutated, first deep clone them here
    * For words with an interval of 1, return up to 3 documents (and at least 1)
    * For words with other intervals, return 1 document
-   * For any word where we couldnt find 1/3 documents per the above, return that word as an orphan
+   * For any word where we couldnt find 1/3 documents per the above, return that word as an orphan, once
    * @param docs precondition: sorted by count_due desc, fraction_due desc
    * @param dueWords
    */
@@ -385,9 +385,11 @@ WHERE NOT EXISTS (
       });
     }
 
+    // Below code used to return a multiset of orphans, now just returns a set of those same orphans - TODO simplify implementation (code is correct) once have settled algo
     let unshuffledOrphans: string[] = [];
     for (const [word, interval] of dueWords) {
-      const desiredAmount = getDesiredAmount(interval);
+      // const desiredAmount = getDesiredAmount(interval); // just leaving how I used to do it here in case I change back to returning multiset of orphans
+      const desiredAmount = 1;
       const includedTimes = includedWords.get(word) ?? 0;
       const difference = desiredAmount - includedTimes;
       for (let i = 0; i < difference; i++) {
